@@ -29,7 +29,7 @@ async def create_job(req: JobRequest):
     print(f"Created job {job_id} with headless={req.headless}, proxy={proxy}")
     return {"job_id": job_id}
 
-
+# TODO: implement the ws connection to stream the browser using the vnc and xvbf
 @app.websocket("/ws/{job_id}")
 async def job_ws(ws: WebSocket, job_id: str):
     await ws.accept()

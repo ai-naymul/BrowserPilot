@@ -6,6 +6,10 @@ from backend.browser_controller import BrowserController
 from backend.vision_model import decide
 # from backend.main import broadcast, OUTPUT_DIR 
 
+
+# TODO: rotate proxy if its being detected by cloudflare or other antibot system
+# TODO: using xvbf to run the browser in headless mode wherre it the window won't be visible, its crucial for those anti bot systems which detects the browser is running in headless mode or not
+
 async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","html"],
                     headless: bool, proxy: dict | None):
     """
