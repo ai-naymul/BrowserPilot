@@ -5,10 +5,40 @@
 <title>AI-Agent-Scraper</title>
 <style>
  body{font-family:Arial;margin:0;padding:0;display:flex;height:100vh}
- #left{flex:0 0 300px;padding:20px;border-right:1px solid #ddd}
+ #left{flex:0 0 350px;padding:20px;border-right:1px solid #ddd}
  #right{flex:1;display:flex;flex-direction:column}
  #screens{flex:1;overflow:auto;background:#000}
  img{width:100%;height:auto}
+ #token-stats {
+   margin-top: 20px;
+   padding: 10px;
+   background: #f5f5f5;
+   border-radius: 5px;
+   font-size: 12px;
+ }
+ .token-row {
+   display: flex;
+   justify-content: space-between;
+   margin: 2px 0;
+ }
+ .token-label {
+   font-weight: bold;
+ }
+ #decisions-log {
+   margin-top: 10px;
+   max-height: 200px;
+   overflow-y: auto;
+   background: #fafafa;
+   border: 1px solid #ddd;
+   padding: 5px;
+   font-size: 11px;
+ }
+ .decision-entry {
+   margin: 5px 0;
+   padding: 5px;
+   background: white;
+   border-left: 3px solid #007acc;
+ }
 </style>
 </head>
 <body>
@@ -24,14 +54,92 @@
   <button onclick="run()">Run</button>
   <div id="status"></div>
   <a id="download" style="display:none;">Download result</a>
+  
+  <div id="token-stats" style="display:none;">
+    <h4 style="margin-top:0;">Token Usage</h4>
+    <div class="token-row">
+      <span class="token-label">Total Tokens:</span>
+      <span id="total-tokens">0</span>
+    </div>
+    <div class="token-row">
+      <span class="token-label">Prompt Tokens:</span>
+      <span id="prompt-tokens">0</span>
+    </div>
+    <div class="token-row">
+      <span class="token-label">Response Tokens:</span>
+      <span id="response-tokens">0</span>
+    </div>
+    <div class="token-row">
+      <span class="token-label">API Calls:</span>
+      <span id="api-calls">0</span>
+    </div>
+  </div>
+  
+  <div id="decisions-log" style="display:none;">
+    <h4 style="margin-top:0;">Recent Decisions</h4>
+    <div id="decisions-content"></div>
+  </div>
 </div>
 <div id="right">
   <div id="screens"></div>
 </div>
 
 <script>
+let totalTokens = 0;
+let totalPromptTokens = 0;
+let totalResponseTokens = 0;
+let apiCallCount = 0;
+
+function updateTokenStats(tokenUsage) {
+  if (tokenUsage) {
+    totalTokens += tokenUsage.total_tokens || 0;
+    totalPromptTokens += tokenUsage.prompt_tokens || 0;
+    totalResponseTokens += tokenUsage.response_tokens || 0;
+    apiCallCount++;
+    
+    document.getElementById('total-tokens').textContent = totalTokens.toLocaleString();
+    document.getElementById('prompt-tokens').textContent = totalPromptTokens.toLocaleString();
+    document.getElementById('response-tokens').textContent = totalResponseTokens.toLocaleString();
+    document.getElementById('api-calls').textContent = apiCallCount;
+    document.getElementById('token-stats').style.display = 'block';
+  }
+}
+
+function addDecisionToLog(decision) {
+  const decisionsContent = document.getElementById('decisions-content');
+  const entry = document.createElement('div');
+  entry.className = 'decision-entry';
+  
+  let actionText = `Action: ${decision.action}`;
+  if (decision.selector) actionText += `\nSelector: ${decision.selector}`;
+  if (decision.text) actionText += `\nText: ${decision.text}`;
+  if (decision.url) actionText += `\nURL: ${decision.url}`;
+  
+  entry.textContent = actionText;
+  decisionsContent.insertBefore(entry, decisionsContent.firstChild);
+  
+  // Keep only last 10 decisions
+  while (decisionsContent.children.length > 10) {
+    decisionsContent.removeChild(decisionsContent.lastChild);
+  }
+  
+  document.getElementById('decisions-log').style.display = 'block';
+}
+
+function resetStats() {
+  totalTokens = 0;
+  totalPromptTokens = 0;
+  totalResponseTokens = 0;
+  apiCallCount = 0;
+  document.getElementById('token-stats').style.display = 'none';
+  document.getElementById('decisions-log').style.display = 'none';
+  document.getElementById('decisions-content').innerHTML = '';
+}
+
 async function run() {
   document.getElementById("screens").innerHTML="";
+  resetStats();
+  
   const body = {
     prompt: document.getElementById("prompt").value,
     format: document.getElementById("fmt").value,
@@ -47,6 +155,12 @@ async function run() {
       const img = new Image();
       img.src="data:image/png;base64,"+msg.screenshot;
       document.getElementById("screens").prepend(img);
+    }
+    if (msg.decision) {
+      addDecisionToLog(msg.decision);
+      if (msg.decision.token_usage) {
+        updateTokenStats(msg.decision.token_usage);
+      }
     }
     if (msg.status==="saved"){
       const link = document.getElementById("download");
