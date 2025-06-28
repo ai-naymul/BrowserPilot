@@ -1,5 +1,3 @@
-# backend/browser_controller.py
-import asyncio, base64
 from pathlib import Path
 from playwright.async_api import async_playwright
 

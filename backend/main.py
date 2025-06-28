@@ -1,4 +1,3 @@
-# backend/main.py
 import asyncio, json, os, uuid, shutil, base64
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks, UploadFile, Form
 from fastapi.responses import FileResponse
@@ -18,7 +17,7 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 class JobRequest(BaseModel):
     prompt: str
-    format: str = "txt"     # txt | md | json | html
+    format: str = "txt"     # txt | md | json | html default is txt
     headless: bool = False
 
 @app.post("/job")
@@ -30,6 +29,7 @@ async def create_job(req: JobRequest):
     print(f"Created job {job_id} with headless={req.headless}, proxy={proxy}")
     return {"job_id": job_id}
 
+
 @app.websocket("/ws/{job_id}")
 async def job_ws(ws: WebSocket, job_id: str):
     await ws.accept()
@@ -40,10 +40,12 @@ async def job_ws(ws: WebSocket, job_id: str):
     except WebSocketDisconnect:
         ws_subscribers[job_id].discard(ws)
 
+# to download the output file
 @app.get("/download/{job_id}")
 def download(job_id: str):
     file_path = OUTPUT_DIR / f"{job_id}.output"
     return FileResponse(path=file_path, filename=file_path.name)
+
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 # helper for agent → frontend streaming
 async def push(job_id: str, msg: dict):

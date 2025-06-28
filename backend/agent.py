@@ -1,11 +1,10 @@
-# backend/agent.py
 import asyncio, json
 from pathlib import Path
 from typing import Literal
 
 from backend.browser_controller import BrowserController
 from backend.vision_model import decide
-# from backend.main import broadcast, OUTPUT_DIR   # avoid circular import
+# from backend.main import broadcast, OUTPUT_DIR 
 
 async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","html"],
                     headless: bool, proxy: dict | None):
@@ -70,6 +69,7 @@ async def extract(page, fmt: str) -> str:
         return (await page.inner_text("body")).strip()
     if fmt == "md":
         # quick heuristic – keep <h1-h6>, <p>, <li>
+        # needs more work for a full Markdown conversion
         import bs4, markdownify
         soup = bs4.BeautifulSoup(html, "lxml")
         for tag in soup.find_all(True):

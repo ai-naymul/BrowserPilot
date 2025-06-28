@@ -15,6 +15,9 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 # Use the newer model that supports vision
 MODEL = genai.GenerativeModel("gemini-2.0-flash-exp-image-generation")  # or "gemini-pro-vision"
 
+
+# catch the cloudlfare or antibot system to rotate the proxy
+
 SYSTEM_PROMPT = """
 You control a web browser for data extraction.
 Given the current page screenshot + URL + the user's high-level goal,

@@ -1,5 +1,6 @@
-# backend/proxy_manager.py
 import os, json, random
+
+# rotate the proxy if its being deteceted by cloudflare or other antibot system
 
 class ProxyManager:
     def __init__(self):
