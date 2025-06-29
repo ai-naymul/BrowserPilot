@@ -16,8 +16,9 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ElementInfo:
-    """Comprehensive information about a DOM element"""
-    id: str  # Unique identifier for the element
+    """DOM element information compatible with browser-use"""
+    index: int  # Highlight index for clicking
+    id: str # Unique identifier
     tag_name: str
     xpath: str
     css_selector: str
@@ -25,34 +26,24 @@ class ElementInfo:
     attributes: Dict[str, str]
     is_clickable: bool
     is_input: bool
+    is_visible: bool = True
+    is_in_viewport: bool = True
     input_type: Optional[str] = None
     placeholder: Optional[str] = None
     bounding_box: Optional[Dict[str, float]] = None
     center_coordinates: Optional[Dict[str, float]] = None
-    is_visible: bool = True
-    element_hash: Optional[str] = None
-    parent_text: Optional[str] = None
-    nearby_text: Optional[str] = None
+    viewport_coordinates: Optional[Dict[str, float]] = None
 
 class PageState:
-    """Represents the current state of a web page"""
-    def __init__(self, url: str, title: str, elements: List[ElementInfo], screenshot: Optional[str] = None):
+    """Page state compatible with browser-use"""
+    def __init__(self, url: str, title: str, elements: List[ElementInfo], selector_map: Dict[int, ElementInfo], screenshot: Optional[str] = None):
         self.url = url
         self.title = title
         self.elements = elements
+        self.selector_map = selector_map  # index -> ElementInfo mapping
         self.screenshot = screenshot
         self.clickable_elements = [e for e in elements if e.is_clickable]
         self.input_elements = [e for e in elements if e.is_input]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "url": self.url,
-            "title": self.title,
-            "elements": [asdict(e) for e in self.elements],
-            "screenshot": self.screenshot,
-            "clickable_count": len(self.clickable_elements),
-            "input_count": len(self.input_elements)
-        }
 
 class BrowserController:
     def __init__(self, headless: bool, proxy: dict | None, enable_vnc: bool = False):
@@ -67,16 +58,299 @@ class BrowserController:
         self.wm_process = None
         self.display_num = None
         self.vnc_port = 5901
-        self.element_counter = 0
+        
+        # Load the robust DOM extraction JavaScript
+        self.dom_js = self._get_dom_extraction_js()
+
+    def _get_dom_extraction_js(self) -> str:
+        """Get the robust DOM extraction JavaScript similar to browser-use"""
+        return """
+        (args) => {
+            const { doHighlightElements = true, debugMode = false } = args || {};
+            
+            // Performance tracking
+            const startTime = performance.now();
+            let nodeCount = 0;
+            let processedCount = 0;
+            
+            // Results
+            const elementMap = new Map();
+            const selectorMap = {};
+            let highlightIndex = 0;
+            
+            // Helper function to safely get className
+            function getClassName(element) {
+                if (!element.className) return '';
+                if (typeof element.className === 'string') return element.className;
+                if (element.className.toString) return element.className.toString();
+                if (element.classList && element.classList.length > 0) {
+                    return Array.from(element.classList).join(' ');
+                }
+                return '';
+            }
+            
+            // Helper function to generate CSS selector
+            function getCSSSelector(element) {
+                if (element.id) {
+                    return '#' + element.id;
+                }
+                
+                const className = getClassName(element);
+                if (className) {
+                    const classes = className.split(' ').filter(c => c.length > 0);
+                    if (classes.length > 0) {
+                        return element.tagName.toLowerCase() + '.' + classes.join('.');
+                    }
+                }
+                
+                return element.tagName.toLowerCase();
+            }
+            
+            // Helper function to generate XPath
+            function getXPath(element) {
+                if (element.id !== '') {
+                    return `//*[@id="${element.id}"]`;
+                }
+                
+                if (element === document.body) {
+                    return '/html/body';
+                }
+                
+                let ix = 0;
+                const siblings = element.parentNode ? element.parentNode.childNodes : [];
+                for (let i = 0; i < siblings.length; i++) {
+                    const sibling = siblings[i];
+                    if (sibling === element) {
+                        const tagName = element.tagName ? element.tagName.toLowerCase() : '';
+                        return getXPath(element.parentNode) + '/' + tagName + '[' + (ix + 1) + ']';
+                    }
+                    if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
+                        ix++;
+                    }
+                }
+                return '';
+            }
+            
+            // Check if element is interactive
+            function isInteractive(element) {
+                const tagName = element.tagName.toLowerCase();
+                const interactiveTags = ['a', 'button', 'input', 'select', 'textarea', 'label'];
+                
+                // Check tag name
+                if (interactiveTags.includes(tagName)) return true;
+                
+                // Check attributes
+                if (element.onclick || element.getAttribute('onclick')) return true;
+                if (element.getAttribute('role') === 'button') return true;
+                if (element.getAttribute('role') === 'link') return true;
+                if (element.hasAttribute('tabindex')) return true;
+                if (element.contentEditable === 'true') return true;
+                
+                // Check computed style
+                const style = window.getComputedStyle(element);
+                if (style.cursor === 'pointer') return true;
+                
+                // Check class names for common interactive patterns
+                const className = getClassName(element);
+                const interactivePatterns = ['btn', 'button', 'link', 'clickable'];
+                if (interactivePatterns.some(pattern => className.includes(pattern))) return true;
+                
+                return false;
+            }
+            
+            // Check if element is input
+            function isInput(element) {
+                const tagName = element.tagName.toLowerCase();
+                return ['input', 'textarea', 'select'].includes(tagName) || 
+                       element.contentEditable === 'true';
+            }
+            
+            // Get text content safely
+            function getTextContent(element) {
+                let text = '';
+                
+                // Get direct text content
+                if (element.textContent) {
+                    text = element.textContent.trim();
+                }
+                
+                // For inputs, get value or placeholder
+                if (element.value) {
+                    text = element.value;
+                } else if (element.placeholder) {
+                    text = element.placeholder;
+                }
+                
+                // For images, get alt text
+                if (element.tagName === 'IMG' && element.alt) {
+                    text = element.alt;
+                }
+                
+                return text.substring(0, 200); // Limit text length
+            }
+            
+            // Check if element is visible and in viewport
+            function isVisibleAndInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                const style = window.getComputedStyle(element);
+                
+                // Check if element has dimensions
+                const hasDimensions = rect.width > 0 && rect.height > 0;
+                
+                // Check if element is visible
+                const isVisible = style.visibility !== 'hidden' && 
+                                style.display !== 'none' && 
+                                style.opacity !== '0';
+                
+                // Check if element is in viewport
+                const isInViewport = rect.top < window.innerHeight && 
+                                   rect.bottom > 0 && 
+                                   rect.left < window.innerWidth && 
+                                   rect.right > 0;
+                
+                return hasDimensions && isVisible && isInViewport;
+            }
+            
+            // Process all elements
+            function processElement(element) {
+                nodeCount++;
+                
+                if (!element || element.nodeType !== 1) return null;
+                
+                const isElementVisible = isVisibleAndInViewport(element);
+                const isElementInteractive = isInteractive(element);
+                const isElementInput = isInput(element);
+                
+                // Only process visible elements or interactive elements
+                if (!isElementVisible && !isElementInteractive) return null;
+                
+                processedCount++;
+                
+                const rect = element.getBoundingClientRect();
+                const elementId = `element_${processedCount}`;
+                let currentHighlightIndex = null;
+                
+                // Assign highlight index to interactive elements
+                if (isElementInteractive || isElementInput) {
+                    currentHighlightIndex = highlightIndex++;
+                    
+                    // Add visual highlight if enabled
+                    if (doHighlightElements) {
+                        element.style.outline = '2px solid red';
+                        element.style.outlineOffset = '1px';
+                        
+                        // Add index label
+                        const label = document.createElement('div');
+                        label.textContent = currentHighlightIndex.toString();
+                        label.style.cssText = `
+                            position: absolute;
+                            top: ${rect.top + window.scrollY - 20}px;
+                            left: ${rect.left + window.scrollX}px;
+                            background: red;
+                            color: white;
+                            padding: 2px 6px;
+                            font-size: 12px;
+                            font-weight: bold;
+                            z-index: 10000;
+                            border-radius: 3px;
+                            pointer-events: none;
+                        `;
+                        document.body.appendChild(label);
+                    }
+                }
+                
+                // Create element data
+                const elementData = {
+                    index: currentHighlightIndex,
+                    id: elementId,
+                    tagName: element.tagName.toLowerCase(),
+                    xpath: getXPath(element),
+                    cssSelector: getCSSSelector(element),
+                    text: getTextContent(element),
+                    attributes: {},
+                    isClickable: isElementInteractive,
+                    isInput: isElementInput,
+                    isVisible: isElementVisible,
+                    isInViewport: isElementVisible,
+                    inputType: element.type || null,
+                    placeholder: element.placeholder || null,
+                    boundingBox: {
+                        x: rect.x,
+                        y: rect.y,
+                        width: rect.width,
+                        height: rect.height,
+                        top: rect.top,
+                        bottom: rect.bottom,
+                        left: rect.left,
+                        right: rect.right
+                    },
+                    centerCoordinates: {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2
+                    },
+                    viewportCoordinates: {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2
+                    }
+                };
+                
+                // Get attributes
+                if (element.attributes) {
+                    for (let attr of element.attributes) {
+                        elementData.attributes[attr.name] = attr.value;
+                    }
+                }
+                
+                elementMap.set(elementId, elementData);
+                
+                // Add to selector map if has highlight index
+                if (currentHighlightIndex !== null) {
+                    selectorMap[currentHighlightIndex] = elementData;
+                }
+                
+                return elementData;
+            }
+            
+            // Process all elements in the document
+            const allElements = document.querySelectorAll('*');
+            const elements = [];
+            
+            allElements.forEach(element => {
+                const elementData = processElement(element);
+                if (elementData) {
+                    elements.push(elementData);
+                }
+            });
+            
+            const endTime = performance.now();
+            
+            const result = {
+                elements: elements,
+                selectorMap: selectorMap,
+                stats: {
+                    totalNodes: nodeCount,
+                    processedNodes: processedCount,
+                    interactiveElements: Object.keys(selectorMap).length,
+                    executionTime: endTime - startTime
+                }
+            };
+            
+            if (debugMode) {
+                console.log('DOM extraction completed:', result.stats);
+            }
+            
+            return result;
+        }
+        """
 
     async def __aenter__(self):
         if self.enable_vnc:
             await self._setup_vnc()
-            if self.display_num:
-                os.environ['DISPLAY'] = f":{self.display_num}"
+
+        if self.display_num:
+            os.environ['DISPLAY'] = f":{self.display_num}"
 
         self.play = await async_playwright().start()
-
         launch_options = {
             "headless": False if self.enable_vnc else self.headless,
             "args": [
@@ -118,7 +392,6 @@ class BrowserController:
         try:
             self.display_num = self._find_free_display()
             self.vnc_port = 5901 + self.display_num
-
             print(f"🖥️ Setting up VNC on display :{self.display_num}, port {self.vnc_port}")
 
             xvfb_cmd = [
@@ -134,17 +407,16 @@ class BrowserController:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
-
             await asyncio.sleep(3)
+
             os.environ['DISPLAY'] = f":{self.display_num}"
-            
+
             wm_cmd = ["fluxbox", "-display", f":{self.display_num}"]
             self.wm_process = subprocess.Popen(
                 wm_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
-            
             await asyncio.sleep(2)
 
             vnc_cmd = [
@@ -164,7 +436,6 @@ class BrowserController:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
-
             await asyncio.sleep(3)
             print(f"✅ VNC server started on port {self.vnc_port}")
 
@@ -183,7 +454,6 @@ class BrowserController:
     async def _cleanup_vnc(self):
         """Clean up VNC and Xvfb processes"""
         processes = [self.vnc_process, self.wm_process, self.xvfb_process]
-        
         for process in processes:
             if process:
                 try:
@@ -194,7 +464,7 @@ class BrowserController:
                         process.kill()
                     except:
                         pass
-        
+
         if self.display_num:
             lock_file = f"/tmp/.X{self.display_num}-lock"
             if os.path.exists(lock_file):
@@ -214,278 +484,148 @@ class BrowserController:
             logger.error(f"Failed to navigate to {url}: {e}")
             raise
 
-    async def get_comprehensive_page_state(self, include_screenshot: bool = True) -> PageState:
-        """Get comprehensive information about the current page state"""
+    async def get_page_state(self, include_screenshot: bool = True, highlight_elements: bool = True) -> PageState:
+        """Get comprehensive page state using robust DOM extraction"""
         try:
             # Wait for page to be ready
-            await self.page.wait_for_load_state("networkidle", timeout=10000)
-            
+            await self.page.wait_for_load_state("domcontentloaded", timeout=10000)
+            await asyncio.sleep(1)  # Additional wait for dynamic content
+
             # Get page info
             url = self.page.url
             title = await self.page.title()
-            
+
             # Get screenshot if requested
             screenshot = None
             if include_screenshot:
                 screenshot_bytes = await self.page.screenshot(full_page=False)
                 screenshot = base64.b64encode(screenshot_bytes).decode('utf-8')
+
+            # Extract DOM elements using robust JavaScript
+            try:
+                dom_result = await self.page.evaluate(self.dom_js, {
+                    'doHighlightElements': highlight_elements,
+                    'debugMode': logger.isEnabledFor(logging.DEBUG)
+                })
+                
+                logger.info(f"DOM extraction stats: {dom_result.get('stats', {})}")
+                
+            except Exception as e:
+                logger.error(f"Failed to extract DOM elements: {e}")
+                return PageState(url, title, [], {}, screenshot)
+
+            # Convert to ElementInfo objects
+            elements = []
+            selector_map = {}
             
-            # Get all interactive elements
-            elements = await self._extract_all_elements()
-            
-            return PageState(url, title, elements, screenshot)
-            
+            for elem_data in dom_result.get('elements', []):
+                try:
+                    element_info = ElementInfo(
+                        index=elem_data.get('index'),
+                        id=elem_data.get('id', ''),
+                        tag_name=elem_data.get('tagName', ''),
+                        xpath=elem_data.get('xpath', ''),
+                        css_selector=elem_data.get('cssSelector', ''),
+                        text=elem_data.get('text', ''),
+                        attributes=elem_data.get('attributes', {}),
+                        is_clickable=elem_data.get('isClickable', False),
+                        is_input=elem_data.get('isInput', False),
+                        is_visible=elem_data.get('isVisible', True),
+                        is_in_viewport=elem_data.get('isInViewport', True),
+                        input_type=elem_data.get('inputType'),
+                        placeholder=elem_data.get('placeholder'),
+                        bounding_box=elem_data.get('boundingBox'),
+                        center_coordinates=elem_data.get('centerCoordinates'),
+                        viewport_coordinates=elem_data.get('viewportCoordinates')
+                    )
+                    
+                    elements.append(element_info)
+                    
+                    # Add to selector map if has index
+                    if element_info.index is not None:
+                        selector_map[element_info.index] = element_info
+                        
+                except Exception as e:
+                    logger.warning(f"Failed to process element: {e}")
+                    continue
+
+            logger.info(f"Successfully extracted {len(elements)} elements, {len(selector_map)} interactive")
+            return PageState(url, title, elements, selector_map, screenshot)
+
         except Exception as e:
             logger.error(f"Failed to get page state: {e}")
-            return PageState("", "", [], None)
+            return PageState("", "", [], {}, None)
 
-    async def _extract_all_elements(self) -> List[ElementInfo]:
-        """Extract all interactive elements from the page"""
+    async def click_element_by_index(self, index: int, page_state: PageState = None) -> bool:
+        """Click element by index (browser-use compatible)"""
         try:
-            js_code = """
-            () => {
-                const elements = [];
-                let elementId = 0;
-                
-                // Define what makes an element interactive
-                const interactiveSelectors = [
-                    'a[href]', 'button', 'input', 'select', 'textarea',
-                    '[onclick]', '[role="button"]', '[role="link"]', '[role="tab"]',
-                    '[tabindex]', 'label', '[contenteditable="true"]', 'summary'
-                ];
-                
-                // Get all potentially interactive elements
-                const allElements = document.querySelectorAll('*');
-                
-                allElements.forEach((el) => {
-                    const rect = el.getBoundingClientRect();
-                    const style = window.getComputedStyle(el);
-                    
-                    // Check if element is visible and has reasonable size
-                    const isVisible = rect.width > 0 && rect.height > 0 && 
-                                    style.visibility !== 'hidden' && 
-                                    style.display !== 'none' &&
-                                    rect.top < window.innerHeight && 
-                                    rect.bottom > 0;
-                    
-                    if (!isVisible) return;
-                    
-                    const tagName = el.tagName.toLowerCase();
-                    const isClickable = el.matches(interactiveSelectors.join(',')) || 
-                                      el.onclick || 
-                                      style.cursor === 'pointer' ||
-                                      el.hasAttribute('data-testid') ||
-                                      el.className.includes('btn') ||
-                                      el.className.includes('button') ||
-                                      el.className.includes('link');
-                    
-                    const isInput = ['input', 'textarea', 'select'].includes(tagName) ||
-                                   el.contentEditable === 'true';
-                    
-                    // Include all clickable elements and visible text elements
-                    const hasText = el.textContent && el.textContent.trim().length > 0;
-                    const isImportant = isClickable || isInput || 
-                                      (hasText && el.textContent.trim().length < 200);
-                    
-                    if (isImportant) {
-                        const xpath = getXPath(el);
-                        const cssSelector = getCSSSelector(el);
-                        const centerX = rect.left + rect.width / 2;
-                        const centerY = rect.top + rect.height / 2;
-                        
-                        // Get nearby text for context
-                        const nearbyText = getNearbyText(el);
-                        const parentText = el.parentElement ? 
-                            el.parentElement.textContent?.trim().substring(0, 100) : '';
-                        
-                        elements.push({
-                            id: `element_${elementId++}`,
-                            tag_name: tagName,
-                            xpath: xpath,
-                            css_selector: cssSelector,
-                            text: el.textContent?.trim() || el.value || el.alt || '',
-                            attributes: Array.from(el.attributes).reduce((acc, attr) => {
-                                acc[attr.name] = attr.value;
-                                return acc;
-                            }, {}),
-                            is_clickable: isClickable,
-                            is_input: isInput,
-                            input_type: el.type || null,
-                            placeholder: el.placeholder || null,
-                            bounding_box: {
-                                x: rect.x,
-                                y: rect.y,
-                                width: rect.width,
-                                height: rect.height,
-                                top: rect.top,
-                                bottom: rect.bottom,
-                                left: rect.left,
-                                right: rect.right
-                            },
-                            center_coordinates: {
-                                x: centerX,
-                                y: centerY
-                            },
-                            is_visible: isVisible,
-                            parent_text: parentText,
-                            nearby_text: nearbyText
-                        });
-                    }
-                });
-                
-                function getXPath(element) {
-                    if (element.id !== '') {
-                        return `//*[@id="${element.id}"]`;
-                    }
-                    if (element === document.body) {
-                        return '/html/body';
-                    }
-                    
-                    let ix = 0;
-                    const siblings = element.parentNode ? element.parentNode.childNodes : [];
-                    for (let i = 0; i < siblings.length; i++) {
-                        const sibling = siblings[i];
-                        if (sibling === element) {
-                            const tagName = element.tagName ? element.tagName.toLowerCase() : '';
-                            return getXPath(element.parentNode) + '/' + tagName + '[' + (ix + 1) + ']';
-                        }
-                        if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
-                            ix++;
-                        }
-                    }
-                    return '';
-                }
-                
-                function getCSSSelector(element) {
-                    if (element.id) {
-                        return '#' + element.id;
-                    }
-                    if (element.className) {
-                        const classes = element.className.split(' ').filter(c => c.length > 0);
-                        if (classes.length > 0) {
-                            return element.tagName.toLowerCase() + '.' + classes.join('.');
-                        }
-                    }
-                    return element.tagName.toLowerCase();
-                }
-                
-                function getNearbyText(element) {
-                    let text = '';
-                    // Check siblings
-                    if (element.parentNode) {
-                        const siblings = Array.from(element.parentNode.children);
-                        siblings.forEach(sibling => {
-                            if (sibling !== element) {
-                                const siblingText = sibling.textContent?.trim();
-                                if (siblingText && siblingText.length < 50) {
-                                    text += siblingText + ' ';
-                                }
-                            }
-                        });
-                    }
-                    return text.trim().substring(0, 100);
-                }
-                
-                return elements;
-            }
-            """
+            if page_state is None:
+                page_state = await self.get_page_state(include_screenshot=False, highlight_elements=False)
             
-            elements_data = await self.page.evaluate(js_code)
-            elements = []
-            
-            for elem_data in elements_data:
-                # Generate hash for element
-                element_hash = self._generate_element_hash(elem_data)
-                elem_data['element_hash'] = element_hash
-                elements.append(ElementInfo(**elem_data))
-            
-            logger.info(f"Extracted {len(elements)} elements from page")
-            return elements
-            
-        except Exception as e:
-            logger.error(f"Failed to extract elements: {e}")
-            return []
-
-    def _generate_element_hash(self, element_data: Dict) -> str:
-        """Generate a unique hash for an element"""
-        hash_components = [
-            element_data.get('xpath', ''),
-            element_data.get('tag_name', ''),
-            str(element_data.get('attributes', {})),
-            element_data.get('text', '')[:50]  # First 50 chars of text
-        ]
-        hash_string = '|'.join(hash_components)
-        return hashlib.sha256(hash_string.encode()).hexdigest()[:16]
-
-    async def click_by_coordinates(self, x: float, y: float) -> bool:
-        """Click at specific coordinates"""
-        try:
-            await self.page.mouse.click(x, y)
-            logger.info(f"Clicked at coordinates ({x}, {y})")
-            await asyncio.sleep(1)  # Wait for any potential page changes
-            return True
-        except Exception as e:
-            logger.error(f"Failed to click at coordinates ({x}, {y}): {e}")
-            return False
-
-    async def click_element_by_id(self, element_id: str, page_state: PageState) -> bool:
-        """Click an element by its ID from the page state"""
-        try:
-            element = next((e for e in page_state.elements if e.id == element_id), None)
-            if not element or not element.center_coordinates:
-                logger.error(f"Element with ID {element_id} not found or has no coordinates")
+            if index not in page_state.selector_map:
+                logger.error(f"Element with index {index} not found in selector map")
                 return False
+
+            element = page_state.selector_map[index]
             
+            if not element.center_coordinates:
+                logger.error(f"Element at index {index} has no coordinates")
+                return False
+
             x = element.center_coordinates['x']
             y = element.center_coordinates['y']
+
+            logger.info(f"Clicking element {index}: {element.text[:50]}... at ({x}, {y})")
             
-            # Scroll element into view if needed
-            await self._scroll_to_element(element)
-            await asyncio.sleep(0.5)
+            # Click using coordinates
+            await self.page.mouse.click(x, y)
+            await asyncio.sleep(1)
             
-            return await self.click_by_coordinates(x, y)
+            logger.info(f"Successfully clicked element {index}")
+            return True
+
         except Exception as e:
-            logger.error(f"Failed to click element {element_id}: {e}")
+            logger.error(f"Failed to click element at index {index}: {e}")
             return False
 
-    async def type_text(self, text: str, element_id: str = None, coordinates: Tuple[float, float] = None) -> bool:
-        """Type text into an input field"""
+    async def input_text_by_index(self, index: int, text: str, page_state: PageState = None) -> bool:
+        """Input text into element by index (browser-use compatible)"""
         try:
-            if coordinates:
-                # Click at coordinates first to focus
-                await self.click_by_coordinates(coordinates[0], coordinates[1])
-                await asyncio.sleep(0.5)
-            elif element_id:
-                # Find element and click it first
-                page_state = await self.get_comprehensive_page_state(include_screenshot=False)
-                element = next((e for e in page_state.elements if e.id == element_id), None)
-                if element and element.center_coordinates:
-                    await self.click_by_coordinates(
-                        element.center_coordinates['x'], 
-                        element.center_coordinates['y']
-                    )
-                    await asyncio.sleep(0.5)
+            if page_state is None:
+                page_state = await self.get_page_state(include_screenshot=False, highlight_elements=False)
+            
+            if index not in page_state.selector_map:
+                logger.error(f"Element with index {index} not found in selector map")
+                return False
+
+            element = page_state.selector_map[index]
+            
+            if not element.is_input:
+                logger.warning(f"Element at index {index} may not be an input field")
+
+            if not element.center_coordinates:
+                logger.error(f"Element at index {index} has no coordinates")
+                return False
+
+            x = element.center_coordinates['x']
+            y = element.center_coordinates['y']
+
+            logger.info(f"Typing '{text}' into element {index}: {element.text[:30]}...")
+            
+            # Click to focus, then type
+            await self.page.mouse.click(x, y)
+            await asyncio.sleep(0.5)
             
             # Clear existing text and type new text
             await self.page.keyboard.press('Control+a')
             await self.page.keyboard.type(text)
-            logger.info(f"Typed text: {text}")
-            return True
             
-        except Exception as e:
-            logger.error(f"Failed to type text: {e}")
-            return False
+            logger.info(f"Successfully typed text into element {index}")
+            return True
 
-    async def _scroll_to_element(self, element: ElementInfo):
-        """Scroll to make element visible"""
-        if element.center_coordinates:
-            await self.page.evaluate(f"""
-                window.scrollTo({{
-                    left: {element.center_coordinates['x'] - 640},
-                    top: {element.center_coordinates['y'] - 400},
-                    behavior: 'smooth'
-                }});
-            """)
+        except Exception as e:
+            logger.error(f"Failed to input text into element at index {index}: {e}")
+            return False
 
     async def scroll_page(self, direction: str = "down", amount: int = 500):
         """Scroll the page"""
@@ -505,23 +645,6 @@ class BrowserController:
             logger.error(f"Failed to press key {key}: {e}")
             return False
 
-    async def wait_for_navigation(self, timeout: int = 10000) -> bool:
-        """Wait for page navigation to complete"""
-        try:
-            await self.page.wait_for_load_state("networkidle", timeout=timeout)
-            return True
-        except:
-            return False
-
-    async def get_page_screenshot(self) -> str:
-        """Get base64 encoded screenshot of current page"""
-        try:
-            screenshot_bytes = await self.page.screenshot(full_page=False)
-            return base64.b64encode(screenshot_bytes).decode('utf-8')
-        except Exception as e:
-            logger.error(f"Failed to take screenshot: {e}")
-            return ""
-
     def get_vnc_info(self):
         """Get VNC connection information"""
         if self.enable_vnc and self.vnc_port:
@@ -529,84 +652,8 @@ class BrowserController:
                 "enabled": True,
                 "port": self.vnc_port,
                 "display": self.display_num,
-                "url": f"ws://localhost:{self.vnc_port + 1000}"
+                "url": f"ws://localhost:{self.vnc_port + 1000}",
+                "websocket_port": self.vnc_port + 1000,
+                "websocket_url": f"ws://localhost:{self.vnc_port + 1000}"
             }
         return {"enabled": False}
-
-# AI Integration Helper Class
-class AIBrowserAgent:
-    """Helper class to integrate with AI for decision making"""
-    
-    def __init__(self, browser_controller: BrowserController):
-        self.browser = browser_controller
-    
-    async def execute_task(self, task_description: str) -> Dict[str, Any]:
-        """Execute a task described in natural language"""
-        try:
-            # Get current page state
-            page_state = await self.browser.get_comprehensive_page_state()
-            
-            # This is where you would integrate with your AI model
-            # The AI would receive:
-            # 1. task_description - what the user wants to do
-            # 2. page_state - current state of the page with all elements
-            # 3. screenshot - visual context
-            
-            return {
-                "status": "ready_for_ai",
-                "task": task_description,
-                "page_state": page_state.to_dict(),
-                "available_actions": [
-                    "click_element_by_id",
-                    "type_text", 
-                    "scroll_page",
-                    "press_key",
-                    "goto"
-                ]
-            }
-            
-        except Exception as e:
-            logger.error(f"Failed to execute task: {e}")
-            return {"status": "error", "error": str(e)}
-    
-    async def perform_ai_action(self, action: Dict[str, Any]) -> bool:
-        """Perform an action decided by AI"""
-        try:
-            action_type = action.get("type")
-            
-            if action_type == "click":
-                if "element_id" in action:
-                    page_state = await self.browser.get_comprehensive_page_state(include_screenshot=False)
-                    return await self.browser.click_element_by_id(action["element_id"], page_state)
-                elif "coordinates" in action:
-                    return await self.browser.click_by_coordinates(
-                        action["coordinates"]["x"], 
-                        action["coordinates"]["y"]
-                    )
-            
-            elif action_type == "type":
-                return await self.browser.type_text(
-                    action["text"],
-                    action.get("element_id"),
-                    action.get("coordinates")
-                )
-            
-            elif action_type == "scroll":
-                await self.browser.scroll_page(
-                    action.get("direction", "down"),
-                    action.get("amount", 500)
-                )
-                return True
-            
-            elif action_type == "key":
-                return await self.browser.press_key(action["key"])
-            
-            elif action_type == "navigate":
-                await self.browser.goto(action["url"])
-                return True
-            
-            return False
-            
-        except Exception as e:
-            logger.error(f"Failed to perform AI action: {e}")
-            return False
