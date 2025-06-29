@@ -3,7 +3,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks, Up
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
-
+from backend.browser_controller import BrowserController
 from backend.proxy_manager import ProxyManager
 from backend.agent import run_agent
 from backend.vnc_proxy import start_vnc_proxy, stop_vnc_proxy
@@ -62,6 +62,39 @@ async def job_ws(ws: WebSocket, job_id: str):
 def download(job_id: str):
     file_path = OUTPUT_DIR / f"{job_id}.output"
     return FileResponse(path=file_path, filename=file_path.name)
+
+
+@app.post("/vnc/create/{job_id}")
+async def create_vnc_session(job_id: str):
+    """Create a VNC session without starting a job"""
+    if job_id in vnc_sessions:
+        return vnc_sessions[job_id]
+    
+    # Create a minimal browser controller just for VNC
+    try:
+        browser_ctrl = BrowserController(headless=False, proxy=None, enable_vnc=True)
+        await browser_ctrl._setup_vnc()
+        
+        vnc_info = browser_ctrl.get_vnc_info()
+        if vnc_info.get("enabled"):
+            websocket_port = await start_vnc_proxy(vnc_info["port"])
+            if websocket_port:
+                vnc_info["websocket_port"] = websocket_port
+                vnc_info["websocket_url"] = f"ws://localhost:{websocket_port}"
+                vnc_sessions[job_id] = vnc_info
+                
+                # Keep the browser controller alive
+                vnc_sessions[job_id]["browser_ctrl"] = browser_ctrl
+                
+                await broadcast(job_id, {
+                    "type": "vnc_info",
+                    "vnc": vnc_info
+                })
+                
+                return vnc_info
+    except Exception as e:
+        return {"enabled": False, "error": str(e)}
+
 
 @app.get("/vnc/{job_id}")
 async def get_vnc_info(job_id: str):

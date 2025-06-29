@@ -14,35 +14,37 @@ class BrowserController:
         self.vnc_process = None
         self.xvfb_process = None
         self.display_num = None
-        self.vnc_port = None
+        self.vnc_port = 5901
 
     async def __aenter__(self):
-        if self.enable_vnc and not self.headless:
+        if self.enable_vnc:
             await self._setup_vnc()
-        
+            # Ensure DISPLAY is set for the browser
+            if self.display_num:
+                os.environ['DISPLAY'] = f":{self.display_num}"
+
         self.play = await async_playwright().start()
-        
+
         # Browser launch options
         launch_options = {
-            "headless": self.headless,
+            "headless": False if self.enable_vnc else self.headless,  # Force non-headless for VNC
             "args": [
                 "--no-sandbox",
                 "--disable-dev-shm-usage",
-                "--disable-gpu",
+                "--disable-gpu" if not self.enable_vnc else "--use-gl=swiftshader",
                 "--disable-web-security",
-                "--disable-features=VizDisplayCompositor"
+                "--disable-features=VizDisplayCompositor",
+                "--window-size=1280,800",
+                "--window-position=0,0"
             ]
         }
-        
+
         if self.proxy:
             launch_options["proxy"] = self.proxy
-            
-        # If VNC is enabled and we're using Xvfb, set the display
-        if self.enable_vnc and self.display_num:
-            os.environ['DISPLAY'] = f":{self.display_num}"
-            
+
         self.browser = await self.play.chromium.launch(**launch_options)
         self.page = await self.browser.new_page(viewport={"width": 1280, "height": 800})
+
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -55,27 +57,41 @@ class BrowserController:
         try:
             # Find available display number
             self.display_num = self._find_free_display()
-            self.vnc_port = 5900 + self.display_num
-            
+            self.vnc_port = 5901 + self.display_num
+
             print(f"🖥️ Setting up VNC on display :{self.display_num}, port {self.vnc_port}")
-            
+
             # Start Xvfb (X Virtual Framebuffer)
             xvfb_cmd = [
                 "Xvfb", f":{self.display_num}",
                 "-screen", "0", "1280x800x24",
                 "-ac", "+extension", "GLX",
-                "+render", "-noreset"
+                "+render", "-noreset",
+                "-dpi", "96"  # Add DPI setting
             ]
-            
+
             self.xvfb_process = subprocess.Popen(
                 xvfb_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
-            
+
             # Wait for Xvfb to start
-            await asyncio.sleep(2)
+            await asyncio.sleep(3)
+
+            # Set DISPLAY environment variable BEFORE starting VNC
+            os.environ['DISPLAY'] = f":{self.display_num}"
             
+            # Start a simple window manager (helps with browser display)
+            wm_cmd = ["fluxbox", "-display", f":{self.display_num}"]
+            self.wm_process = subprocess.Popen(
+                wm_cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            
+            await asyncio.sleep(2)
+
             # Start VNC server
             vnc_cmd = [
                 "x11vnc",
@@ -84,24 +100,27 @@ class BrowserController:
                 "-forever",
                 "-nopw",
                 "-quiet",
-                "-bg"
+                "-bg",
+                "-shared",  # Allow multiple connections
+                "-cursor", "arrow"  # Show cursor
             ]
-            
+
             self.vnc_process = subprocess.Popen(
                 vnc_cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
-            
+
             # Wait for VNC server to start
-            await asyncio.sleep(2)
-            
+            await asyncio.sleep(3)
+
             print(f"✅ VNC server started on port {self.vnc_port}")
-            
+
         except Exception as e:
             print(f"❌ Failed to setup VNC: {e}")
             await self._cleanup_vnc()
             raise
+
 
     def _find_free_display(self):
         """Find a free X display number"""
