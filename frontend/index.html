@@ -5,10 +5,43 @@
 <title>AI-Agent-Scraper</title>
 <style>
  body{font-family:Arial;margin:0;padding:0;display:flex;height:100vh}
- #left{flex:0 0 350px;padding:20px;border-right:1px solid #ddd}
+ #left{flex:0 0 350px;padding:20px;border-right:1px solid #ddd;overflow-y:auto}
  #right{flex:1;display:flex;flex-direction:column}
- #screens{flex:1;overflow:auto;background:#000}
- img{width:100%;height:auto}
+ #view-controls{padding:10px;background:#f0f0f0;border-bottom:1px solid #ddd}
+ #screens{flex:1;overflow:auto;background:#000;position:relative}
+ 
+ /* Screenshot view styles */
+ .screenshot-view img{width:100%;height:auto}
+ 
+ /* VNC view styles */
+ .vnc-view {
+   width: 100%;
+   height: 100%;
+   position: relative;
+ }
+ .vnc-info {
+   position: absolute;
+   top: 10px;
+   left: 10px;
+   background: rgba(0,0,0,0.8);
+   color: white;
+   padding: 10px;
+   border-radius: 5px;
+   font-size: 12px;
+ }
+ .vnc-status {
+   position: absolute;
+   top: 10px;
+   right: 10px;
+   padding: 5px 10px;
+   border-radius: 3px;
+   font-size: 12px;
+   font-weight: bold;
+ }
+ .vnc-status.connected { background: #4CAF50; color: white; }
+ .vnc-status.connecting { background: #FF9800; color: white; }
+ .vnc-status.disconnected { background: #f44336; color: white; }
+ 
  #token-stats {
    margin-top: 20px;
    padding: 10px;
@@ -39,6 +72,31 @@
    background: white;
    border-left: 3px solid #007acc;
  }
+ 
+ /* Control styles */
+ .view-option {
+   margin-right: 15px;
+ }
+ .view-option input[type="radio"] {
+   margin-right: 5px;
+ }
+ 
+ /* Hidden by default */
+ .hidden { display: none !important; }
+ 
+ /* Debug styles */
+ .debug-info {
+   position: fixed;
+   bottom: 10px;
+   right: 10px;
+   background: rgba(255,0,0,0.8);
+   color: white;
+   padding: 10px;
+   border-radius: 5px;
+   font-size: 12px;
+   max-width: 300px;
+   z-index: 1000;
+ }
 </style>
 </head>
 <body>
@@ -50,8 +108,9 @@
       <option>txt</option><option>md</option><option>json</option><option>html</option>
     </select>
   </label><br/>
-  <label><input type="checkbox" id="headless" checked/> Headless</label><br/><br/>
-  <button onclick="run()">Run</button>
+  <label><input type="checkbox" id="headless" checked/> Headless</label><br/>
+  <label><input type="checkbox" id="enable-vnc"/> Enable Real-time Browser View</label><br/><br/>
+  <button onclick="handleRun()">Run</button>
   <div id="status"></div>
   <a id="download" style="display:none;">Download result</a>
   
@@ -80,16 +139,220 @@
     <div id="decisions-content"></div>
   </div>
 </div>
+
 <div id="right">
-  <div id="screens"></div>
+  <div id="view-controls">
+    <div class="view-option">
+      <input type="radio" id="view-screenshot" name="view-mode" value="screenshot" checked>
+      <label for="view-screenshot">Screenshots</label>
+    </div>
+    <div class="view-option">
+      <input type="radio" id="view-vnc" name="view-mode" value="vnc">
+      <label for="view-vnc">Real-time Browser</label>
+    </div>
+    <span id="vnc-availability" style="color:#999;font-size:12px;">(Enable VNC option to use real-time view)</span>
+  </div>
+  
+  <div id="screens">
+    <!-- Screenshot view -->
+    <div id="screenshot-container" class="screenshot-view">
+      <!-- Screenshots will be added here -->
+    </div>
+    
+    <!-- VNC view -->
+    <div id="vnc-container" class="vnc-view hidden">
+      <div id="vnc-screen"></div>
+      <div class="vnc-info">
+        <div>Real-time Browser View</div>
+        <div id="vnc-details">Waiting for connection...</div>
+      </div>
+      <div id="vnc-status" class="vnc-status disconnected">Disconnected</div>
+    </div>
+  </div>
 </div>
 
+<!-- Debug info (will be hidden in production) -->
+<div id="debug-info" class="debug-info" style="display:none;"></div>
+
 <script>
+// Debug function
+function debugLog(message) {
+  console.log(message);
+  const debugDiv = document.getElementById('debug-info');
+  if (debugDiv) {
+    debugDiv.style.display = 'block';
+    debugDiv.innerHTML = message + '<br>' + debugDiv.innerHTML;
+    // Keep only last 5 messages
+    const lines = debugDiv.innerHTML.split('<br>');
+    if (lines.length > 5) {
+      debugDiv.innerHTML = lines.slice(0, 5).join('<br>');
+    }
+  }
+}
+
+// Global variables
 let totalTokens = 0;
 let totalPromptTokens = 0;
 let totalResponseTokens = 0;
 let apiCallCount = 0;
+let currentJobId = null;
+let vnc = null;
+let vncEnabled = false;
+let RFB = null; // Will be set when noVNC loads
 
+
+
+// Add this function to create VNC session before starting job
+async function createVNCSession(jobId) {
+    try {
+        const response = await fetch(`/vnc/create/${jobId}`, {
+            method: 'POST'
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Failed to create VNC session:', error);
+        return null;
+    }
+}
+
+// Modify your real-time browser button handler
+document.getElementById('vnc-button').addEventListener('click', async () => {
+    const jobId = generateJobId(); // You'll need to implement this
+    const vncInfo = await createVNCSession(jobId);
+    
+    if (vncInfo && vncInfo.enabled) {
+        // Connect to VNC
+        connectToVNC(vncInfo);
+    } else {
+        console.error('Failed to create VNC session');
+    }
+});
+
+// Wrapper function for the run button
+function handleRun() {
+  debugLog('Run button clicked');
+  try {
+    run();
+  } catch (error) {
+    debugLog('Error in run(): ' + error.message);
+    console.error('Error in run():', error);
+  }
+}
+
+// View mode management
+function initViewControls() {
+  debugLog('Initializing view controls');
+  const viewRadios = document.querySelectorAll('input[name="view-mode"]');
+  viewRadios.forEach(radio => {
+    radio.addEventListener('change', switchViewMode);
+  });
+}
+
+function switchViewMode() {
+  const selectedMode = document.querySelector('input[name="view-mode"]:checked').value;
+  const screenshotContainer = document.getElementById('screenshot-container');
+  const vncContainer = document.getElementById('vnc-container');
+  
+  if (selectedMode === 'screenshot') {
+    screenshotContainer.classList.remove('hidden');
+    vncContainer.classList.add('hidden');
+  } else if (selectedMode === 'vnc') {
+    if (vncEnabled) {
+      screenshotContainer.classList.add('hidden');
+      vncContainer.classList.remove('hidden');
+    } else {
+      // Switch back to screenshot if VNC not available
+      document.getElementById('view-screenshot').checked = true;
+      alert('VNC is not enabled for this session. Please enable "Real-time Browser View" option and restart.');
+    }
+  }
+}
+
+// VNC management
+function initVNC(vncInfo) {
+  if (!vncInfo.enabled) return;
+  
+  debugLog('Initializing VNC with info: ' + JSON.stringify(vncInfo));
+  
+  vncEnabled = true;
+  document.getElementById('vnc-availability').textContent = '(VNC enabled - you can switch to real-time view)';
+  document.getElementById('view-vnc').disabled = false;
+  
+  const vncScreen = document.getElementById('vnc-screen');
+  const vncDetails = document.getElementById('vnc-details');
+  const vncStatus = document.getElementById('vnc-status');
+  
+  try {
+    // Clear any existing VNC connection
+    if (vnc) {
+      vnc.disconnect();
+    }
+    
+    // Check if RFB is available
+    if (!RFB) {
+      throw new Error('noVNC RFB class not loaded');
+    }
+    
+    // Initialize noVNC RFB
+    vnc = new RFB(vncScreen, vncInfo.websocket_url, {
+      credentials: {},
+      repeaterID: '',
+      shared: true,
+      local_cursor: true,
+      view_only: false
+    });
+    
+    vncDetails.textContent = `Port: ${vncInfo.port}, Display: :${vncInfo.display}`;
+    
+    // VNC event handlers
+    vnc.addEventListener('connect', () => {
+      debugLog('VNC connected');
+      vncStatus.textContent = 'Connected';
+      vncStatus.className = 'vnc-status connected';
+    });
+    
+    vnc.addEventListener('disconnect', () => {
+      debugLog('VNC disconnected');
+      vncStatus.textContent = 'Disconnected';
+      vncStatus.className = 'vnc-status disconnected';
+    });
+    
+    vnc.addEventListener('credentialsrequired', () => {
+      debugLog('VNC credentials required');
+      vncStatus.textContent = 'Auth Required';
+      vncStatus.className = 'vnc-status connecting';
+    });
+    
+    vnc.addEventListener('securityfailure', (e) => {
+      debugLog('VNC security failure: ' + e.toString());
+      vncStatus.textContent = 'Security Failure';
+      vncStatus.className = 'vnc-status disconnected';
+    });
+    
+    vncStatus.textContent = 'Connecting...';
+    vncStatus.className = 'vnc-status connecting';
+    
+  } catch (error) {
+    debugLog('Failed to initialize VNC: ' + error.message);
+    vncDetails.textContent = `Error: ${error.message}`;
+    vncStatus.textContent = 'Error';
+    vncStatus.className = 'vnc-status disconnected';
+  }
+}
+
+function disconnectVNC() {
+  if (vnc) {
+    vnc.disconnect();
+    vnc = null;
+  }
+  vncEnabled = false;
+  document.getElementById('vnc-availability').textContent = '(Enable VNC option to use real-time view)';
+  document.getElementById('view-vnc').disabled = true;
+  document.getElementById('view-screenshot').checked = true;
+  switchViewMode();
+}
+
+// Token stats management
 function updateTokenStats(tokenUsage) {
   if (tokenUsage) {
     totalTokens += tokenUsage.total_tokens || 0;
@@ -114,6 +377,7 @@ function addDecisionToLog(decision) {
   if (decision.selector) actionText += `\nSelector: ${decision.selector}`;
   if (decision.text) actionText += `\nText: ${decision.text}`;
   if (decision.url) actionText += `\nURL: ${decision.url}`;
+  if (decision.error) actionText += `\nError: ${decision.error}`;
   
   entry.textContent = actionText;
   decisionsContent.insertBefore(entry, decisionsContent.firstChild);
@@ -137,39 +401,262 @@ function resetStats() {
 }
 
 async function run() {
-  document.getElementById("screens").innerHTML="";
+  debugLog('Starting run function');
+  
+  // Clean up previous session
+  if (currentJobId) {
+    disconnectVNC();
+  }
+  
+  document.getElementById("screenshot-container").innerHTML = "";
   resetStats();
   
   const body = {
     prompt: document.getElementById("prompt").value,
     format: document.getElementById("fmt").value,
-    headless: document.getElementById("headless").checked
+    headless: document.getElementById("headless").checked,
+    enable_vnc: document.getElementById("enable-vnc").checked
   };
-  const res = await fetch("/job", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-  const {job_id} = await res.json();
-  document.getElementById("status").textContent="Job "+job_id;
-  const sock = new WebSocket(`ws://${location.host}/ws/${job_id}`);
-  sock.onmessage = ev => {
-    const msg = JSON.parse(ev.data);
-    if (msg.screenshot){
-      const img = new Image();
-      img.src="data:image/png;base64,"+msg.screenshot;
-      document.getElementById("screens").prepend(img);
+  
+  debugLog('Sending request with body: ' + JSON.stringify(body));
+  
+  try {
+    const res = await fetch("/job", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(body)
+    });
+    
+    debugLog('Response status: ' + res.status);
+    
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
     }
-    if (msg.decision) {
-      addDecisionToLog(msg.decision);
-      if (msg.decision.token_usage) {
-        updateTokenStats(msg.decision.token_usage);
+    
+    const jobResponse = await res.json();
+    currentJobId = jobResponse.job_id;
+    
+    debugLog('Job ID: ' + currentJobId);
+    
+    document.getElementById("status").textContent = "Job " + currentJobId;
+    
+    // Connect to WebSocket
+    const wsUrl = `ws://${location.host}/ws/${currentJobId}`;
+    debugLog('Connecting to WebSocket: ' + wsUrl);
+    
+    const sock = new WebSocket(wsUrl);
+    
+    sock.onopen = () => {
+      debugLog('WebSocket connected');
+    };
+    
+    sock.onmessage = ev => {
+      debugLog('WebSocket message received');
+      try {
+        const msg = JSON.parse(ev.data);
+        
+        // Handle different message types
+        if (msg.type === 'screenshot' || msg.screenshot) {
+          const screenshot = msg.screenshot || msg.data;
+          if (screenshot) {
+            const img = new Image();
+            img.src = "data:image/png;base64," + screenshot;
+            document.getElementById("screenshot-container").prepend(img);
+          }
+        }
+        
+        if (msg.type === 'decision' || msg.decision) {
+          const decision = msg.decision || msg.data;
+          if (decision) {
+            addDecisionToLog(decision);
+            if (decision.token_usage) {
+              updateTokenStats(decision.token_usage);
+            }
+          }
+        }
+        
+        if (msg.type === 'vnc_info' || msg.vnc) {
+          const vncInfo = msg.vnc || msg.data;
+          initVNC(vncInfo);
+        }
+        
+        if (msg.type === 'status' || msg.status) {
+          const status = msg.status || msg.data;
+          if (status === "saved") {
+            const link = document.getElementById("download");
+            link.href = `/download/${currentJobId}`;
+            link.textContent = "Download";
+            link.style.display = "block";
+          }
+        }
+        
+        if (msg.type === 'error' || msg.error) {
+          const error = msg.error || msg.data;
+          debugLog('Agent error: ' + error);
+        }
+      } catch (error) {
+        debugLog('Error parsing WebSocket message: ' + error.message);
       }
-    }
-    if (msg.status==="saved"){
-      const link = document.getElementById("download");
-      link.href=`/download/${job_id}`;
-      link.textContent="Download";
-      link.style.display="block";
-    }
+    };
+    
+    sock.onclose = () => {
+      debugLog('WebSocket connection closed');
+    };
+    
+    sock.onerror = (error) => {
+      debugLog('WebSocket error: ' + error.toString());
+    };
+    
+  } catch (error) {
+    debugLog('Error in run function: ' + error.message);
+    document.getElementById("status").textContent = "Error: " + error.message;
   }
 }
+
+// Load noVNC dynamically with multiple fallback options
+async function loadNoVNC() {
+  const cdnOptions = [
+    'https://cdn.jsdelivr.net/npm/@novnc/novnc@1.6.0/lib/rfb.min.js'
+  ];
+  
+  for (let i = 0; i < cdnOptions.length; i++) {
+    try {
+      debugLog(`Loading noVNC from CDN ${i + 1}/${cdnOptions.length}: ${cdnOptions[i]}`);
+      await loadNoVNCFromURL(cdnOptions[i]);
+      debugLog('noVNC loaded successfully');
+      return;
+    } catch (error) {
+      debugLog(`CDN ${i + 1} failed: ${error.message}`);
+    }
+  }
+  
+  // If all CDNs fail, try a simple inline implementation
+  debugLog('All CDN attempts failed, trying inline fallback...');
+  await loadNoVNCInlineFallback();
+}
+
+// Load noVNC from specific URL
+function loadNoVNCFromURL(url) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = url;
+    
+    script.onload = () => {
+      // Check if RFB is available in global scope
+      if (window.RFB) {
+        RFB = window.RFB;
+        resolve();
+      } else {
+        reject(new Error('RFB not found in global scope'));
+      }
+    };
+    
+    script.onerror = () => {
+      reject(new Error('Failed to load script'));
+    };
+    
+    // Set timeout to avoid hanging
+    setTimeout(() => {
+      reject(new Error('Script load timeout'));
+    }, 10000);
+    
+    document.head.appendChild(script);
+  });
+}
+
+// Inline fallback - create a minimal RFB stub for testing
+async function loadNoVNCInlineFallback() {
+  debugLog('Creating minimal RFB fallback...');
+  
+  // Create a minimal RFB class that logs connection attempts
+  window.RFB = class RFBFallback {
+    constructor(target, url, options) {
+      this.target = target;
+      this.url = url;
+      this.options = options;
+      this.connected = false;
+      
+      debugLog('RFB Fallback: Attempting connection to ' + url);
+      
+      // Create a placeholder canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 600;
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.background = '#000';
+      
+      // Clear target and add canvas
+      target.innerHTML = '';
+      target.appendChild(canvas);
+      
+      // Draw placeholder text
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('VNC Connection Placeholder', canvas.width / 2, canvas.height / 2);
+      ctx.fillText('(noVNC library not available)', canvas.width / 2, canvas.height / 2 + 25);
+      
+      // Simulate connection after a delay
+      setTimeout(() => {
+        this.connected = true;
+        this.dispatchEvent(new CustomEvent('connect'));
+      }, 1000);
+    }
+    
+    addEventListener(event, handler) {
+      if (!this.eventHandlers) this.eventHandlers = {};
+      this.eventHandlers[event] = handler;
+    }
+    
+    dispatchEvent(event) {
+      if (this.eventHandlers && this.eventHandlers[event.type]) {
+        this.eventHandlers[event.type](event);
+      }
+    }
+    
+    disconnect() {
+      this.connected = false;
+      this.dispatchEvent(new CustomEvent('disconnect'));
+    }
+  };
+  
+  RFB = window.RFB;
+  debugLog('RFB fallback created');
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', async () => {
+  debugLog('Page loaded, initializing...');
+  
+  initViewControls();
+  
+  try {
+    await loadNoVNC();
+  } catch (error) {
+    debugLog('noVNC loading failed: ' + error.message);
+  }
+  
+  // Hide debug info after 10 seconds unless there are errors
+  setTimeout(() => {
+    const debugDiv = document.getElementById('debug-info');
+    if (debugDiv && !debugDiv.innerHTML.includes('Error') && !debugDiv.innerHTML.includes('Failed')) {
+      debugDiv.style.display = 'none';
+    }
+  }, 10000);
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+  if (currentJobId) {
+    disconnectVNC();
+    // Optionally notify server to clean up VNC session
+    fetch(`/vnc/${currentJobId}`, { method: 'DELETE' }).catch(() => {});
+  }
+});
+
 </script>
 </body>
 </html>
