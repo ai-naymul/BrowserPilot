@@ -232,7 +232,7 @@
         <div id="status"></div>
     </div>
 
-    <!-- Token Usage Display -->
+    <!-- 1. Token Usage Display -->
     <div class="container">
         <div class="token-usage">
             <h3>📊 Token Usage</h3>
@@ -257,19 +257,7 @@
         </div>
     </div>
 
-    <!-- Recent Decisions -->
-    <div class="container">
-        <h3>🧠 Recent Decisions</h3>
-        <div id="decisions" class="logs"></div>
-    </div>
-
-    <!-- Screenshots -->
-    <div class="container">
-        <h3>📸 Screenshots</h3>
-        <div id="screenshots"></div>
-    </div>
-
-    <!-- Real-time Browser Streaming -->
+    <!-- 2. Real-time Browser Streaming -->
     <div class="container">
         <h3>🎥 Real-time Browser Streaming</h3>
         <div class="stream-container" id="stream-container" style="display: none;">
@@ -293,6 +281,26 @@
         <div id="stream-placeholder" style="text-align: center; padding: 40px; color: #6c757d;">
             <p>Enable streaming option to use real-time browser view</p>
         </div>
+    </div>
+
+    <!-- 3. Recent Decisions -->
+    <div class="container">
+        <h3>🧠 Recent Decisions</h3>
+        <div id="decisions" class="logs"></div>
+    </div>
+
+    <!-- 4. Smart Proxy Status (placeholder - will be created dynamically) -->
+    <div class="container" id="proxy-container" style="display: none;">
+        <h3>🔄 Smart Proxy Status</h3>
+        <div id="proxy-stats" class="token-usage">
+            <div class="token-stats" id="proxy-stats-grid"></div>
+        </div>
+    </div>
+
+    <!-- 5. Screenshots -->
+    <div class="container">
+        <h3>📸 Screenshots</h3>
+        <div id="screenshots"></div>
     </div>
 
     <script>
@@ -514,20 +522,9 @@
         }
 
         function updateProxyStats(stats) {
-            // Create proxy stats display if it doesn't exist
-            let proxyStatsDiv = document.getElementById('proxy-stats');
-            if (!proxyStatsDiv) {
-                const container = document.createElement('div');
-                container.className = 'container';
-                container.innerHTML = `
-                    <h3>🔄 Smart Proxy Status</h3>
-                    <div id="proxy-stats" class="token-usage">
-                        <div class="token-stats" id="proxy-stats-grid"></div>
-                    </div>
-                `;
-                document.body.appendChild(container);
-                proxyStatsDiv = document.getElementById('proxy-stats');
-            }
+            // Show the proxy container when stats are received
+            const proxyContainer = document.getElementById('proxy-container');
+            proxyContainer.style.display = 'block';
             
             const statsGrid = document.getElementById('proxy-stats-grid');
             statsGrid.innerHTML = `
