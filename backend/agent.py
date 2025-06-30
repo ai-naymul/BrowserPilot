@@ -1,7 +1,7 @@
 import asyncio, json, base64, re
 from pathlib import Path
 from typing import Literal
-from backend.browser_controller import BrowserController
+from backend.smart_browser_controller import SmartBrowserController
 from backend.vision_model import decide
 from backend.universal_extractor import UniversalExtractor
 
@@ -33,7 +33,7 @@ def get_file_extension(fmt: str) -> str:
     """Get appropriate file extension for format"""
     extensions = {
         'txt': 'txt',
-        'md': 'md', 
+        'md': 'md',
         'json': 'json',
         'html': 'html',
         'csv': 'csv',
@@ -55,10 +55,10 @@ def get_content_type(fmt: str) -> str:
 
 async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","html","csv","pdf"],
                    headless: bool, proxy: dict | None, enable_streaming: bool = False):
-    """Universal agent with complete file format support"""
+    """Enhanced agent with smart proxy rotation and vision-based anti-bot detection"""
     from backend.main import broadcast, OUTPUT_DIR, register_streaming_session, store_job_info
     
-    print(f"🚀 Starting universal agent for job {job_id}")
+    print(f"🚀 Starting smart agent with vision-based anti-bot detection")
     print(f"📋 Goal: {prompt}")
     print(f"🌐 Default Format: {fmt}")
     
@@ -68,41 +68,63 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
         print(f"🔄 Format overridden: {fmt} → {detected_fmt}")
         fmt = detected_fmt
     
-    # Store job info for later download
-    await store_job_info(job_id, {
-        "format": fmt,
-        "content_type": get_content_type(fmt),
-        "extension": get_file_extension(fmt),
-        "prompt": prompt
-    })
-    
     # Initialize universal extractor
     extractor = UniversalExtractor()
     
-    async with BrowserController(headless, proxy, enable_streaming) as browser:
+    # Use SmartBrowserController instead of regular BrowserController
+    async with SmartBrowserController(headless, proxy, enable_streaming) as browser:
+        
         # Register streaming session
         if enable_streaming:
             await register_streaming_session(job_id, browser)
         
-        # Smart navigation
+        # Store job info for later download
+        await store_job_info(job_id, {
+            "format": fmt,
+            "content_type": get_content_type(fmt),
+            "extension": get_file_extension(fmt),
+            "prompt": prompt
+        })
+        
+        # Show initial proxy stats
+        proxy_stats = browser.get_proxy_stats()
+        print(f"📊 Initial proxy stats: {proxy_stats}")
+        await broadcast(job_id, {
+            "type": "proxy_stats",
+            "stats": proxy_stats
+        })
+        
+        # Smart navigation to starting URL
         url_match = re.search(r"https?://[\w\-\.]+[^\s]*", prompt)
         if url_match:
             start_url = url_match.group(0).rstrip('".,;')
             print(f"🔗 Found URL in prompt: {start_url}")
-            await browser.goto(start_url)
         else:
             start_url = determine_starting_url(prompt)
             print(f"🔗 Starting at: {start_url}")
+        
+        try:
+            # This now uses smart navigation with anti-bot detection and proxy rotation
             await browser.goto(start_url)
+            print("✅ Successfully navigated with smart proxy rotation")
+        except Exception as e:
+            print(f"❌ Smart navigation failed: {e}")
+            await broadcast(job_id, {
+                "type": "error",
+                "message": f"Navigation failed: {str(e)}",
+                "proxy_stats": browser.get_proxy_stats()
+            })
+            return
         
         await broadcast(job_id, {
-            "status": "started", 
+            "status": "started",
             "initial_url": browser.page.url,
             "detected_format": fmt,
-            "file_extension": get_file_extension(fmt)
+            "file_extension": get_file_extension(fmt),
+            "proxy_stats": browser.get_proxy_stats()
         })
         
-        # Dynamic limits
+        # Dynamic limits based on task complexity
         max_steps = determine_max_steps(prompt)
         consecutive_scrolls = 0
         max_consecutive_scrolls = 3
@@ -111,9 +133,19 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
         
         print(f"🎯 Running for max {max_steps} steps, output format: {fmt}")
         
-        # Main universal loop
+        # Main enhanced agent loop with smart proxy rotation
         for step in range(max_steps):
             print(f"\n🔄 Step {step + 1}/{max_steps}")
+            
+            # Periodically check proxy health and broadcast stats
+            if step % 5 == 0:
+                proxy_stats = browser.get_proxy_stats()
+                await broadcast(job_id, {
+                    "type": "proxy_stats", 
+                    "stats": proxy_stats,
+                    "step": step
+                })
+                print(f"📊 Proxy health check: {proxy_stats['available']}/{proxy_stats['total']} available")
             
             try:
                 page_state = await browser.get_page_state(include_screenshot=True)
@@ -158,7 +190,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                 print(f"🤖 AI Decision: {decision.get('action')} - {decision.get('reason', 'No reason')}")
                 
                 await broadcast(job_id, {
-                    "type": "decision", 
+                    "type": "decision",
                     "step": step + 1,
                     "decision": decision
                 })
@@ -167,7 +199,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                 print(f"❌ AI decision failed: {e}")
                 continue
             
-            # Execute action
+            # Execute action with enhanced error handling
             action = decision.get("action")
             print(f"⚡ Executing: {action}")
             
@@ -179,7 +211,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                         print(f"🖱️ Clicking: {elem.text[:50]}...")
                         await browser.click_element_by_index(index, page_state)
                         consecutive_scrolls = 0
-                        extraction_attempts = 0
+                        extraction_attempts = 0  # Reset on navigation
                         await asyncio.sleep(2)
                     else:
                         print(f"❌ Invalid click index: {index}")
@@ -219,10 +251,21 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                     url = decision.get("url", "")
                     if url and url.startswith("http"):
                         print(f"🔗 Navigating to: {url}")
-                        await browser.goto(url)
-                        consecutive_scrolls = 0
-                        extraction_attempts = 0
-                        await asyncio.sleep(2)
+                        # This will use smart navigation with anti-bot detection
+                        try:
+                            await browser.goto(url)
+                            consecutive_scrolls = 0
+                            extraction_attempts = 0
+                            await asyncio.sleep(2)
+                        except Exception as nav_error:
+                            print(f"❌ Smart navigation failed: {nav_error}")
+                            # Broadcast navigation failure with proxy stats
+                            await broadcast(job_id, {
+                                "type": "navigation_error",
+                                "url": url,
+                                "error": str(nav_error),
+                                "proxy_stats": browser.get_proxy_stats()
+                            })
                     else:
                         print(f"❌ Invalid navigation URL: {url}")
                         
@@ -231,7 +274,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                     if extraction_attempts <= max_extraction_attempts:
                         print(f"🔍 Starting intelligent extraction in {fmt} format...")
                         await broadcast(job_id, {
-                            "type": "extraction", 
+                            "type": "extraction",
                             "status": "starting",
                             "attempt": extraction_attempts,
                             "format": fmt
@@ -250,11 +293,12 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                         if saved_successfully:
                             print(f"💾 Content saved successfully: {output_file}")
                             await broadcast(job_id, {
-                                "type": "extraction", 
+                                "type": "extraction",
                                 "status": "completed",
                                 "format": fmt,
                                 "file_path": str(output_file),
-                                "file_extension": file_extension
+                                "file_extension": file_extension,
+                                "proxy_stats": browser.get_proxy_stats()
                             })
                         else:
                             print(f"❌ Failed to save content")
@@ -275,6 +319,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                 print(f"❌ Action execution failed: {e}")
                 await asyncio.sleep(1)
             
+            # Small delay between actions
             await asyncio.sleep(0.5)
         
         # Final extraction if not done yet
@@ -291,10 +336,18 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
             except Exception as e:
                 print(f"❌ Final extraction failed: {e}")
         
-        await broadcast(job_id, {"status": "finished", "final_format": fmt})
+        # Final proxy statistics
+        final_proxy_stats = browser.get_proxy_stats()
+        print(f"📊 Final proxy stats: {final_proxy_stats}")
+        
+        await broadcast(job_id, {
+            "status": "finished", 
+            "final_format": fmt,
+            "final_proxy_stats": final_proxy_stats
+        })
 
 async def save_content(content_result: str, output_file: Path, fmt: str, job_id: str) -> bool:
-    """Save content based on format type"""
+    """Save content based on format type with enhanced error handling"""
     try:
         if fmt == "pdf":
             # Handle PDF - check for direct save indicator
@@ -340,28 +393,56 @@ def determine_starting_url(prompt: str) -> str:
     """Determine the best starting URL based on the user's goal"""
     prompt_lower = prompt.lower()
     
+    # Search-related tasks
     if any(word in prompt_lower for word in ["search", "find", "look for", "google"]):
         return "https://www.google.com"
-    if "linkedin" in prompt_lower:
+    
+    # Professional networks
+    if "linkedin" in prompt_lower or "professional profile" in prompt_lower:
         return "https://www.linkedin.com"
-    if "github" in prompt_lower:
+    
+    # Code repositories
+    if "github" in prompt_lower or "code repository" in prompt_lower:
         return "https://www.github.com"
-    if any(word in prompt_lower for word in ["buy", "purchase", "product", "amazon"]):
+    
+    # E-commerce
+    if any(word in prompt_lower for word in ["buy", "purchase", "product", "price", "amazon"]):
         return "https://www.amazon.com"
-    if any(word in prompt_lower for word in ["news", "article"]):
+    
+    # News and articles
+    if any(word in prompt_lower for word in ["news", "article", "breaking"]):
         return "https://news.google.com"
     
+    # Job listings
+    if any(word in prompt_lower for word in ["job", "career", "hiring", "position"]):
+        return "https://www.linkedin.com/jobs"
+    
+    # Default to Google for most tasks
     return "https://www.google.com"
 
 def determine_max_steps(prompt: str) -> int:
     """Determine max steps based on task complexity"""
     prompt_lower = prompt.lower()
     
-    if any(word in prompt_lower for word in ["extract", "get info", "save"]):
+    # Simple extraction tasks
+    if any(word in prompt_lower for word in ["extract", "get info", "save", "download"]):
         return 15
-    if any(word in prompt_lower for word in ["research", "analyze", "compare"]):
+    
+    # Complex research tasks
+    if any(word in prompt_lower for word in ["research", "analyze", "compare", "comprehensive"]):
         return 25
-    if any(word in prompt_lower for word in ["fill", "submit", "register"]):
+    
+    # Form filling or multi-step processes
+    if any(word in prompt_lower for word in ["fill", "submit", "register", "apply", "multiple"]):
         return 20
     
+    # Shopping or product research
+    if any(word in prompt_lower for word in ["buy", "product", "price", "review"]):
+        return 18
+    
+    # Job searching
+    if any(word in prompt_lower for word in ["job", "career", "position"]):
+        return 20
+    
+    # Default
     return 20

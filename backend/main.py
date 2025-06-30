@@ -3,8 +3,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks, Up
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
-from backend.browser_controller import BrowserController
-from backend.proxy_manager import ProxyManager
+from backend.smart_browser_controller import SmartBrowserController  # Updated import
+from backend.proxy_manager import SmartProxyManager  # Updated import
 from backend.agent import run_agent
 from fastapi.staticfiles import StaticFiles
 
@@ -14,6 +14,9 @@ tasks = {} # job_id → async.Task
 ws_subscribers = {} # job_id → { websocket, … }
 streaming_sessions = {} # job_id → browser_controller
 job_info = {} # job_id → { format, content_type, extension, prompt }
+
+# Initialize global smart proxy manager
+smart_proxy_manager = SmartProxyManager()
 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -38,19 +41,32 @@ async def create_job(req: JobRequest):
         req.format = "txt"
     
     job_id = str(uuid.uuid4())
-    proxy = ProxyManager().get_proxy()
     
-    print(f"🚀 Creating universal job {job_id}")
+    # Use smart proxy manager to get the best available proxy
+    proxy_info = smart_proxy_manager.get_best_proxy()
+    proxy = proxy_info.to_playwright_dict() if proxy_info else None
+    
+    print(f"🚀 Creating smart job {job_id}")
     print(f"📋 Goal: {req.prompt}")
     print(f"🌐 Format: {req.format}")
     print(f"🖥️ Headless: {req.headless}")
     print(f"📡 Streaming: {req.enable_streaming}")
+    print(f"🔄 Selected proxy: {proxy.get('server', 'None') if proxy else 'None'}")
+    
+    # Get initial proxy stats
+    proxy_stats = smart_proxy_manager.get_proxy_stats()
+    print(f"📊 Proxy pool stats: {proxy_stats}")
     
     # Create the agent task
     coro = run_agent(job_id, req.prompt, req.format, req.headless, proxy, req.enable_streaming)
     tasks[job_id] = asyncio.create_task(coro)
     
-    response = {"job_id": job_id, "format": req.format}
+    response = {
+        "job_id": job_id, 
+        "format": req.format,
+        "proxy_stats": proxy_stats
+    }
+    
     if req.enable_streaming:
         response["streaming_enabled"] = True
         response["stream_url"] = f"ws://localhost:8000/stream/{job_id}"
@@ -70,6 +86,13 @@ async def job_ws(ws: WebSocket, job_id: str):
             "type": "streaming_info",
             "streaming": stream_info
         }))
+    
+    # Send initial proxy stats
+    proxy_stats = smart_proxy_manager.get_proxy_stats()
+    await ws.send_text(json.dumps({
+        "type": "proxy_stats",
+        "stats": proxy_stats
+    }))
     
     try:
         while True:
@@ -131,13 +154,25 @@ async def create_streaming_session(job_id: str):
         return browser_ctrl.get_streaming_info()
     
     try:
-        # Create browser controller with streaming enabled
-        browser_ctrl = BrowserController(headless=False, proxy=None, enable_streaming=True)
+        # Get best available proxy for streaming session
+        proxy_info = smart_proxy_manager.get_best_proxy()
+        proxy = proxy_info.to_playwright_dict() if proxy_info else None
+        
+        print(f"🎥 Creating streaming session with proxy: {proxy.get('server', 'None') if proxy else 'None'}")
+        
+        # Create smart browser controller with streaming enabled
+        browser_ctrl = SmartBrowserController(headless=False, proxy=proxy, enable_streaming=True)
         await browser_ctrl.__aenter__()
         await browser_ctrl.start_streaming(quality=80)
         streaming_sessions[job_id] = browser_ctrl
         
         stream_info = browser_ctrl.get_streaming_info()
+        
+        # Add proxy information to stream info
+        stream_info["proxy_info"] = {
+            "current_proxy": proxy.get("server", "None") if proxy else "None",
+            "proxy_stats": smart_proxy_manager.get_proxy_stats()
+        }
         
         # Broadcast to connected clients
         await broadcast(job_id, {
@@ -148,6 +183,7 @@ async def create_streaming_session(job_id: str):
         return stream_info
         
     except Exception as e:
+        print(f"❌ Failed to create streaming session: {e}")
         return {"enabled": False, "error": str(e)}
 
 @app.get("/streaming/{job_id}")
@@ -155,7 +191,13 @@ async def get_streaming_info(job_id: str):
     """Get streaming connection information for a job"""
     if job_id in streaming_sessions:
         browser_ctrl = streaming_sessions[job_id]
-        return browser_ctrl.get_streaming_info()
+        stream_info = browser_ctrl.get_streaming_info()
+        
+        # Add current proxy stats
+        stream_info["proxy_stats"] = smart_proxy_manager.get_proxy_stats()
+        
+        return stream_info
+    
     return {"enabled": False, "error": "Streaming not enabled for this job"}
 
 @app.delete("/streaming/{job_id}")
@@ -207,7 +249,6 @@ def download(job_id: str):
     
     if not file_path.exists():
         print(f"❌ File not found: {file_path}")
-        # Return 404 or create empty file
         from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="File not found")
     
@@ -242,9 +283,39 @@ def get_job_info(job_id: str):
         info["file_exists"] = file_path.exists()
         info["file_path"] = str(file_path) if file_path.exists() else None
         
+        # Add current proxy stats
+        info["proxy_stats"] = smart_proxy_manager.get_proxy_stats()
+        
         return info
     else:
         return {"error": "Job not found", "job_id": job_id}
+
+@app.get("/proxy/stats")
+def get_proxy_stats():
+    """Get current proxy pool statistics"""
+    stats = smart_proxy_manager.get_proxy_stats()
+    return {
+        "proxy_stats": stats,
+        "timestamp": asyncio.get_event_loop().time()
+    }
+
+@app.post("/proxy/reload")
+def reload_proxies():
+    """Reload proxy list from environment"""
+    try:
+        global smart_proxy_manager
+        smart_proxy_manager = SmartProxyManager()
+        stats = smart_proxy_manager.get_proxy_stats()
+        return {
+            "success": True,
+            "message": "Proxy list reloaded successfully",
+            "proxy_stats": stats
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": f"Failed to reload proxies: {str(e)}"
+        }
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 
@@ -258,7 +329,7 @@ async def broadcast(job_id: str, msg: dict):
             except:
                 ws_subscribers[job_id].discard(ws)
 
-async def register_streaming_session(job_id: str, browser_ctrl: BrowserController):
+async def register_streaming_session(job_id: str, browser_ctrl):
     """Register streaming session information"""
     streaming_sessions[job_id] = browser_ctrl
     
@@ -275,10 +346,21 @@ async def register_streaming_session(job_id: str, browser_ctrl: BrowserControlle
 @app.on_event("shutdown")
 async def cleanup():
     """Cleanup resources on shutdown"""
+    print("🧹 Cleaning up resources...")
+    
+    # Cleanup streaming sessions
     for job_id, browser_ctrl in streaming_sessions.items():
         try:
             await browser_ctrl.__aexit__(None, None, None)
-        except:
-            pass
+            print(f"✅ Cleaned up streaming session: {job_id}")
+        except Exception as e:
+            print(f"❌ Error cleaning up session {job_id}: {e}")
+    
     streaming_sessions.clear()
     job_info.clear()
+    
+    # Print final proxy stats
+    final_stats = smart_proxy_manager.get_proxy_stats()
+    print(f"📊 Final proxy stats: {final_stats}")
+    
+    print("✅ Cleanup completed")
