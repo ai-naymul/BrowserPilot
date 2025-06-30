@@ -11,8 +11,7 @@ import io
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-MODEL = genai.GenerativeModel("gemini-2.0-flash-exp")
-
+MODEL = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
 # Much more concise system prompt
 SYSTEM_PROMPT = """
 You are a web automation agent that controls a browser using element indices (like browser-use).
@@ -116,6 +115,16 @@ Next action?
 
         content = [SYSTEM_PROMPT, prompt, compressed_image]
 
+        # COUNT TOKENS BEFORE SENDING REQUEST
+        print("📊 Counting tokens...")
+        token_count_response = await asyncio.to_thread(
+            functools.partial(MODEL.count_tokens, content)
+        )
+
+
+        input_tokens = token_count_response.total_tokens
+        print(f"📊 Input tokens: {input_tokens}")
+
         print("📡 Sending optimized request to Gemini...")
 
         response = await asyncio.to_thread(
@@ -125,7 +134,11 @@ Next action?
         print("✅ Received response")
         raw_text = response.text
         print(f"📝 Response: {raw_text[:100]}...")
-
+        
+        #COUNT TOKENS FOR THE RESPONSE
+        response_tokens = await count_response_tokens(raw_text)
+        # Calculate total tokens
+        total_tokens = input_tokens + response_tokens
         # Parse response
         result = {"action": "done"}
         try:
@@ -146,7 +159,12 @@ Next action?
             result = {"action": "done"}
 
         # Add token usage
-        token_usage = extract_token_usage(response)
+        # token_usage = extract_token_usage(response)
+        token_usage = {
+            'prompt_tokens': input_tokens,
+            'response_tokens': response_tokens,
+            'total_tokens': total_tokens
+        }
         print(f"📊 Token usage: {token_usage}")
         print("Here is the response:", response)
         # import time
@@ -170,7 +188,22 @@ Next action?
         }
 
 
+async def count_response_tokens(response_text: str) -> int:
+    """Count tokens in the response text"""
+    try:
+        # Count tokens for just the response text
+        token_count_response = await asyncio.to_thread(
+            functools.partial(MODEL.count_tokens, response_text)
+        )
+        return token_count_response.total_tokens
+    except Exception as e:
+        print(f"❌ Error counting response tokens: {e}")
+        # Fallback: rough estimation (1 token ≈ 4 characters for English)
+        return len(response_text) // 4
 
+
+
+## This doesn't work with current response structure or generative model
 # extract token usage
 def extract_token_usage(response):
     """
