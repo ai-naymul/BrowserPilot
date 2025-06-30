@@ -537,7 +537,7 @@ class BrowserController:
             if include_screenshot:
                 screenshot_bytes = await self.page.screenshot(
                     full_page=False,
-                    clip={'x': 0, 'y': 0, 'width': 800, 'height': 600}
+                    clip={'x': 0, 'y': 0, 'width': 1250, 'height': 800}
                 )
                 screenshot = base64.b64encode(screenshot_bytes).decode('utf-8')
             

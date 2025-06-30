@@ -92,7 +92,7 @@ class UniversalExtractor:
     def __init__(self):
         self.extraction_cache = {}
     
-    async def extract_intelligent_content(self, browser: BrowserController, goal: str, fmt: str = "json") -> str:
+    async def extract_intelligent_content(self, browser: BrowserController, goal: str, fmt: str = "json", job_id: str = None) -> str:
         """Extract content intelligently from any website based on user's goal"""
         try:
             # Get comprehensive page information
@@ -109,7 +109,7 @@ class UniversalExtractor:
             extracted_data = await self._ai_extract(goal, url, title, website_type, content)
             
             # Format the output based on requested format
-            return await self._format_output(extracted_data, fmt, goal)
+            return await self._format_output(extracted_data, fmt, goal, job_id)  # Pass job_id
                 
         except Exception as e:
             print(f"❌ Universal extraction failed: {e}")
@@ -324,7 +324,7 @@ class UniversalExtractor:
         
         return summary
     
-    async def _format_output(self, data: Dict[str, Any], fmt: str, goal: str) -> str:
+    async def _format_output(self, data: Dict[str, Any], fmt: str, goal: str, job_id: str = None) -> str:
         """Format extracted data in the requested format"""
         if fmt == "json":
             return json.dumps(data, indent=2, ensure_ascii=False)
@@ -337,9 +337,10 @@ class UniversalExtractor:
         elif fmt == "csv":
             return self._format_as_csv(data)
         elif fmt == "pdf":
-            return await self._format_as_pdf(data, goal)
+            return await self._format_as_pdf(data, goal, job_id)  # Pass job_id
         else:
             return json.dumps(data, indent=2, ensure_ascii=False)
+
     
     def _format_as_text(self, data: Dict[str, Any]) -> str:
         """Format as clean text"""
@@ -470,58 +471,102 @@ class UniversalExtractor:
                     csv_lines.append(f'"{key}","{clean_value}"')
             return "\n".join(csv_lines)
     
-    async def _format_as_pdf(self, data: Dict[str, Any], goal: str) -> str:
+    async def _format_as_pdf(self, data: Dict[str, Any], goal: str, job_id: str = None) -> str:
         """Format as PDF and return file path"""
         try:
+            from reportlab.lib.pagesizes import letter
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+            from reportlab.lib.styles import getSampleStyleSheet
+            import html
+            
             output_dir = Path("outputs")
             output_dir.mkdir(exist_ok=True)
             
-            filename = f"extracted_data_{int(asyncio.get_event_loop().time())}.pdf"
+            # Use job_id if provided, otherwise use timestamp
+            if job_id:
+                filename = f"{job_id}.pdf"
+            else:
+                import time
+                timestamp = int(time.time())
+                filename = f"extracted_data_{timestamp}.pdf"
+                
             filepath = output_dir / filename
             
-            doc = SimpleDocTemplate(str(filepath), pagesize=letter)
+            doc = SimpleDocTemplate(str(filepath), pagesize=letter, topMargin=72, bottomMargin=72)
             styles = getSampleStyleSheet()
             story = []
             
             # Title
             story.append(Paragraph("Extracted Information", styles['Title']))
-            story.append(Spacer(1, 12))
+            story.append(Spacer(1, 20))
             
             # Metadata
             metadata = data.get("_metadata", {})
             if metadata:
-                story.append(Paragraph(f"<b>Source:</b> {metadata.get('source_url', 'Unknown')}", styles['Normal']))
-                story.append(Paragraph(f"<b>Goal:</b> {metadata.get('extraction_goal', 'Unknown')}", styles['Normal']))
-                story.append(Paragraph(f"<b>Website Type:</b> {metadata.get('website_type', 'Unknown')}", styles['Normal']))
-                story.append(Spacer(1, 12))
+                story.append(Paragraph(f"<b>Source:</b> {html.escape(str(metadata.get('source_url', 'Unknown')))}", styles['Normal']))
+                story.append(Paragraph(f"<b>Goal:</b> {html.escape(str(metadata.get('extraction_goal', 'Unknown')))}", styles['Normal']))
+                story.append(Paragraph(f"<b>Website Type:</b> {html.escape(str(metadata.get('website_type', 'Unknown')))}", styles['Normal']))
+                story.append(Spacer(1, 20))
             
-            # Content
+            # Content with better handling
             def add_content(key: str, value, level: int = 0):
                 if isinstance(value, dict):
                     if key != "_metadata":
                         style = styles['Heading1'] if level == 0 else styles['Heading2']
-                        story.append(Paragraph(key.replace('_', ' ').title(), style))
-                        story.append(Spacer(1, 6))
+                        clean_key = html.escape(key.replace('_', ' ').title())
+                        story.append(Paragraph(clean_key, style))
+                        story.append(Spacer(1, 10))
                         for k, v in value.items():
                             add_content(k, v, level + 1)
                 elif isinstance(value, list):
-                    story.append(Paragraph(f"<b>{key.replace('_', ' ').title()}:</b>", styles['Normal']))
+                    clean_key = html.escape(key.replace('_', ' ').title())
+                    story.append(Paragraph(f"<b>{clean_key}:</b>", styles['Normal']))
+                    story.append(Spacer(1, 6))
                     for item in value:
-                        story.append(Paragraph(f"• {item}", styles['Normal']))
-                    story.append(Spacer(1, 6))
+                        # Handle long text items and escape HTML
+                        item_str = html.escape(str(item))
+                        if len(item_str) > 300:
+                            item_str = item_str[:300] + "..."
+                        story.append(Paragraph(f"• {item_str}", styles['Normal']))
+                    story.append(Spacer(1, 10))
                 else:
-                    story.append(Paragraph(f"<b>{key.replace('_', ' ').title()}:</b> {value}", styles['Normal']))
-                    story.append(Spacer(1, 6))
+                    # Handle long text values and escape HTML
+                    clean_key = html.escape(key.replace('_', ' ').title())
+                    value_str = html.escape(str(value))
+                    if len(value_str) > 800:
+                        value_str = value_str[:800] + "..."
+                    story.append(Paragraph(f"<b>{clean_key}:</b> {value_str}", styles['Normal']))
+                    story.append(Spacer(1, 8))
             
             for key, value in data.items():
                 add_content(key, value)
             
-            doc.build(story)
-            return f"PDF saved to: {filepath}"
+            # Build PDF with error handling
+            try:
+                doc.build(story)
+                print(f"✅ PDF successfully generated: {filepath}")
+                return f"PDF_DIRECT_SAVE:{filepath}"  # Special indicator for direct save
+            except Exception as build_error:
+                print(f"❌ PDF build error: {build_error}")
+                raise build_error
+            
+        except ImportError:
+            print("❌ ReportLab not installed. Installing...")
+            import subprocess
+            import sys
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "reportlab"])
+                # Try again after installation
+                return await self._format_as_pdf(data, goal, job_id)
+            except subprocess.CalledProcessError:
+                print("❌ Failed to install ReportLab")
+                raise ImportError("ReportLab installation failed")
             
         except Exception as e:
             print(f"❌ PDF generation failed: {e}")
-            return f"PDF generation failed: {str(e)}"
+            # Return error indicator instead of fallback file
+            raise RuntimeError(f"PDF generation failed: {str(e)}")
+
     
     def _flatten_dict(self, d: Dict[str, Any], parent_key: str = '', sep: str = '_') -> Dict[str, Any]:
         """Flatten nested dictionary for CSV export"""

@@ -5,14 +5,76 @@ from backend.browser_controller import BrowserController
 from backend.vision_model import decide
 from backend.universal_extractor import UniversalExtractor
 
+def detect_format_from_prompt(prompt: str, default_fmt: str) -> str:
+    """Detect format from prompt text and override default if found"""
+    prompt_lower = prompt.lower()
+    
+    # Format detection patterns
+    format_patterns = {
+        'pdf': [r'\bpdf\b', r'pdf format', r'save.*pdf', r'as pdf', r'to pdf'],
+        'csv': [r'\bcsv\b', r'csv format', r'save.*csv', r'as csv', r'to csv'],
+        'json': [r'\bjson\b', r'json format', r'save.*json', r'as json', r'to json'],
+        'html': [r'\bhtml\b', r'html format', r'save.*html', r'as html', r'to html'],
+        'md': [r'\bmarkdown\b', r'md format', r'save.*markdown', r'as markdown', r'to md'],
+        'txt': [r'\btext\b', r'txt format', r'save.*text', r'as text', r'to txt', r'plain text']
+    }
+    
+    # Check each format pattern
+    for fmt, patterns in format_patterns.items():
+        for pattern in patterns:
+            if re.search(pattern, prompt_lower):
+                print(f"🎯 Detected format '{fmt}' from prompt")
+                return fmt
+    
+    print(f"📋 No specific format detected, using default: {default_fmt}")
+    return default_fmt
+
+def get_file_extension(fmt: str) -> str:
+    """Get appropriate file extension for format"""
+    extensions = {
+        'txt': 'txt',
+        'md': 'md', 
+        'json': 'json',
+        'html': 'html',
+        'csv': 'csv',
+        'pdf': 'pdf'
+    }
+    return extensions.get(fmt, 'output')  # fallback to .output
+
+def get_content_type(fmt: str) -> str:
+    """Get MIME type for format"""
+    content_types = {
+        'txt': 'text/plain',
+        'md': 'text/markdown',
+        'json': 'application/json',
+        'html': 'text/html',
+        'csv': 'text/csv',
+        'pdf': 'application/pdf'
+    }
+    return content_types.get(fmt, 'application/octet-stream')
+
 async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","html","csv","pdf"],
                    headless: bool, proxy: dict | None, enable_streaming: bool = False):
-    """Universal agent that works with any website"""
-    from backend.main import broadcast, OUTPUT_DIR, register_streaming_session
+    """Universal agent with complete file format support"""
+    from backend.main import broadcast, OUTPUT_DIR, register_streaming_session, store_job_info
     
     print(f"🚀 Starting universal agent for job {job_id}")
     print(f"📋 Goal: {prompt}")
-    print(f"🌐 Format: {fmt}")
+    print(f"🌐 Default Format: {fmt}")
+    
+    # Smart format detection from prompt
+    detected_fmt = detect_format_from_prompt(prompt, fmt)
+    if detected_fmt != fmt:
+        print(f"🔄 Format overridden: {fmt} → {detected_fmt}")
+        fmt = detected_fmt
+    
+    # Store job info for later download
+    await store_job_info(job_id, {
+        "format": fmt,
+        "content_type": get_content_type(fmt),
+        "extension": get_file_extension(fmt),
+        "prompt": prompt
+    })
     
     # Initialize universal extractor
     extractor = UniversalExtractor()
@@ -22,28 +84,32 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
         if enable_streaming:
             await register_streaming_session(job_id, browser)
         
-        # Smart navigation - detect if URL is in prompt
+        # Smart navigation
         url_match = re.search(r"https?://[\w\-\.]+[^\s]*", prompt)
         if url_match:
             start_url = url_match.group(0).rstrip('".,;')
             print(f"🔗 Found URL in prompt: {start_url}")
             await browser.goto(start_url)
         else:
-            # Determine best starting point based on goal
             start_url = determine_starting_url(prompt)
             print(f"🔗 Starting at: {start_url}")
             await browser.goto(start_url)
         
-        await broadcast(job_id, {"status": "started", "initial_url": browser.page.url})
+        await broadcast(job_id, {
+            "status": "started", 
+            "initial_url": browser.page.url,
+            "detected_format": fmt,
+            "file_extension": get_file_extension(fmt)
+        })
         
-        # Dynamic limits based on task complexity
+        # Dynamic limits
         max_steps = determine_max_steps(prompt)
         consecutive_scrolls = 0
         max_consecutive_scrolls = 3
         extraction_attempts = 0
         max_extraction_attempts = 2
         
-        print(f"🎯 Running for max {max_steps} steps")
+        print(f"🎯 Running for max {max_steps} steps, output format: {fmt}")
         
         # Main universal loop
         for step in range(max_steps):
@@ -54,13 +120,13 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                 print(f"📊 Found {len(page_state.selector_map)} interactive elements")
                 print(f"📍 Current: {page_state.url}")
                 
-                # Send info to frontend
                 await broadcast(job_id, {
                     "type": "page_info",
                     "step": step + 1,
                     "url": page_state.url,
                     "title": page_state.title,
-                    "interactive_elements": len(page_state.selector_map)
+                    "interactive_elements": len(page_state.selector_map),
+                    "format": fmt
                 })
                 
                 if page_state.screenshot:
@@ -81,7 +147,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                     consecutive_scrolls += 1
                     continue
                 else:
-                    print("⚠️ No elements found after scrolling, may need to navigate elsewhere")
+                    print("⚠️ No elements found after scrolling")
                     break
             
             # AI decision making
@@ -113,8 +179,8 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                         print(f"🖱️ Clicking: {elem.text[:50]}...")
                         await browser.click_element_by_index(index, page_state)
                         consecutive_scrolls = 0
-                        extraction_attempts = 0  # Reset on navigation
-                        await asyncio.sleep(2)  # Wait for page changes
+                        extraction_attempts = 0
+                        await asyncio.sleep(2)
                     else:
                         print(f"❌ Invalid click index: {index}")
                         
@@ -163,27 +229,36 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                 elif action == "extract":
                     extraction_attempts += 1
                     if extraction_attempts <= max_extraction_attempts:
-                        print("🔍 Starting intelligent extraction...")
+                        print(f"🔍 Starting intelligent extraction in {fmt} format...")
                         await broadcast(job_id, {
                             "type": "extraction", 
                             "status": "starting",
-                            "attempt": extraction_attempts
+                            "attempt": extraction_attempts,
+                            "format": fmt
                         })
                         
-                        # Use universal extraction
-                        content = await extractor.extract_intelligent_content(browser, prompt, fmt)
+                        # Use universal extraction with specified format
+                        content_result = await extractor.extract_intelligent_content(browser, prompt, fmt, job_id)
                         
-                        # Save content
-                        output_file = OUTPUT_DIR / f"{job_id}.output"
-                        with open(output_file, "w", encoding="utf-8") as f:
-                            f.write(content)
+                        # Save content with proper extension
+                        file_extension = get_file_extension(fmt)
+                        output_file = OUTPUT_DIR / f"{job_id}.{file_extension}"
                         
-                        print(f"💾 Universal content saved to {output_file}")
-                        await broadcast(job_id, {
-                            "type": "extraction", 
-                            "status": "completed",
-                            "file_size": len(content)
-                        })
+                        # Handle different content types
+                        saved_successfully = await save_content(content_result, output_file, fmt, job_id)
+                        
+                        if saved_successfully:
+                            print(f"💾 Content saved successfully: {output_file}")
+                            await broadcast(job_id, {
+                                "type": "extraction", 
+                                "status": "completed",
+                                "format": fmt,
+                                "file_path": str(output_file),
+                                "file_extension": file_extension
+                            })
+                        else:
+                            print(f"❌ Failed to save content")
+                            
                         break
                     else:
                         print("⚠️ Maximum extraction attempts reached")
@@ -200,65 +275,93 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                 print(f"❌ Action execution failed: {e}")
                 await asyncio.sleep(1)
             
-            # Small delay between actions
             await asyncio.sleep(0.5)
         
         # Final extraction if not done yet
         if extraction_attempts == 0:
-            print("🔍 Performing final extraction...")
+            print(f"🔍 Performing final extraction in {fmt} format...")
             try:
-                content = await extractor.extract_intelligent_content(browser, prompt, fmt)
-                output_file = OUTPUT_DIR / f"{job_id}.output"
-                with open(output_file, "w", encoding="utf-8") as f:
-                    f.write(content)
-                print(f"💾 Final content saved to {output_file}")
+                content_result = await extractor.extract_intelligent_content(browser, prompt, fmt, job_id)
+                
+                file_extension = get_file_extension(fmt)
+                output_file = OUTPUT_DIR / f"{job_id}.{file_extension}"
+                
+                await save_content(content_result, output_file, fmt, job_id)
+                print(f"💾 Final content saved: {output_file}")
             except Exception as e:
                 print(f"❌ Final extraction failed: {e}")
         
-        await broadcast(job_id, {"status": "finished"})
+        await broadcast(job_id, {"status": "finished", "final_format": fmt})
+
+async def save_content(content_result: str, output_file: Path, fmt: str, job_id: str) -> bool:
+    """Save content based on format type"""
+    try:
+        if fmt == "pdf":
+            # Handle PDF - check for direct save indicator
+            if content_result.startswith("PDF_DIRECT_SAVE:"):
+                # PDF was saved directly to the correct location
+                pdf_path = content_result.split("PDF_DIRECT_SAVE:")[1].strip()
+                print(f"📄 PDF saved directly: {pdf_path}")
+                
+                # Verify the file exists at expected location
+                if Path(pdf_path).exists():
+                    return True
+                else:
+                    print(f"❌ PDF file not found at expected location: {pdf_path}")
+                    return False
+                    
+            elif content_result.startswith("PDF saved to:"):
+                # Legacy format - PDF was saved elsewhere, need to copy
+                pdf_path = content_result.split("PDF saved to: ")[1].strip()
+                import shutil
+                shutil.copy2(pdf_path, output_file)
+                print(f"📄 PDF copied to standard location: {output_file}")
+                return True
+            else:
+                # Content is text, save as fallback
+                with open(output_file.with_suffix('.txt'), "w", encoding="utf-8") as f:
+                    f.write("PDF GENERATION FAILED - TEXT FALLBACK\n")
+                    f.write("="*50 + "\n\n")
+                    f.write(content_result)
+                print(f"📄 PDF fallback saved as text: {output_file.with_suffix('.txt')}")
+                return True
+        else:
+            # Handle text-based formats
+            with open(output_file, "w", encoding="utf-8") as f:
+                f.write(content_result)
+            print(f"📝 {fmt.upper()} content saved: {output_file}")
+            return True
+            
+    except Exception as e:
+        print(f"❌ Error saving content: {e}")
+        return False
 
 def determine_starting_url(prompt: str) -> str:
     """Determine the best starting URL based on the user's goal"""
     prompt_lower = prompt.lower()
     
-    # Search-related tasks
     if any(word in prompt_lower for word in ["search", "find", "look for", "google"]):
         return "https://www.google.com"
-    
-    # LinkedIn profiles
-    if "linkedin" in prompt_lower or "professional profile" in prompt_lower:
+    if "linkedin" in prompt_lower:
         return "https://www.linkedin.com"
-    
-    # GitHub profiles
-    if "github" in prompt_lower or "code repository" in prompt_lower:
+    if "github" in prompt_lower:
         return "https://www.github.com"
-    
-    # Shopping/e-commerce
-    if any(word in prompt_lower for word in ["buy", "purchase", "product", "price", "amazon"]):
+    if any(word in prompt_lower for word in ["buy", "purchase", "product", "amazon"]):
         return "https://www.amazon.com"
-    
-    # News
-    if any(word in prompt_lower for word in ["news", "article", "breaking"]):
+    if any(word in prompt_lower for word in ["news", "article"]):
         return "https://news.google.com"
     
-    # Default to Google for most tasks
     return "https://www.google.com"
 
 def determine_max_steps(prompt: str) -> int:
     """Determine max steps based on task complexity"""
     prompt_lower = prompt.lower()
     
-    # Simple extraction tasks
-    if any(word in prompt_lower for word in ["extract", "get info", "save", "download"]):
+    if any(word in prompt_lower for word in ["extract", "get info", "save"]):
         return 15
-    
-    # Complex research tasks
-    if any(word in prompt_lower for word in ["research", "analyze", "compare", "comprehensive"]):
+    if any(word in prompt_lower for word in ["research", "analyze", "compare"]):
         return 25
-    
-    # Form filling or multi-step processes
-    if any(word in prompt_lower for word in ["fill", "submit", "register", "apply", "multiple"]):
+    if any(word in prompt_lower for word in ["fill", "submit", "register"]):
         return 20
     
-    # Default
     return 20

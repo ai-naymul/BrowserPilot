@@ -13,21 +13,28 @@ app = FastAPI()
 tasks = {} # job_id → async.Task
 ws_subscribers = {} # job_id → { websocket, … }
 streaming_sessions = {} # job_id → browser_controller
+job_info = {} # job_id → { format, content_type, extension, prompt }
 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 class JobRequest(BaseModel):
     prompt: str
-    format: str = "txt" # txt | md | json | html | csv | pdf default is txt
+    format: str = "txt" # txt | md | json | html | csv | pdf
     headless: bool = False
-    enable_streaming: bool = False # New option for real-time browser streaming
+    enable_streaming: bool = False
+
+async def store_job_info(job_id: str, info: dict):
+    """Store job information for later retrieval"""
+    job_info[job_id] = info
+    print(f"📊 Stored job info for {job_id}: {info}")
 
 @app.post("/job")
 async def create_job(req: JobRequest):
     # Validate format
     valid_formats = ["txt", "md", "json", "html", "csv", "pdf"]
     if req.format not in valid_formats:
+        print(f"⚠️ Invalid format '{req.format}', defaulting to 'txt'")
         req.format = "txt"
     
     job_id = str(uuid.uuid4())
@@ -95,7 +102,6 @@ async def stream_ws(websocket: WebSocket, job_id: str):
     
     try:
         while True:
-            # Receive messages from client (mouse/keyboard events)
             try:
                 message = await websocket.receive_text()
                 data = json.loads(message)
@@ -108,7 +114,6 @@ async def stream_ws(websocket: WebSocket, job_id: str):
                     await websocket.send_text(json.dumps({"type": "pong"}))
                     
             except asyncio.TimeoutError:
-                # Send keepalive ping
                 await websocket.send_text(json.dumps({"type": "ping"}))
                 
     except WebSocketDisconnect:
@@ -128,17 +133,10 @@ async def create_streaming_session(job_id: str):
     try:
         # Create browser controller with streaming enabled
         browser_ctrl = BrowserController(headless=False, proxy=None, enable_streaming=True)
-        
-        # Start browser context
         await browser_ctrl.__aenter__()
-        
-        # Start streaming
         await browser_ctrl.start_streaming(quality=80)
-        
-        # Store session
         streaming_sessions[job_id] = browser_ctrl
         
-        # Get streaming info
         stream_info = browser_ctrl.get_streaming_info()
         
         # Broadcast to connected clients
@@ -176,12 +174,81 @@ async def cleanup_streaming(job_id: str):
 
 @app.get("/download/{job_id}")
 def download(job_id: str):
-    file_path = OUTPUT_DIR / f"{job_id}.output"
-    return FileResponse(path=file_path, filename=file_path.name)
+    """Enhanced download endpoint that handles all file formats"""
+    print(f"📥 Download request for job {job_id}")
+    
+    # Get job information
+    if job_id in job_info:
+        info = job_info[job_id]
+        extension = info.get("extension", "output")
+        content_type = info.get("content_type", "application/octet-stream")
+        format_name = info.get("format", "unknown")
+        
+        print(f"📋 Job info found: {info}")
+    else:
+        # Fallback for jobs without stored info
+        extension = "output"
+        content_type = "application/octet-stream"
+        format_name = "unknown"
+        print(f"⚠️ No job info found for {job_id}, using fallback")
+    
+    # Try to find the file with proper extension first
+    file_path = OUTPUT_DIR / f"{job_id}.{extension}"
+    
+    if not file_path.exists():
+        # Fallback: try common extensions
+        for fallback_ext in ['txt', 'pdf', 'csv', 'json', 'html', 'md', 'output']:
+            fallback_path = OUTPUT_DIR / f"{job_id}.{fallback_ext}"
+            if fallback_path.exists():
+                file_path = fallback_path
+                extension = fallback_ext
+                print(f"📁 Found file with fallback extension: {file_path}")
+                break
+    
+    if not file_path.exists():
+        print(f"❌ File not found: {file_path}")
+        # Return 404 or create empty file
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Generate appropriate filename
+    safe_filename = f"extracted_data_{job_id}.{extension}"
+    
+    print(f"✅ Serving file: {file_path}")
+    print(f"📄 Content-Type: {content_type}")
+    print(f"📎 Filename: {safe_filename}")
+    
+    # Serve file with proper content type and filename
+    return FileResponse(
+        path=file_path, 
+        filename=safe_filename,
+        media_type=content_type,
+        headers={
+            "Content-Disposition": f"attachment; filename={safe_filename}",
+            "X-File-Format": format_name,
+            "X-Original-Extension": extension
+        }
+    )
+
+@app.get("/job/{job_id}/info")
+def get_job_info(job_id: str):
+    """Get job information including format and status"""
+    if job_id in job_info:
+        info = job_info[job_id].copy()
+        
+        # Add file existence check
+        extension = info.get("extension", "output")
+        file_path = OUTPUT_DIR / f"{job_id}.{extension}"
+        info["file_exists"] = file_path.exists()
+        info["file_path"] = str(file_path) if file_path.exists() else None
+        
+        return info
+    else:
+        return {"error": "Job not found", "job_id": job_id}
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 
-# Helper for agent → frontend streaming
+# Helper functions
 async def broadcast(job_id: str, msg: dict):
     """Broadcast message to all subscribers of a job"""
     if job_id in ws_subscribers:
@@ -191,21 +258,27 @@ async def broadcast(job_id: str, msg: dict):
             except:
                 ws_subscribers[job_id].discard(ws)
 
-# Function to register streaming session
 async def register_streaming_session(job_id: str, browser_ctrl: BrowserController):
     """Register streaming session information"""
     streaming_sessions[job_id] = browser_ctrl
     
-    # Start streaming if enabled
     if browser_ctrl.enable_streaming:
         await browser_ctrl.start_streaming(quality=80)
     
-    # Broadcast streaming info to connected clients
     stream_info = browser_ctrl.get_streaming_info()
     await broadcast(job_id, {
         "type": "streaming_info",
         "streaming": stream_info
     })
 
-# Exposed functions for agent.py
-push = broadcast
+# Cleanup on shutdown
+@app.on_event("shutdown")
+async def cleanup():
+    """Cleanup resources on shutdown"""
+    for job_id, browser_ctrl in streaming_sessions.items():
+        try:
+            await browser_ctrl.__aexit__(None, None, None)
+        except:
+            pass
+    streaming_sessions.clear()
+    job_info.clear()
