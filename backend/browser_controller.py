@@ -58,10 +58,52 @@ class BrowserController:
         self.wm_process = None
         self.display_num = None
         self.vnc_port = 5901
+        self._cached_page_state = None
+        self._cached_url = None
+        self._last_action_timestamp = None
         
         # Load the robust DOM extraction JavaScript
         self.dom_js = self._get_dom_extraction_js()
 
+
+    async def get_page_state_cached(self, include_screenshot: bool = True, force_refresh: bool = False) -> PageState:
+        """Get page state with smart caching to reduce API calls"""
+        current_url = self.page.url
+        current_time = asyncio.get_event_loop().time()
+        
+        # Use cache if:
+        # 1. Same URL
+        # 2. Less than 5 seconds since last extraction
+        # 3. Not forced refresh
+        cache_valid = (
+            self._cached_page_state and 
+            self._cached_url == current_url and
+            self._last_action_timestamp and
+            (current_time - self._last_action_timestamp) < 5.0 and
+            not force_refresh
+        )
+        
+        if cache_valid:
+            print("📋 Using cached page state")
+            return self._cached_page_state
+            
+        # Get fresh state
+        print("🔄 Getting fresh page state")
+        page_state = await self.get_page_state(include_screenshot, highlight_elements=True)
+        
+        # Cache results
+        self._cached_page_state = page_state
+        self._cached_url = current_url
+        self._last_action_timestamp = current_time
+        
+        return page_state
+        
+    async def invalidate_cache(self):
+        """Invalidate cache after actions that change the page"""
+        self._cached_page_state = None
+        self._cached_url = None
+        self._last_action_timestamp = None
+        
     def _get_dom_extraction_js(self) -> str:
         """Get the robust DOM extraction JavaScript similar to browser-use"""
         return """
@@ -485,71 +527,116 @@ class BrowserController:
             raise
 
     async def get_page_state(self, include_screenshot: bool = True, highlight_elements: bool = True) -> PageState:
-        """Get comprehensive page state using robust DOM extraction"""
+        """Optimized page state extraction with minimal data"""
         try:
-            # Wait for page to be ready
+            # Wait for page
             await self.page.wait_for_load_state("domcontentloaded", timeout=10000)
-            await asyncio.sleep(1)  # Additional wait for dynamic content
+            await asyncio.sleep(1)
 
-            # Get page info
+            # Get basic page info
             url = self.page.url
             title = await self.page.title()
 
-            # Get screenshot if requested
+            # Optimized screenshot (smaller size = fewer tokens!)
             screenshot = None
             if include_screenshot:
-                screenshot_bytes = await self.page.screenshot(full_page=False)
+                # Take smaller screenshot to reduce tokens
+                screenshot_bytes = await self.page.screenshot(
+                    full_page=False,
+                    clip={'x': 0, 'y': 0, 'width': 800, 'height': 600}  # Smaller viewport
+                )
                 screenshot = base64.b64encode(screenshot_bytes).decode('utf-8')
 
-            # Extract DOM elements using robust JavaScript
+            # Optimized DOM extraction (much less data!)
+            optimized_js = """
+            () => {
+                const elements = [];
+                let index = 0;
+                
+                // Only get essential interactive elements
+                const selectors = 'input, button, a[href], select, textarea, [role="button"], [onclick]';
+                const interactive = document.querySelectorAll(selectors);
+                
+                for (let elem of interactive) {
+                    const rect = elem.getBoundingClientRect();
+                    
+                    // Only visible elements
+                    if (rect.width < 1 || rect.height < 1) continue;
+                    if (rect.top > window.innerHeight || rect.bottom < 0) continue;
+                    
+                    // Minimal data only
+                    const data = {
+                        index: index++,
+                        tagName: elem.tagName.toLowerCase(),
+                        text: (elem.textContent || elem.value || elem.placeholder || '').trim().substring(0, 50),
+                        isInput: ['input', 'textarea', 'select'].includes(elem.tagName.toLowerCase()),
+                        centerCoordinates: {
+                            x: rect.left + rect.width / 2,
+                            y: rect.top + rect.height / 2
+                        },
+                        // Only essential attributes
+                        attributes: {
+                            type: elem.type || '',
+                            placeholder: elem.placeholder || ''
+                        }
+                    };
+                    
+                    elements.push(data);
+                    
+                    // Highlight element
+                    elem.style.outline = '2px solid red';
+                    elem.style.outlineOffset = '1px';
+                    
+                    // Add index label
+                    const label = document.createElement('div');
+                    label.textContent = index - 1;
+                    label.style.cssText = `
+                        position: absolute;
+                        top: ${rect.top + window.scrollY - 20}px;
+                        left: ${rect.left + window.scrollX}px;
+                        background: red; color: white;
+                        padding: 2px 6px; font-size: 12px;
+                        z-index: 10000; border-radius: 3px;
+                    `;
+                    document.body.appendChild(label);
+                    
+                    // Limit to prevent token explosion
+                    if (elements.length >= 20) break;
+                }
+                
+                return { elements, count: elements.length };
+            }
+            """
+
             try:
-                dom_result = await self.page.evaluate(self.dom_js, {
-                    'doHighlightElements': highlight_elements,
-                    'debugMode': logger.isEnabledFor(logging.DEBUG)
-                })
-                
-                logger.info(f"DOM extraction stats: {dom_result.get('stats', {})}")
-                
+                dom_result = await self.page.evaluate(optimized_js)
+                logger.info(f"Extracted {dom_result.get('count', 0)} interactive elements")
             except Exception as e:
-                logger.error(f"Failed to extract DOM elements: {e}")
+                logger.error(f"DOM extraction failed: {e}")
                 return PageState(url, title, [], {}, screenshot)
 
-            # Convert to ElementInfo objects
+            # Convert to simplified elements
             elements = []
             selector_map = {}
             
             for elem_data in dom_result.get('elements', []):
-                try:
-                    element_info = ElementInfo(
-                        index=elem_data.get('index'),
-                        id=elem_data.get('id', ''),
-                        tag_name=elem_data.get('tagName', ''),
-                        xpath=elem_data.get('xpath', ''),
-                        css_selector=elem_data.get('cssSelector', ''),
-                        text=elem_data.get('text', ''),
-                        attributes=elem_data.get('attributes', {}),
-                        is_clickable=elem_data.get('isClickable', False),
-                        is_input=elem_data.get('isInput', False),
-                        is_visible=elem_data.get('isVisible', True),
-                        is_in_viewport=elem_data.get('isInViewport', True),
-                        input_type=elem_data.get('inputType'),
-                        placeholder=elem_data.get('placeholder'),
-                        bounding_box=elem_data.get('boundingBox'),
-                        center_coordinates=elem_data.get('centerCoordinates'),
-                        viewport_coordinates=elem_data.get('viewportCoordinates')
-                    )
-                    
-                    elements.append(element_info)
-                    
-                    # Add to selector map if has index
-                    if element_info.index is not None:
-                        selector_map[element_info.index] = element_info
-                        
-                except Exception as e:
-                    logger.warning(f"Failed to process element: {e}")
-                    continue
+                element_info = ElementInfo(
+                    index=elem_data.get('index'),
+                    id=f"elem_{elem_data.get('index')}",
+                    tag_name=elem_data.get('tagName', ''),
+                    xpath='',  # Skip XPath to save tokens
+                    css_selector='',  # Skip CSS selector to save tokens  
+                    text=elem_data.get('text', ''),
+                    attributes=elem_data.get('attributes', {}),
+                    is_clickable=True,  # All extracted elements are interactive
+                    is_input=elem_data.get('isInput', False),
+                    center_coordinates=elem_data.get('centerCoordinates')
+                )
+                
+                elements.append(element_info)
+                selector_map[element_info.index] = element_info
 
-            logger.info(f"Successfully extracted {len(elements)} elements, {len(selector_map)} interactive")
+            logger.info(f"Created {len(elements)} optimized elements")
             return PageState(url, title, elements, selector_map, screenshot)
 
         except Exception as e:

@@ -11,9 +11,9 @@ import io
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-
 MODEL = genai.GenerativeModel("gemini-2.0-flash-exp")
 
+# Much more concise system prompt
 SYSTEM_PROMPT = """
 You are a web automation agent that controls a browser using element indices (like browser-use).
 
@@ -62,76 +62,72 @@ IMPORTANT:
 """
 
 async def decide(img_bytes: bytes, page_state, goal: str) -> dict:
-    """AI decision function compatible with browser-use"""
-    print(f"🤖 Starting AI decision with browser-use compatible approach")
+    """Optimized AI decision with minimal token usage"""
+    print(f"🤖 Optimized AI decision")
     print(f"📊 Image size: {len(img_bytes)} bytes")
     print(f"🎯 Goal: {goal}")
-    print(f"📋 Available elements: {len(page_state.elements)}")
     print(f"🖱️ Interactive elements: {len(page_state.selector_map)}")
 
     try:
+        # Compress image to reduce tokens
         image = Image.open(io.BytesIO(img_bytes))
-        print(f"🖼️ Image dimensions: {image.size}")
+        
+        # Resize image to reduce tokens (critical optimization!)
+        max_size = (1280, 800)  # Much smaller than 1280x800
+        image.thumbnail(max_size, Image.Resampling.LANCZOS)
+        
+        # Convert back to bytes with compression
+        compressed_buffer = io.BytesIO()
+        image.save(compressed_buffer, format='JPEG', quality=70, optimize=True)
+        compressed_image = Image.open(compressed_buffer)
+        
+        print(f"🖼️ Compressed image: {image.size} -> {compressed_image.size}")
 
-        # Create element information for AI (only interactive elements)
+        # Create minimal element information (HUGE token reduction!)
         interactive_elements = []
-        for index, elem in page_state.selector_map.items():
-            interactive_elements.append({
-                "index": index,
-                "tag_name": elem.tag_name,
-                "text": elem.text[:80] if elem.text else "",
-                "is_clickable": elem.is_clickable,
-                "is_input": elem.is_input,
-                "input_type": elem.input_type,
-                "placeholder": elem.placeholder,
-                "coordinates": elem.center_coordinates,
-                "key_attributes": {
-                    "class": elem.attributes.get("class", ""),
-                    "id": elem.attributes.get("id", ""),
-                    "href": elem.attributes.get("href", ""),
-                    "type": elem.attributes.get("type", ""),
-                    "name": elem.attributes.get("name", "")
-                }
-            })
+        for index in sorted(page_state.selector_map.keys())[:15]:  # Limit to 15 elements max
+            elem = page_state.selector_map[index]
+            
+            # Only essential information
+            element_data = {
+                "i": index,  # Shortened key names
+                "t": elem.tag_name,
+                "txt": elem.text[:30] if elem.text else "",  # Truncate text
+                "input": elem.is_input,
+            }
+            
+            # Add minimal attributes only if relevant
+            if elem.is_input and elem.placeholder:
+                element_data["ph"] = elem.placeholder[:20]
+            if elem.attributes.get("type"):
+                element_data["type"] = elem.attributes["type"]
+                
+            interactive_elements.append(element_data)
 
-        # Sort by index for consistent ordering
-        interactive_elements.sort(key=lambda x: x["index"])
-
-        element_summary = f"""
-INTERACTIVE ELEMENTS (Total: {len(interactive_elements)}):
-{json.dumps(interactive_elements, indent=2)}
-"""
-
+        # Much shorter prompt
         prompt = f"""
-CURRENT PAGE:
+Goal: {goal[:100]}  
 URL: {page_state.url}
-Title: {page_state.title}
 
-USER GOAL: {goal}
+Elements: {json.dumps(interactive_elements)}
 
-{element_summary}
-
-Analyze the screenshot and interactive elements to determine the next action.
-Look for elements highlighted with red outlines and numbered labels.
-Use the exact index number from the list above.
-
-Respond with a JSON object only.
+Next action?
 """
 
-        content = [SYSTEM_PROMPT, prompt, image]
+        content = [SYSTEM_PROMPT, prompt, compressed_image]
 
-        print("📡 Sending request to Gemini API...")
+        print("📡 Sending optimized request to Gemini...")
 
         response = await asyncio.to_thread(
             functools.partial(MODEL.generate_content, content)
         )
 
-        print("✅ Received response from Gemini API")
+        print("✅ Received response")
         raw_text = response.text
-        print(f"📝 Raw Gemini response: {raw_text}")
+        print(f"📝 Response: {raw_text[:100]}...")
 
+        # Parse response
         result = {"action": "done"}
-
         try:
             start = raw_text.find('{')
             end = raw_text.rfind('}') + 1
@@ -139,55 +135,40 @@ Respond with a JSON object only.
             if start != -1 and end > start:
                 json_str = raw_text[start:end]
                 result = json.loads(json_str)
-                print(f"✅ Successfully parsed JSON: {result}")
                 
-                # Validate index if provided
-                if "index" in result:
-                    index = result["index"]
-                    if index in page_state.selector_map:
-                        element = page_state.selector_map[index]
-                        print(f"✅ Element index {index} found: {element.text[:50]}...")
-                    else:
-                        print(f"❌ Element index {index} not found in selector map")
-                        available_indices = list(page_state.selector_map.keys())
-                        print(f"Available indices: {available_indices}")
-                        result = {"action": "scroll", "direction": "down", "reason": "Looking for more interactive elements"}
+                # Validate index
+                if "index" in result and result["index"] not in page_state.selector_map:
+                    print(f"❌ Invalid index {result['index']}")
+                    result = {"action": "scroll", "direction": "down"}
                         
-            else:
-                print("❌ No JSON found in response")
-                result = {"action": "done", "reason": "No valid JSON in AI response"}
-
         except json.JSONDecodeError as e:
-            print(f"❌ JSON decode error: {e}")
-            result = {"action": "done", "reason": "JSON parsing failed"}
+            print(f"❌ JSON error: {e}")
+            result = {"action": "done"}
 
         # Add token usage
         token_usage = extract_token_usage(response)
+        print(f"📊 Token usage: {token_usage}")
+        print("Here is the response:", response)
+        # import time
+        # time.sleep(70)  # Short delay to avoid rate limits
         if token_usage:
-            print(f"📊 Token usage extracted: {token_usage}")
+            print(f"📊 Token usage: {token_usage}")
             result['token_usage'] = token_usage
         else:
-            print("❌ No token usage found in response")
-            result['token_usage'] = {
-                'prompt_tokens': 0,
-                'response_tokens': 0,
-                'total_tokens': 0
-            }
+            print("❌ No token usage found")
+            result['token_usage'] = {'prompt_tokens': 0, 'response_tokens': 0, 'total_tokens': 0}
 
-        print(f"🎯 Final result: {result}")
+        print(f"🎯 Result: {result}")
         return result
 
     except Exception as e:
-        print(f"❌ Error in decide function: {str(e)}")
-        import traceback
-        traceback.print_exc()
-
+        print(f"❌ Error: {e}")
         return {
             "action": "done",
             "error": str(e),
-            "reason": "AI processing failed",
             "token_usage": {"prompt_tokens": 0, "response_tokens": 0, "total_tokens": 0}
         }
+
 
 
 # extract token usage

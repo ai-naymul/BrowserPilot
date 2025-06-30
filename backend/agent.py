@@ -6,180 +6,126 @@ from backend.vision_model import decide
 
 async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","html"],
                    headless: bool, proxy: dict | None, enable_vnc: bool = False):
-    """
-    Browser-use compatible agent with index-based element interaction
-    """
+    """Optimized agent with reduced API calls"""
     from backend.main import broadcast, OUTPUT_DIR, register_vnc_session
 
-    print(f"🚀 Starting agent for job {job_id}")
-    print(f"📝 Prompt: {prompt}")
-    print(f"📄 Format: {fmt}")
-    print(f"👁️ Headless: {headless}")
-    print(f"📺 VNC Enabled: {enable_vnc}")
+    print(f"🚀 Starting optimized agent for job {job_id}")
 
     async with BrowserController(headless, proxy, enable_vnc) as browser:
-        # Register VNC session if enabled
+        # VNC setup
         if enable_vnc:
             vnc_info = browser.get_vnc_info()
             await register_vnc_session(job_id, vnc_info)
-            print(f"🖥️ VNC Info: {vnc_info}")
 
-        # Try to navigate to a URL explicitly mentioned in the user's prompt
+        # Navigate
         url_match = re.search(r"https?://\S+", prompt)
         if url_match:
-            initial_url = url_match.group(0).rstrip('"')
-            print(f"🌐 Navigating to: {initial_url}")
-            await browser.goto(initial_url)
+            await browser.goto(url_match.group(0).rstrip('"'))
         else:
-            # Start with Google if no URL specified in prompt
-            print("🌐 No URL found in prompt, starting with Google")
             await browser.goto("https://www.google.com")
 
         await broadcast(job_id, {"status": "started"})
-        print(f"📡 Broadcast: started")
 
-        # Main agent loop with max 30 steps
+        consecutive_scrolls = 0
+        max_consecutive_scrolls = 3
+        
+        # Main loop with smart state management
         for step in range(30):
-            print(f"\n🔄 Step {step + 1}/30 for job {job_id}")
+            print(f"\n🔄 Step {step + 1}/30")
 
-            # Get page state with element extraction
+            # Smart caching: don't re-extract after scroll
+            force_refresh = step == 0 or consecutive_scrolls == 0
+            
             try:
-                page_state = await browser.get_page_state(include_screenshot=True, highlight_elements=True)
-                print(f"📊 Found {len(page_state.elements)} total elements")
-                print(f"🖱️ Interactive elements: {len(page_state.selector_map)}")
-                print(f"🔗 Current URL: {page_state.url}")
-                print(f"📄 Page title: {page_state.title}")
+                page_state = await browser.get_page_state_cached(
+                    include_screenshot=True, 
+                    force_refresh=force_refresh
+                )
                 
-                # Send page info to frontend
+                print(f"📊 Using {len(page_state.selector_map)} interactive elements")
+                
+                # Send minimal info to frontend
                 await broadcast(job_id, {
                     "type": "page_info",
                     "url": page_state.url,
-                    "title": page_state.title,
-                    "total_elements": len(page_state.elements),
                     "interactive_elements": len(page_state.selector_map)
                 })
 
-                # Send screenshot to frontend
-                if page_state.screenshot:
+                # Only send screenshot if state changed
+                if force_refresh and page_state.screenshot:
                     await broadcast(job_id, {
                         "type": "screenshot", 
                         "screenshot": page_state.screenshot
                     })
-                    print(f"📡 Broadcast: screenshot and page info sent")
 
             except Exception as e:
-                print(f"❌ Failed to get page state: {e}")
-                await broadcast(job_id, {
-                    "type": "error",
-                    "error": f"Failed to get page state: {str(e)}"
-                })
+                print(f"❌ Page state failed: {e}")
                 continue
 
-            # Get decision from AI
-            print(f"🤖 Requesting decision from AI...")
+            # Skip AI call if no interactive elements and we just scrolled
+            if len(page_state.selector_map) == 0 and consecutive_scrolls > 0:
+                print("⚠️ No elements found, scrolling...")
+                await browser.scroll_page("down", 300)
+                consecutive_scrolls += 1
+                continue
+
+            # AI decision (optimized for minimal tokens)
             try:
-                # Convert screenshot to bytes for vision model
                 screenshot_bytes = base64.b64decode(page_state.screenshot)
-                
-                # Send page state to AI
                 decision = await decide(screenshot_bytes, page_state, prompt)
-                print(f"🎯 Decision received: {decision}")
-
-                # Broadcast the decision to frontend
-                await broadcast(job_id, {
-                    "type": "decision",
-                    "decision": decision
-                })
-                print(f"📡 Broadcast: decision sent")
-
+                
+                await broadcast(job_id, {"type": "decision", "decision": decision})
+                
             except Exception as e:
-                print(f"❌ Failed to get AI decision: {e}")
-                await broadcast(job_id, {
-                    "type": "error", 
-                    "error": f"AI decision failed: {str(e)}"
-                })
+                print(f"❌ AI decision failed: {e}")
                 continue
 
-            # Execute the decision
+            # Execute action
             action = decision.get("action")
-            print(f"⚡ Executing action: {action}")
+            print(f"⚡ Action: {action}")
 
             try:
                 if action == "click":
                     index = decision.get("index")
                     if index is not None:
-                        print(f"🖱️ Clicking element at index {index}")
                         success = await browser.click_element_by_index(index, page_state)
                         if success:
-                            print(f"✅ Successfully clicked element {index}")
-                        else:
-                            print(f"❌ Failed to click element {index}")
-                    else:
-                        print(f"❌ No index provided for click action")
+                            await browser.invalidate_cache()  # Invalidate after click
+                            consecutive_scrolls = 0
                         
                 elif action == "type":
                     index = decision.get("index")
                     text = decision.get("text", "")
                     if index is not None and text:
-                        print(f"⌨️ Typing '{text}' into element {index}")
                         success = await browser.input_text_by_index(index, text, page_state)
                         if success:
-                            print(f"✅ Successfully typed into element {index}")
-                        else:
-                            print(f"❌ Failed to type into element {index}")
-                    else:
-                        print(f"❌ Invalid type parameters: index={index}, text='{text}'")
-                        
+                            consecutive_scrolls = 0
+                            
                 elif action == "scroll":
-                    direction = decision.get("direction", "down")
-                    amount = decision.get("amount", 500)
-                    print(f"📜 Scrolling {direction} by {amount}px")
-                    await browser.scroll_page(direction, amount)
+                    await browser.scroll_page(decision.get("direction", "down"), 300)
+                    consecutive_scrolls += 1
                     
+                    # Prevent infinite scrolling
+                    if consecutive_scrolls >= max_consecutive_scrolls:
+                        print("⚠️ Too many scrolls, switching strategy")
+                        await browser.press_key("End")  # Jump to bottom
+                        consecutive_scrolls = 0
+                        
                 elif action == "press_key":
-                    key = decision.get("key", "Enter")
-                    print(f"⌨️ Pressing key: {key}")
-                    await browser.press_key(key)
-                    
-                elif action == "navigate":
-                    url = decision.get("url")
-                    print(f"🌐 Navigating to: {url}")
-                    await browser.goto(url)
-                    
-                elif action == "extract":
-                    print(f"📄 Extracting content as {fmt}")
-                    content = await extract_page_content(browser, fmt)
-                    file_path = OUTPUT_DIR / f"{job_id}.output"
-                    file_path.write_text(content, encoding="utf-8")
-                    print(f"💾 Content saved to: {file_path}")
-                    
-                    await broadcast(job_id, {
-                        "type": "status",
-                        "status": "saved"
-                    })
-                    print(f"📡 Broadcast: saved")
-                    break
+                    await browser.press_key(decision.get("key", "Enter"))
+                    await browser.invalidate_cache()
+                    consecutive_scrolls = 0
                     
                 elif action == "done":
-                    print(f"✅ Agent completed task")
+                    print("✅ Task completed")
                     break
 
             except Exception as e:
-                print(f"❌ Action execution failed: {e}")
-                await broadcast(job_id, {
-                    "type": "error",
-                    "error": f"Action execution failed: {str(e)}"
-                })
+                print(f"❌ Action failed: {e}")
 
-            # Wait before next iteration
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)  # Shorter wait
 
-        await broadcast(job_id, {
-            "type": "status",
-            "status": "finished"
-        })
-        print(f"📡 Broadcast: finished")
-        print(f"🏁 Agent finished for job {job_id}")
+        await broadcast(job_id, {"status": "finished"})
 
 
 async def extract_page_content(browser: BrowserController, fmt: str) -> str:
