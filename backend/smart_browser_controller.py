@@ -7,7 +7,7 @@ from backend.browser_controller import BrowserController
 from backend.proxy_manager import SmartProxyManager
 from backend.anti_bot_detection import AntiBotVisionModel
 import logging
-
+import base64
 logger = logging.getLogger(__name__)
 
 class SmartBrowserController(BrowserController):
