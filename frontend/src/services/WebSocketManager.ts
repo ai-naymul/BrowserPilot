@@ -1,3 +1,4 @@
+// frontend/src/services/WebSocketManager.ts
 export class WebSocketManager {
     private websocket: WebSocket | null = null
     private streamWebSocket: WebSocket | null = null
@@ -24,9 +25,53 @@ export class WebSocketManager {
         try {
           const data = JSON.parse(event.data)
           console.log('📨 WebSocket message received:', data.type, data)
-          this.emit(data.type, data)
+          
+          // Handle different message types
+          switch (data.type) {
+            case 'proxy_stats':
+              console.log('🔄 Proxy stats received:', data.stats || data)
+              this.emit('proxy_stats', data.stats || data)
+              break
+            case 'decision':
+              console.log('🧠 Decision received:', data.decision || data)
+              this.emit('decision', data.decision || data)
+              break
+            case 'screenshot':
+              console.log('📸 Screenshot received')
+              this.emit('screenshot', data.screenshot || data)
+              break
+            case 'token_usage':
+              console.log('📊 Token usage received:', data.token_usage || data)
+              this.emit('token_usage', data.token_usage || data)
+              break
+            case 'page_info':
+              console.log('📄 Page info received:', data)
+              this.emit('page_info', data)
+              break
+            case 'extraction':
+              console.log('🔍 Extraction update:', data)
+              this.emit('extraction', data)
+              break
+            case 'streaming_info':
+              console.log('🎥 Streaming info received:', data)
+              this.emit('streaming_info', data)
+              break
+            case 'error':
+              console.log('❌ Error received:', data)
+              this.emit('error', data)
+              break
+            default:
+              // Handle general status updates
+              if (data.status) {
+                console.log('📢 Status update:', data)
+                this.emit('status', data)
+              } else {
+                console.log('📨 Unknown message type:', data.type, data)
+                this.emit(data.type, data)
+              }
+          }
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error)
+          console.error('Error parsing WebSocket message:', error, event.data)
         }
       }
   
@@ -34,12 +79,11 @@ export class WebSocketManager {
         console.log('📡 WebSocket disconnected:', event.code, event.reason)
         this.websocket = null
         
-        // Attempt reconnection
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
           this.reconnectAttempts++
           console.log(`🔄 Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts}`)
           setTimeout(() => this.connect(jobId), this.reconnectDelay)
-          this.reconnectDelay *= 2 // Exponential backoff
+          this.reconnectDelay *= 2
         }
       }
   
@@ -97,20 +141,12 @@ export class WebSocketManager {
         this.eventListeners.set(event, [])
       }
       this.eventListeners.get(event)?.push(callback)
-    }
-  
-    public off(event: string, callback: Function): void {
-      const listeners = this.eventListeners.get(event)
-      if (listeners) {
-        const index = listeners.indexOf(callback)
-        if (index !== -1) {
-          listeners.splice(index, 1)
-        }
-      }
+      console.log(`📝 Event listener added for: ${event}`)
     }
   
     private emit(event: string, data: any): void {
       const listeners = this.eventListeners.get(event) || []
+      console.log(`📤 Emitting event: ${event} to ${listeners.length} listeners`)
       listeners.forEach(callback => {
         try {
           callback(data)

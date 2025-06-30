@@ -13,23 +13,44 @@ export class StreamingViewer {
   private setupStreamListeners(): void {
     // Listen for stream events from WebSocketManager
     this.wsManager.on('stream_connected', () => {
+      console.log('🎥 Stream connected event received')
       this.updateStreamStatus('connected')
       this.streamStats.startTime = Date.now()
       this.streamStats.frameCount = 0
     })
-
+  
     this.wsManager.on('stream_disconnected', () => {
+      console.log('🎥 Stream disconnected event received')
       this.updateStreamStatus('disconnected')
     })
-
+  
     this.wsManager.on('stream_frame', (data: any) => {
+      console.log('🎥 Stream frame received')
       this.displayFrame(data.data)
       this.updateStreamStats()
     })
-
+  
     this.wsManager.on('stream_error', (data: any) => {
+      console.log('🎥 Stream error received:', data)
       this.showNotification(`Stream error: ${data.error}`, 'error')
       this.updateStreamStatus('disconnected')
+    })
+  
+    // NEW: Listen for streaming_info from main WebSocket
+    this.wsManager.on('streaming_info', (data: any) => {
+      console.log('🎥 StreamingViewer received streaming_info:', data)
+      if (data.streaming?.enabled) {
+        console.log('🎥 Auto-enabling streaming container')
+        this.showStreamContainer()
+        
+        // Auto-connect to stream after a short delay
+        if (this.currentJobId) {
+          setTimeout(() => {
+            console.log('🎥 Auto-connecting to stream')
+            this.connectStream()
+          }, 2000)
+        }
+      }
     })
   }
 

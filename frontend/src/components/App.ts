@@ -1,8 +1,9 @@
+// frontend/src/components/App.ts
 import { JobForm } from './JobForm'
 import { StatusDisplay } from './StatusDisplay'
-import { TokenUsage } from './TokenUsage'  // FIX: Import from correct file
-import { DecisionLog } from './DecisionLog'  // FIX: Import from correct file
-import { ScreenshotGallery } from './ScreenshotGallery'  // FIX: Import from correct file
+import { TokenUsage } from './TokenUsage'
+import { DecisionLog } from './DecisionLog'
+import { ScreenshotGallery } from './ScreenshotGallery'
 import { StreamingViewer } from './StreamingViewer'
 import { ProxyStats } from './ProxyStats'
 import { WebSocketManager } from '../services/WebSocketManager'
@@ -39,45 +40,64 @@ export class App {
       proxyStats: new ProxyStats()
     }
 
-    // Connect WebSocket events to components with proper data extraction
+    console.log('🔧 Setting up WebSocket event listeners...')
+
+    // Connect WebSocket events to components with detailed logging
     this.wsManager.on('decision', (data: ComponentData) => {
-      if (data.decision) {
-        this.components.decisionLog.addDecision(data.decision)
-      } else {
-        this.components.decisionLog.addDecision(data)
-      }
+        console.log('🧠 App received decision:', data)
+        
+        // Handle the decision
+        if (data.decision) {
+          this.components.decisionLog.addDecision(data.decision)
+          
+          // Extract token usage from decision if present
+          if (data.decision.token_usage) {
+            console.log('📊 Extracting token usage from decision:', data.decision.token_usage)
+            this.components.tokenUsage.updateUsage(data.decision.token_usage)
+          }
+        } else {
+          this.components.decisionLog.addDecision(data)
+          
+          // Check for token usage in the data itself
+          if (data.token_usage) {
+            console.log('📊 Extracting token usage from data:', data.token_usage)
+            this.components.tokenUsage.updateUsage(data.token_usage)
+          }
+        }
     })
 
     this.wsManager.on('screenshot', (data: ComponentData) => {
+      console.log('📸 App received screenshot')
       const screenshot = data.screenshot || data
       if (typeof screenshot === 'string') {
         this.components.screenshotGallery.addScreenshot(screenshot)
+      } else {
+        console.warn('Invalid screenshot data type:', typeof screenshot)
       }
     })
 
     this.wsManager.on('proxy_stats', (data: ComponentData) => {
-      if (data.stats) {
-        this.components.proxyStats.updateStats(data.stats)
-      } else {
-        this.components.proxyStats.updateStats(data)
-      }
+      console.log('🔄 App received proxy stats:', data)
+      // Handle both direct stats and nested stats
+      const stats = data.stats || data
+      this.components.proxyStats.updateStats(stats)
     })
 
     this.wsManager.on('token_usage', (data: ComponentData) => {
-      if (data.token_usage) {
-        this.components.tokenUsage.updateUsage(data.token_usage)
-      } else {
-        this.components.tokenUsage.updateUsage(data)
-      }
+      console.log('📊 App received token usage:', data)
+      const usage = data.token_usage || data
+      this.components.tokenUsage.updateUsage(usage)
     })
 
     // Handle page info updates
     this.wsManager.on('page_info', (data: ComponentData) => {
+      console.log('📄 App received page info:', data)
       this.showStatus(`Step ${data.step}: ${data.url} (${data.interactive_elements} elements) [${data.format?.toUpperCase() || 'TXT'}]`, 'info')
     })
 
     // Handle extraction status
     this.wsManager.on('extraction', (data: ComponentData) => {
+      console.log('🔍 App received extraction:', data)
       if (data.status === 'starting') {
         this.showStatus(`Starting extraction (attempt ${data.attempt}) in ${data.format?.toUpperCase() || 'TXT'} format...`, 'info')
       } else if (data.status === 'completed') {
@@ -88,26 +108,16 @@ export class App {
 
     // Handle streaming updates
     this.wsManager.on('streaming_info', (data: ComponentData) => {
-        if (data.streaming?.enabled) {
-          this.showStatus('Streaming available', 'success')
-          this.components.streamingViewer.showStreamContainer()
-        }
-    })
-
-    window.addEventListener('jobCreated', (event) => {
-        const detail = (event as CustomEvent).detail
-        this.components.streamingViewer.setJobId(detail.jobId)
-        
-        // Auto-enable streaming if requested
-        if (detail.streaming) {
-          setTimeout(() => {
-            this.components.streamingViewer.showStreamContainer()
-          }, 2000)
-        }
+      console.log('🎥 App received streaming info:', data)
+      if (data.streaming?.enabled) {
+        this.showStatus('Streaming available', 'success')
+        this.components.streamingViewer.showStreamContainer()
+      }
     })
 
     // Handle general status
     this.wsManager.on('status', (data: ComponentData) => {
+      console.log('📢 App received status:', data)
       if (data.status === 'started') {
         this.showStatus(`Status: ${data.status} | Format: ${data.detected_format?.toUpperCase() || 'TXT'}`, 'info')
       } else if (data.status === 'finished') {
@@ -115,13 +125,32 @@ export class App {
         this.enableDownloadButton(data.final_format || 'TXT')
       }
     })
+
+    // Handle errors
+    this.wsManager.on('error', (data: ComponentData) => {
+      console.log('❌ App received error:', data)
+      this.showStatus(`❌ ${data.message || data.error || 'Unknown error'}`, 'error')
+      if (data.proxy_stats) {
+        this.components.proxyStats.updateStats(data.proxy_stats)
+      }
+    })
+
+    // Listen for connection events
+    this.wsManager.on('connected', () => {
+      console.log('✅ App received WebSocket connected event')
+      this.showStatus('Connected to server', 'success')
+    })
+
+    console.log('✅ WebSocket event listeners set up complete')
   }
 
   private showStatus(message: string, type: 'success' | 'error' | 'info') {
+    console.log(`📢 Showing status: [${type}] ${message}`)
     this.components.statusDisplay.showStatus(message, type)
   }
 
   private enableDownloadButton(format: string) {
+    console.log(`📥 Enabling download button for format: ${format}`)
     window.dispatchEvent(new CustomEvent('enableDownload', { 
       detail: { format } 
     }))
@@ -183,6 +212,7 @@ export class App {
     `
 
     // Render components
+    console.log('🎨 Rendering components...')
     this.components.jobForm.render('#job-form')
     this.components.statusDisplay.render('#status-display')
     this.components.tokenUsage.render('#token-usage')
@@ -194,7 +224,17 @@ export class App {
     // Set up job creation event handling
     window.addEventListener('jobCreated', (event) => {
       const detail = (event as CustomEvent).detail
+      console.log('🚀 Job created event received:', detail)
       this.components.streamingViewer.setJobId(detail.jobId)
+      
+      // Auto-enable streaming if requested
+      if (detail.streaming) {
+        setTimeout(() => {
+          this.components.streamingViewer.showStreamContainer()
+        }, 2000)
+      }
     })
+
+    console.log('✅ App rendering complete')
   }
 }
