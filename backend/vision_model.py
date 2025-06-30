@@ -12,171 +12,171 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 MODEL = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
-# Much more concise system prompt
+
+# Universal system prompt - works for ANY website
 SYSTEM_PROMPT = """
-You are a web automation agent that controls a browser using element indices (like browser-use).
+You are a universal web automation agent that can navigate and interact with ANY website to accomplish user goals.
 
 You will receive:
 1. A screenshot of the current webpage
-2. Information about interactive elements with their indices
-3. The user's goal/task
+2. Interactive elements with indices
+3. The user's specific goal/task
+4. Current URL and page context
 
-Each interactive element has:
-- index: Numeric index to use for interactions (0, 1, 2, etc.)
-- tag_name: HTML tag (button, input, a, etc.)
-- text: Visible text content
-- is_clickable: Whether element can be clicked
-- is_input: Whether element accepts text input
-- coordinates: x,y position for reference
-- attributes: HTML attributes (class, id, href, etc.)
+Your job is to analyze the current page and determine the BEST next action to accomplish the user's goal, regardless of what type of website this is.
 
-Reply ONLY with a JSON object containing:
+AVAILABLE ACTIONS:
 
-CLICK ACTION:
-{"action": "click", "index": 5, "reason": "clicking search button to submit query"}
+CLICK - Click on any interactive element:
+{"action": "click", "index": N, "reason": "specific reason for clicking this element"}
 
-TYPE ACTION:
-{"action": "type", "index": 2, "text": "search query", "reason": "typing search query into search box"}
+TYPE - Input text into any input field:
+{"action": "type", "index": N, "text": "text to enter", "reason": "reason for entering this text"}
 
-SCROLL ACTION:
-{"action": "scroll", "direction": "down", "amount": 500, "reason": "scrolling to see more content"}
+SCROLL - Navigate the page vertically:
+{"action": "scroll", "direction": "down|up", "amount": 300-800, "reason": "reason for scrolling"}
 
-KEY PRESS ACTION:
-{"action": "press_key", "key": "Enter", "reason": "pressing Enter to submit form"}
+PRESS_KEY - Press any keyboard key:
+{"action": "press_key", "key": "Enter|Tab|Escape|Space|etc", "reason": "reason for key press"}
 
-NAVIGATE ACTION:
-{"action": "navigate", "url": "https://example.com", "reason": "navigating to specific URL"}
+NAVIGATE - Go to a specific URL (only if needed):
+{"action": "navigate", "url": "https://example.com", "reason": "reason for navigation"}
 
-EXTRACT ACTION (when task is complete):
-{"action": "extract", "reason": "task completed, extracting page content"}
+EXTRACT - Save current page content (when goal is achieved):
+{"action": "extract", "reason": "goal accomplished, extracting relevant information"}
 
-DONE ACTION (when task is complete):
-{"action": "done", "reason": "task completed successfully"}
+DONE - Mark task as complete:
+{"action": "done", "reason": "task successfully completed"}
 
-IMPORTANT:
-- Use the exact index number from the interactive element list
-- Interactive elements are highlighted with red outlines and numbered labels
-- Choose the most relevant element based on text content and purpose
-- Explain your reasoning for each action
+DECISION RULES:
+1. **Analyze the user's goal** - understand what information/action they want
+2. **Assess current page** - what type of page is this? What can be done here?
+3. **Choose best action** - what single action moves closest to the goal?
+4. **Be adaptive** - different sites have different patterns, adapt accordingly
+
+WEBSITE TYPE DETECTION:
+- **Search engines**: Look for search boxes, enter queries, click results
+- **E-commerce**: Find products, navigate categories, view details
+- **Social media**: Look for profiles, posts, navigation menus
+- **Forms/Applications**: Fill required fields, submit forms
+- **Content sites**: Navigate articles, extract information
+- **Databases/APIs**: Use search/filter features, extract data
+
+INTERACTION STRATEGY:
+- **First time on page**: Look for main navigation, search, or primary actions
+- **Search results**: Click on most relevant results for user's goal
+- **Product pages**: Look for details, specifications, reviews as needed
+- **Profile/About pages**: Extract relevant information about person/entity
+- **Forms**: Fill systematically, validate inputs
+- **Lists/Tables**: Use pagination, sorting, filtering as needed
+
+EXTRACTION TIMING:
+- Extract when you have found the specific information the user requested
+- Don't extract from search results - click through to detailed pages first
+- For research tasks: navigate to authoritative sources before extracting
+- For data collection: ensure you're on pages with comprehensive information
+
+REMEMBER: Be universal - work with ANY website structure, ANY content type, ANY user goal.
 """
 
 async def decide(img_bytes: bytes, page_state, goal: str) -> dict:
-    """Optimized AI decision with minimal token usage"""
-    print(f"🤖 Optimized AI decision")
+    """Universal AI decision making for any website"""
+    print(f"🤖 Universal AI decision")
     print(f"📊 Image size: {len(img_bytes)} bytes")
     print(f"🎯 Goal: {goal}")
     print(f"🖱️ Interactive elements: {len(page_state.selector_map)}")
+    print(f"📍 Current URL: {page_state.url}")
 
     try:
-        # Compress image to reduce tokens
+        # Compress image efficiently
         image = Image.open(io.BytesIO(img_bytes))
-        
-        # Resize image to reduce tokens (critical optimization!)
-        max_size = (1280, 800)  # Much smaller than 1280x800
+        max_size = (1280, 800)
         image.thumbnail(max_size, Image.Resampling.LANCZOS)
         
-        # Convert back to bytes with compression
         compressed_buffer = io.BytesIO()
-        image.save(compressed_buffer, format='JPEG', quality=70, optimize=True)
+        image.save(compressed_buffer, format='JPEG', quality=75, optimize=True)
         compressed_image = Image.open(compressed_buffer)
-        
-        print(f"🖼️ Compressed image: {image.size} -> {compressed_image.size}")
 
-        # Create minimal element information (HUGE token reduction!)
+        # Create comprehensive element information (dynamic based on content)
         interactive_elements = []
-        for index in sorted(page_state.selector_map.keys())[:15]:  # Limit to 15 elements max
+        max_elements = min(20, len(page_state.selector_map))  # Adaptive limit
+        
+        for index in sorted(page_state.selector_map.keys())[:max_elements]:
             elem = page_state.selector_map[index]
             
-            # Only essential information
+            # Dynamic element description based on context
             element_data = {
-                "i": index,  # Shortened key names
-                "t": elem.tag_name,
-                "txt": elem.text[:30] if elem.text else "",  # Truncate text
+                "index": index,
+                "tag": elem.tag_name,
+                "text": elem.text[:60] if elem.text else "",
+                "clickable": elem.is_clickable,
                 "input": elem.is_input,
             }
             
-            # Add minimal attributes only if relevant
-            if elem.is_input and elem.placeholder:
-                element_data["ph"] = elem.placeholder[:20]
+            # Add contextual attributes dynamically
+            if elem.attributes.get("href"):
+                element_data["link"] = elem.attributes["href"][:100]
+            if elem.attributes.get("placeholder"):
+                element_data["placeholder"] = elem.attributes["placeholder"][:30]
             if elem.attributes.get("type"):
                 element_data["type"] = elem.attributes["type"]
+            if elem.attributes.get("class"):
+                # Extract meaningful class hints
+                classes = elem.attributes["class"].lower()
+                if any(hint in classes for hint in ["search", "login", "submit", "button", "nav", "menu"]):
+                    element_data["class_hint"] = classes[:50]
+            if elem.attributes.get("id"):
+                element_data["id"] = elem.attributes["id"][:30]
                 
             interactive_elements.append(element_data)
 
-        # Much shorter prompt
+        # Detect website type dynamically
+        website_type = detect_website_type(page_state.url, page_state.title, interactive_elements)
+        
+        # Create dynamic context-aware prompt
         prompt = f"""
-Goal: {goal[:100]}  
-URL: {page_state.url}
+USER GOAL: {goal}
 
-Elements: {json.dumps(interactive_elements)}
+CURRENT CONTEXT:
+- URL: {page_state.url}
+- Page Title: {page_state.title}
+- Website Type: {website_type}
+- Available Elements: {len(interactive_elements)}
 
-Next action?
+INTERACTIVE ELEMENTS:
+{json.dumps(interactive_elements, indent=1)}
+
+Based on the user's goal and current page context, what is the BEST next action?
+Consider the website type and adapt your strategy accordingly.
 """
 
         content = [SYSTEM_PROMPT, prompt, compressed_image]
 
-        # COUNT TOKENS BEFORE SENDING REQUEST
-        print("📊 Counting tokens...")
+        # Count tokens and send request
         token_count_response = await asyncio.to_thread(
             functools.partial(MODEL.count_tokens, content)
         )
-
-
         input_tokens = token_count_response.total_tokens
-        print(f"📊 Input tokens: {input_tokens}")
-
-        print("📡 Sending optimized request to Gemini...")
 
         response = await asyncio.to_thread(
             functools.partial(MODEL.generate_content, content)
         )
 
-        print("✅ Received response")
         raw_text = response.text
-        print(f"📝 Response: {raw_text[:100]}...")
-        
-        #COUNT TOKENS FOR THE RESPONSE
         response_tokens = await count_response_tokens(raw_text)
-        # Calculate total tokens
         total_tokens = input_tokens + response_tokens
-        # Parse response
-        result = {"action": "done"}
-        try:
-            start = raw_text.find('{')
-            end = raw_text.rfind('}') + 1
-            
-            if start != -1 and end > start:
-                json_str = raw_text[start:end]
-                result = json.loads(json_str)
-                
-                # Validate index
-                if "index" in result and result["index"] not in page_state.selector_map:
-                    print(f"❌ Invalid index {result['index']}")
-                    result = {"action": "scroll", "direction": "down"}
-                        
-        except json.JSONDecodeError as e:
-            print(f"❌ JSON error: {e}")
-            result = {"action": "done"}
+
+        # Parse response with validation
+        result = parse_ai_response(raw_text, page_state, goal, website_type)
 
         # Add token usage
-        # token_usage = extract_token_usage(response)
-        token_usage = {
+        result['token_usage'] = {
             'prompt_tokens': input_tokens,
             'response_tokens': response_tokens,
             'total_tokens': total_tokens
         }
-        print(f"📊 Token usage: {token_usage}")
-        print("Here is the response:", response)
-        # import time
-        # time.sleep(70)  # Short delay to avoid rate limits
-        if token_usage:
-            print(f"📊 Token usage: {token_usage}")
-            result['token_usage'] = token_usage
-        else:
-            print("❌ No token usage found")
-            result['token_usage'] = {'prompt_tokens': 0, 'response_tokens': 0, 'total_tokens': 0}
-
-        print(f"🎯 Result: {result}")
+        
+        print(f"🎯 Universal Result: {result}")
         return result
 
     except Exception as e:
@@ -187,20 +187,123 @@ Next action?
             "token_usage": {"prompt_tokens": 0, "response_tokens": 0, "total_tokens": 0}
         }
 
+def detect_website_type(url: str, title: str, elements: list) -> str:
+    """Dynamically detect website type based on URL and content"""
+    url_lower = url.lower()
+    title_lower = title.lower()
+    
+    # Search engines
+    if any(domain in url_lower for domain in ["google.com", "bing.com", "duckduckgo.com", "yahoo.com"]):
+        if "/search" in url_lower or any("search" in elem.get("text", "").lower() for elem in elements):
+            return "search_results"
+        return "search_engine"
+    
+    # E-commerce
+    if any(domain in url_lower for domain in ["amazon", "ebay", "shopify", "etsy", "alibaba"]):
+        return "ecommerce"
+    if any(word in title_lower for word in ["shop", "store", "buy", "cart", "product"]):
+        return "ecommerce"
+    
+    # Social media
+    if any(domain in url_lower for domain in ["linkedin", "twitter", "facebook", "instagram", "github"]):
+        return "social_profile"
+    
+    # Forms/Applications
+    if any(elem.get("input") for elem in elements if len([e for e in elements if e.get("input")]) > 3):
+        return "form_application"
+    
+    # Content/News sites
+    if any(word in title_lower for word in ["news", "article", "blog", "post"]):
+        return "content_site"
+    
+    # Company/Organization
+    if any(word in title_lower for word in ["company", "corp", "inc", "ltd", "about", "contact"]):
+        return "company_site"
+    
+    # Database/Directory
+    if any(word in url_lower for word in ["directory", "database", "catalog", "listing"]):
+        return "database_site"
+    
+    return "general_website"
+
+def parse_ai_response(raw_text: str, page_state, goal: str, website_type: str) -> dict:
+    """Parse AI response with intelligent fallbacks"""
+    try:
+        # Extract JSON from response
+        start = raw_text.find('{')
+        end = raw_text.rfind('}') + 1
+        
+        if start != -1 and end > start:
+            json_str = raw_text[start:end]
+            result = json.loads(json_str)
+            
+            # Validate action
+            valid_actions = ["click", "type", "scroll", "press_key", "navigate", "extract", "done"]
+            if result.get("action") not in valid_actions:
+                return get_fallback_action(page_state, goal, website_type)
+            
+            # Validate index if present
+            if "index" in result and result["index"] not in page_state.selector_map:
+                print(f"❌ Invalid index {result['index']}")
+                return get_fallback_action(page_state, goal, website_type)
+            
+            return result
+        else:
+            return get_fallback_action(page_state, goal, website_type)
+            
+    except json.JSONDecodeError as e:
+        print(f"❌ JSON error: {e}")
+        return get_fallback_action(page_state, goal, website_type)
+
+def get_fallback_action(page_state, goal: str, website_type: str) -> dict:
+    """Intelligent fallback based on context"""
+    goal_lower = goal.lower()
+    
+    # Look for obvious search boxes
+    for index, elem in page_state.selector_map.items():
+        if elem.is_input and any(word in elem.text.lower() + str(elem.attributes).lower() 
+                                for word in ["search", "query", "find"]):
+            if "search" in goal_lower:
+                return {"action": "type", "index": index, "text": extract_search_query(goal), 
+                       "reason": "Found search box for user query"}
+    
+    # Look for relevant links based on goal
+    for index, elem in page_state.selector_map.items():
+        if elem.is_clickable and elem.text:
+            if any(word in elem.text.lower() for word in goal_lower.split()[:3]):
+                return {"action": "click", "index": index, 
+                       "reason": f"Found relevant link: {elem.text[:30]}"}
+    
+    # Default behaviors by website type
+    if website_type == "search_results":
+        # Click first meaningful result
+        for index, elem in page_state.selector_map.items():
+            if elem.is_clickable and len(elem.text) > 10:
+                return {"action": "click", "index": index, 
+                       "reason": "Clicking search result for more details"}
+    
+    # Generic fallback
+    return {"action": "scroll", "direction": "down", "amount": 400, 
+           "reason": "Exploring page to find relevant content"}
+
+def extract_search_query(goal: str) -> str:
+    """Extract search query from user goal"""
+    # Remove common command words
+    stop_words = ["go", "to", "search", "for", "find", "get", "save", "extract", "info", "about"]
+    words = goal.split()
+    query_words = [word for word in words if word.lower() not in stop_words]
+    return " ".join(query_words[:6])  # Limit query length
 
 async def count_response_tokens(response_text: str) -> int:
     """Count tokens in the response text"""
     try:
-        # Count tokens for just the response text
         token_count_response = await asyncio.to_thread(
             functools.partial(MODEL.count_tokens, response_text)
         )
         return token_count_response.total_tokens
     except Exception as e:
         print(f"❌ Error counting response tokens: {e}")
-        # Fallback: rough estimation (1 token ≈ 4 characters for English)
         return len(response_text) // 4
-
 
 
 ## This doesn't work with current response structure or generative model

@@ -19,22 +19,31 @@ OUTPUT_DIR.mkdir(exist_ok=True)
 
 class JobRequest(BaseModel):
     prompt: str
-    format: str = "txt" # txt | md | json | html default is txt
+    format: str = "txt" # txt | md | json | html | csv | pdf default is txt
     headless: bool = False
     enable_streaming: bool = False # New option for real-time browser streaming
 
 @app.post("/job")
 async def create_job(req: JobRequest):
+    # Validate format
+    valid_formats = ["txt", "md", "json", "html", "csv", "pdf"]
+    if req.format not in valid_formats:
+        req.format = "txt"
+    
     job_id = str(uuid.uuid4())
     proxy = ProxyManager().get_proxy()
     
-    # Create the agent task with streaming option
+    print(f"🚀 Creating universal job {job_id}")
+    print(f"📋 Goal: {req.prompt}")
+    print(f"🌐 Format: {req.format}")
+    print(f"🖥️ Headless: {req.headless}")
+    print(f"📡 Streaming: {req.enable_streaming}")
+    
+    # Create the agent task
     coro = run_agent(job_id, req.prompt, req.format, req.headless, proxy, req.enable_streaming)
     tasks[job_id] = asyncio.create_task(coro)
     
-    print(f"Created job {job_id} with headless={req.headless}, streaming={req.enable_streaming}, proxy={proxy}")
-    
-    response = {"job_id": job_id}
+    response = {"job_id": job_id, "format": req.format}
     if req.enable_streaming:
         response["streaming_enabled"] = True
         response["stream_url"] = f"ws://localhost:8000/stream/{job_id}"

@@ -3,43 +3,63 @@ from pathlib import Path
 from typing import Literal
 from backend.browser_controller import BrowserController
 from backend.vision_model import decide
+from backend.universal_extractor import UniversalExtractor
 
-async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","html"],
+async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","html","csv","pdf"],
                    headless: bool, proxy: dict | None, enable_streaming: bool = False):
-    """Agent with CDP streaming support"""
+    """Universal agent that works with any website"""
     from backend.main import broadcast, OUTPUT_DIR, register_streaming_session
     
-    print(f"🚀 Starting agent for job {job_id} with streaming={enable_streaming}")
+    print(f"🚀 Starting universal agent for job {job_id}")
+    print(f"📋 Goal: {prompt}")
+    print(f"🌐 Format: {fmt}")
+    
+    # Initialize universal extractor
+    extractor = UniversalExtractor()
     
     async with BrowserController(headless, proxy, enable_streaming) as browser:
         # Register streaming session
         if enable_streaming:
             await register_streaming_session(job_id, browser)
         
-        # Navigate
-        url_match = re.search(r"https?://\S+", prompt)
+        # Smart navigation - detect if URL is in prompt
+        url_match = re.search(r"https?://[\w\-\.]+[^\s]*", prompt)
         if url_match:
-            await browser.goto(url_match.group(0).rstrip('"'))
+            start_url = url_match.group(0).rstrip('".,;')
+            print(f"🔗 Found URL in prompt: {start_url}")
+            await browser.goto(start_url)
         else:
-            await browser.goto("https://www.google.com")
+            # Determine best starting point based on goal
+            start_url = determine_starting_url(prompt)
+            print(f"🔗 Starting at: {start_url}")
+            await browser.goto(start_url)
         
-        await broadcast(job_id, {"status": "started"})
+        await broadcast(job_id, {"status": "started", "initial_url": browser.page.url})
         
+        # Dynamic limits based on task complexity
+        max_steps = determine_max_steps(prompt)
         consecutive_scrolls = 0
         max_consecutive_scrolls = 3
+        extraction_attempts = 0
+        max_extraction_attempts = 2
         
-        # Main loop
-        for step in range(30):
-            print(f"\n🔄 Step {step + 1}/30")
+        print(f"🎯 Running for max {max_steps} steps")
+        
+        # Main universal loop
+        for step in range(max_steps):
+            print(f"\n🔄 Step {step + 1}/{max_steps}")
             
             try:
                 page_state = await browser.get_page_state(include_screenshot=True)
-                print(f"📊 Using {len(page_state.selector_map)} interactive elements")
+                print(f"📊 Found {len(page_state.selector_map)} interactive elements")
+                print(f"📍 Current: {page_state.url}")
                 
                 # Send info to frontend
                 await broadcast(job_id, {
                     "type": "page_info",
+                    "step": step + 1,
                     "url": page_state.url,
+                    "title": page_state.title,
                     "interactive_elements": len(page_state.selector_map)
                 })
                 
@@ -53,110 +73,192 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                 print(f"❌ Page state failed: {e}")
                 continue
             
-            # Skip AI call if no interactive elements
-            if len(page_state.selector_map) == 0 and consecutive_scrolls > 0:
-                print("⚠️ No elements found, scrolling...")
-                await browser.scroll_page("down", 300)
-                consecutive_scrolls += 1
-                continue
+            # Handle empty pages
+            if len(page_state.selector_map) == 0:
+                if consecutive_scrolls < max_consecutive_scrolls:
+                    print("⚠️ No interactive elements, trying to scroll...")
+                    await browser.scroll_page("down", 400)
+                    consecutive_scrolls += 1
+                    continue
+                else:
+                    print("⚠️ No elements found after scrolling, may need to navigate elsewhere")
+                    break
             
-            # AI decision
+            # AI decision making
             try:
                 screenshot_bytes = base64.b64decode(page_state.screenshot)
                 decision = await decide(screenshot_bytes, page_state, prompt)
-                await broadcast(job_id, {"type": "decision", "decision": decision})
+                
+                print(f"🤖 AI Decision: {decision.get('action')} - {decision.get('reason', 'No reason')}")
+                
+                await broadcast(job_id, {
+                    "type": "decision", 
+                    "step": step + 1,
+                    "decision": decision
+                })
+                
             except Exception as e:
                 print(f"❌ AI decision failed: {e}")
                 continue
             
             # Execute action
             action = decision.get("action")
-            print(f"⚡ Action: {action}")
+            print(f"⚡ Executing: {action}")
             
             try:
                 if action == "click":
                     index = decision.get("index")
-                    if index is not None:
+                    if index is not None and index in page_state.selector_map:
+                        elem = page_state.selector_map[index]
+                        print(f"🖱️ Clicking: {elem.text[:50]}...")
                         await browser.click_element_by_index(index, page_state)
                         consecutive_scrolls = 0
+                        extraction_attempts = 0  # Reset on navigation
+                        await asyncio.sleep(2)  # Wait for page changes
+                    else:
+                        print(f"❌ Invalid click index: {index}")
                         
                 elif action == "type":
                     index = decision.get("index")
                     text = decision.get("text", "")
-                    if index is not None and text:
+                    if index is not None and index in page_state.selector_map and text:
+                        elem = page_state.selector_map[index]
+                        print(f"⌨️ Typing '{text}' into: {elem.text[:30]}...")
                         await browser.input_text_by_index(index, text, page_state)
                         consecutive_scrolls = 0
+                        await asyncio.sleep(1)
+                    else:
+                        print(f"❌ Invalid type parameters: index={index}, text='{text}'")
                         
                 elif action == "scroll":
-                    await browser.scroll_page(decision.get("direction", "down"), 300)
+                    direction = decision.get("direction", "down")
+                    amount = decision.get("amount", 400)
+                    print(f"📜 Scrolling {direction} by {amount}px")
+                    await browser.scroll_page(direction, amount)
                     consecutive_scrolls += 1
                     
                     if consecutive_scrolls >= max_consecutive_scrolls:
-                        print("⚠️ Too many scrolls, switching strategy")
+                        print("⚠️ Too many scrolls, trying page end")
                         await browser.press_key("End")
                         consecutive_scrolls = 0
                         
                 elif action == "press_key":
-                    await browser.press_key(decision.get("key", "Enter"))
+                    key = decision.get("key", "Enter")
+                    print(f"🔑 Pressing key: {key}")
+                    await browser.press_key(key)
                     consecutive_scrolls = 0
+                    await asyncio.sleep(2)
+                    
+                elif action == "navigate":
+                    url = decision.get("url", "")
+                    if url and url.startswith("http"):
+                        print(f"🔗 Navigating to: {url}")
+                        await browser.goto(url)
+                        consecutive_scrolls = 0
+                        extraction_attempts = 0
+                        await asyncio.sleep(2)
+                    else:
+                        print(f"❌ Invalid navigation URL: {url}")
+                        
+                elif action == "extract":
+                    extraction_attempts += 1
+                    if extraction_attempts <= max_extraction_attempts:
+                        print("🔍 Starting intelligent extraction...")
+                        await broadcast(job_id, {
+                            "type": "extraction", 
+                            "status": "starting",
+                            "attempt": extraction_attempts
+                        })
+                        
+                        # Use universal extraction
+                        content = await extractor.extract_intelligent_content(browser, prompt, fmt)
+                        
+                        # Save content
+                        output_file = OUTPUT_DIR / f"{job_id}.output"
+                        with open(output_file, "w", encoding="utf-8") as f:
+                            f.write(content)
+                        
+                        print(f"💾 Universal content saved to {output_file}")
+                        await broadcast(job_id, {
+                            "type": "extraction", 
+                            "status": "completed",
+                            "file_size": len(content)
+                        })
+                        break
+                    else:
+                        print("⚠️ Maximum extraction attempts reached")
+                        break
                     
                 elif action == "done":
-                    print("✅ Task completed")
+                    print("✅ Task marked as complete by AI")
                     break
                     
+                else:
+                    print(f"⚠️ Unknown action: {action}")
+                    
             except Exception as e:
-                print(f"❌ Action failed: {e}")
+                print(f"❌ Action execution failed: {e}")
+                await asyncio.sleep(1)
             
-            await asyncio.sleep(1)
+            # Small delay between actions
+            await asyncio.sleep(0.5)
         
-        # Extract final content
-        try:
-            content = await extract_page_content(browser, fmt)
-            output_file = OUTPUT_DIR / f"{job_id}.output"
-            with open(output_file, "w", encoding="utf-8") as f:
-                f.write(content)
-            print(f"💾 Content saved to {output_file}")
-        except Exception as e:
-            print(f"❌ Failed to extract content: {e}")
+        # Final extraction if not done yet
+        if extraction_attempts == 0:
+            print("🔍 Performing final extraction...")
+            try:
+                content = await extractor.extract_intelligent_content(browser, prompt, fmt)
+                output_file = OUTPUT_DIR / f"{job_id}.output"
+                with open(output_file, "w", encoding="utf-8") as f:
+                    f.write(content)
+                print(f"💾 Final content saved to {output_file}")
+            except Exception as e:
+                print(f"❌ Final extraction failed: {e}")
         
         await broadcast(job_id, {"status": "finished"})
 
-async def extract_page_content(browser: BrowserController, fmt: str) -> str:
-    """Extract page content in the specified format"""
-    try:
-        html = await browser.page.content()
-        if fmt == "html":
-            return html
-        
-        if fmt == "txt":
-            text_content = await browser.page.inner_text("body")
-            return text_content.strip()
-        
-        if fmt == "md":
-            import bs4, markdownify
-            soup = bs4.BeautifulSoup(html, "lxml")
-            for tag in soup.find_all(True):
-                if tag.name not in ["h1","h2","h3","h4","h5","h6","p","li","ul","ol","a","strong","em","div","span"]:
-                    tag.decompose()
-            return markdownify.markdownify(str(soup))
-        
-        if fmt == "json":
-            page_state = await browser.get_page_state(include_screenshot=False, highlight_elements=False)
-            return json.dumps({
-                "url": page_state.url,
-                "title": page_state.title,
-                "elements": [{
-                    "index": elem.index,
-                    "tag": elem.tag_name,
-                    "text": elem.text[:100],
-                    "type": "interactive" if elem.index is not None else "text",
-                    "coordinates": elem.center_coordinates,
-                    "attributes": elem.attributes
-                } for elem in page_state.elements[:50]]
-            }, indent=2)
-        
-        return html
-        
-    except Exception as e:
-        print(f"❌ Failed to extract content: {e}")
-        return f"Error extracting content: {str(e)}"
+def determine_starting_url(prompt: str) -> str:
+    """Determine the best starting URL based on the user's goal"""
+    prompt_lower = prompt.lower()
+    
+    # Search-related tasks
+    if any(word in prompt_lower for word in ["search", "find", "look for", "google"]):
+        return "https://www.google.com"
+    
+    # LinkedIn profiles
+    if "linkedin" in prompt_lower or "professional profile" in prompt_lower:
+        return "https://www.linkedin.com"
+    
+    # GitHub profiles
+    if "github" in prompt_lower or "code repository" in prompt_lower:
+        return "https://www.github.com"
+    
+    # Shopping/e-commerce
+    if any(word in prompt_lower for word in ["buy", "purchase", "product", "price", "amazon"]):
+        return "https://www.amazon.com"
+    
+    # News
+    if any(word in prompt_lower for word in ["news", "article", "breaking"]):
+        return "https://news.google.com"
+    
+    # Default to Google for most tasks
+    return "https://www.google.com"
+
+def determine_max_steps(prompt: str) -> int:
+    """Determine max steps based on task complexity"""
+    prompt_lower = prompt.lower()
+    
+    # Simple extraction tasks
+    if any(word in prompt_lower for word in ["extract", "get info", "save", "download"]):
+        return 15
+    
+    # Complex research tasks
+    if any(word in prompt_lower for word in ["research", "analyze", "compare", "comprehensive"]):
+        return 25
+    
+    # Form filling or multi-step processes
+    if any(word in prompt_lower for word in ["fill", "submit", "register", "apply", "multiple"]):
+        return 20
+    
+    # Default
+    return 20
