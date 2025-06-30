@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browser Automation with Real-time Streaming</title>
+    <title>Universal Browser Automation with Smart Format Detection</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,6 +63,20 @@
         .status.success { background: #d4edda; color: #155724; }
         .status.error { background: #f8d7da; color: #721c24; }
         .status.info { background: #d1ecf1; color: #0c5460; }
+        
+        /* Format detection indicator */
+        .format-indicator {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 12px;
+            display: none;
+        }
+        .format-indicator.active {
+            display: block;
+        }
         
         /* Streaming specific styles */
         .stream-container {
@@ -177,26 +191,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Browser Automation with Real-time Streaming</h1>
+        <h1>🤖 Universal Browser Automation with Smart Format Detection</h1>
         
         <div class="form-group">
-            <label for="prompt">Prompt</label>
-            <textarea id="prompt" placeholder="go to https://www.ycombinator.com/jobs and save open roles as txt">go to https://www.ycombinator.com/jobs and save open roles as txt</textarea>
+            <label for="prompt">Prompt (mention format in your request for auto-detection)</label>
+            <textarea id="prompt" placeholder="Examples:&#10;- go to https://www.ycombinator.com/jobs and save open roles as txt&#10;- visit firecrawl.dev pricing page and save to PDF format&#10;- search for AI tools and export results as CSV">go to https://www.ycombinator.com/jobs and save open roles as txt</textarea>
         </div>
         
         <div class="form-group">
-            <label for="format">Format:</label>
+            <label for="format">Output Format (will be overridden if format is mentioned in prompt):</label>
             <select id="format">
-                <option value="txt">txt</option>
-                <option value="md">md</option>
-                <option value="json">json</option>
-                <option value="html">html</option>
+                <option value="txt">Plain Text (TXT)</option>
+                <option value="md">Markdown (MD)</option>
+                <option value="json">JSON</option>
+                <option value="html">HTML</option>
+                <option value="csv">CSV</option>
+                <option value="pdf">PDF</option>
             </select>
+            <div id="format-indicator" class="format-indicator">
+                <strong>🎯 Format Detection:</strong> <span id="detected-format-text"></span>
+            </div>
         </div>
         
         <div class="form-group">
             <label>
-                <input type="checkbox" id="headless"> Headless
+                <input type="checkbox" id="headless"> Headless Mode
             </label>
         </div>
         
@@ -206,9 +225,9 @@
             </label>
         </div>
         
-        <button onclick="startJob()">Run</button>
-        <button onclick="downloadResult()" id="download-btn" disabled>Download result</button>
-        <button onclick="createStreamingSession()" id="stream-btn">Create Streaming Session</button>
+        <button onclick="startJob()">🚀 Run Universal Agent</button>
+        <button onclick="downloadResult()" id="download-btn" disabled>📥 Download Result</button>
+        <button onclick="createStreamingSession()" id="stream-btn">🎥 Create Streaming Session</button>
         
         <div id="status"></div>
     </div>
@@ -260,9 +279,9 @@
                 <span id="stream-fps" style="margin-left: 10px;">0 FPS</span>
             </div>
             <div class="stream-controls">
-                <button onclick="connectStream()">Connect</button>
-                <button onclick="disconnectStream()">Disconnect</button>
-                <button onclick="takeScreenshot()">Screenshot</button>
+                <button onclick="connectStream()">🔗 Connect</button>
+                <button onclick="disconnectStream()">🔌 Disconnect</button>
+                <button onclick="takeScreenshot()">📸 Screenshot</button>
                 <span style="margin-left: 10px;">Quality: </span>
                 <select id="stream-quality" onchange="updateStreamQuality()">
                     <option value="60">Low (60%)</option>
@@ -283,6 +302,55 @@
         let totalTokenUsage = { prompt_tokens: 0, response_tokens: 0, total_tokens: 0, api_calls: 0 };
         let streamStats = { frameCount: 0, startTime: null, lastFrameTime: null };
 
+        // Format detection from prompt
+        function detectFormatFromPrompt(prompt) {
+            const promptLower = prompt.toLowerCase();
+            const formatPatterns = {
+                'pdf': [/\bpdf\b/, /pdf format/, /save.*pdf/, /as pdf/, /to pdf/],
+                'csv': [/\bcsv\b/, /csv format/, /save.*csv/, /as csv/, /to csv/],
+                'json': [/\bjson\b/, /json format/, /save.*json/, /as json/, /to json/],
+                'html': [/\bhtml\b/, /html format/, /save.*html/, /as html/, /to html/],
+                'md': [/\bmarkdown\b/, /md format/, /save.*markdown/, /as markdown/, /to md/],
+                'txt': [/\btext\b/, /txt format/, /save.*text/, /as text/, /to txt/, /plain text/]
+            };
+            
+            for (const [format, patterns] of Object.entries(formatPatterns)) {
+                for (const pattern of patterns) {
+                    if (pattern.test(promptLower)) {
+                        return format;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Update format indicator
+        function updateFormatIndicator() {
+            const prompt = document.getElementById('prompt').value;
+            const selectedFormat = document.getElementById('format').value;
+            const detectedFormat = detectFormatFromPrompt(prompt);
+            const indicator = document.getElementById('format-indicator');
+            const indicatorText = document.getElementById('detected-format-text');
+            
+            if (detectedFormat && detectedFormat !== selectedFormat) {
+                indicator.classList.add('active');
+                indicatorText.textContent = `'${detectedFormat.toUpperCase()}' detected in prompt, will override dropdown selection`;
+                indicator.style.borderColor = '#ffc107';
+                indicator.style.backgroundColor = '#fff3cd';
+            } else if (detectedFormat && detectedFormat === selectedFormat) {
+                indicator.classList.add('active');
+                indicatorText.textContent = `'${detectedFormat.toUpperCase()}' detected in prompt, matches dropdown selection`;
+                indicator.style.borderColor = '#28a745';
+                indicator.style.backgroundColor = '#d4edda';
+            } else {
+                indicator.classList.remove('active');
+            }
+        }
+
+        // Add event listeners for format detection
+        document.getElementById('prompt').addEventListener('input', updateFormatIndicator);
+        document.getElementById('format').addEventListener('change', updateFormatIndicator);
+
         // Main job management
         async function startJob() {
             const prompt = document.getElementById('prompt').value;
@@ -295,15 +363,19 @@
                 return;
             }
 
+            // Detect format from prompt
+            const detectedFormat = detectFormatFromPrompt(prompt);
+            const finalFormat = detectedFormat || format;
+
             try {
-                showStatus('Creating job...', 'info');
+                showStatus(`Creating job with ${finalFormat.toUpperCase()} format...`, 'info');
                 
                 const response = await fetch('/job', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         prompt: prompt,
-                        format: format,
+                        format: finalFormat,
                         headless: headless,
                         enable_streaming: streaming
                     })
@@ -312,7 +384,11 @@
                 const data = await response.json();
                 currentJobId = data.job_id;
                 
-                showStatus(`Job created: ${currentJobId}`, 'success');
+                showStatus(`Job created: ${currentJobId} (Format: ${finalFormat.toUpperCase()})`, 'success');
+                
+                // Clear previous data
+                clearDecisions();
+                clearScreenshots();
                 
                 // Connect to WebSocket for updates
                 connectWebSocket();
@@ -381,6 +457,8 @@
         }
 
         function handleWebSocketMessage(data) {
+            console.log('📨 WebSocket message received:', data);
+            
             switch (data.type) {
                 case 'decision':
                     addDecision(data.decision);
@@ -392,21 +470,88 @@
                     addScreenshot(data.screenshot);
                     break;
                 case 'page_info':
-                    showStatus(`Page: ${data.url} (${data.interactive_elements} elements)`, 'info');
+                    showStatus(`Step ${data.step}: ${data.url} (${data.interactive_elements} elements) [${data.format?.toUpperCase() || 'TXT'}]`, 'info');
+                    break;
+                case 'extraction':
+                    if (data.status === 'starting') {
+                        showStatus(`Starting extraction (attempt ${data.attempt}) in ${data.format?.toUpperCase() || 'TXT'} format...`, 'info');
+                    } else if (data.status === 'completed') {
+                        showStatus(`✅ Extraction completed! Format: ${data.format?.toUpperCase() || 'TXT'}`, 'success');
+                        document.getElementById('download-btn').disabled = false;
+                        
+                        // Update download button text
+                        const format = data.format || 'TXT';
+                        document.getElementById('download-btn').textContent = `📥 Download ${format.toUpperCase()} File`;
+                    }
                     break;
                 case 'streaming_info':
                     if (data.streaming.enabled) {
                         showStatus('Streaming available', 'success');
                     }
                     break;
+                case 'proxy_stats':
+                    updateProxyStats(data.stats);
+                    break;
+
+                case 'error':
+                    showStatus(`❌ ${data.message}`, 'error');
+                    if (data.proxy_stats) {
+                        updateProxyStats(data.proxy_stats);
+                    }
+                    break;
                 default:
                     if (data.status) {
-                        showStatus(`Status: ${data.status}`, 'info');
-                        if (data.status === 'finished') {
+                        if (data.status === 'started') {
+                            showStatus(`Status: ${data.status} | Format: ${data.detected_format?.toUpperCase() || 'TXT'}`, 'info');
+                        } else if (data.status === 'finished') {
+                            showStatus(`Status: ${data.status} | Final format: ${data.final_format?.toUpperCase() || 'TXT'}`, 'success');
                             document.getElementById('download-btn').disabled = false;
+                        } else {
+                            showStatus(`Status: ${data.status}`, 'info');
                         }
                     }
             }
+        }
+
+        function updateProxyStats(stats) {
+            // Create proxy stats display if it doesn't exist
+            let proxyStatsDiv = document.getElementById('proxy-stats');
+            if (!proxyStatsDiv) {
+                const container = document.createElement('div');
+                container.className = 'container';
+                container.innerHTML = `
+                    <h3>🔄 Smart Proxy Status</h3>
+                    <div id="proxy-stats" class="token-usage">
+                        <div class="token-stats" id="proxy-stats-grid"></div>
+                    </div>
+                `;
+                document.body.appendChild(container);
+                proxyStatsDiv = document.getElementById('proxy-stats');
+            }
+            
+            const statsGrid = document.getElementById('proxy-stats-grid');
+            statsGrid.innerHTML = `
+                <div class="token-stat">
+                    <div class="value">${stats.available || 0}</div>
+                    <div class="label">Available Proxies</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.healthy || 0}</div>
+                    <div class="label">Healthy</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.blocked || 0}</div>
+                    <div class="label">Blocked</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.retry_count || 0}</div>
+                    <div class="label">Retries</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.captcha_solve_count || 0}</div>
+                    <div class="label">CAPTCHAs Solved</div>
+                </div>
+            `;
         }
 
         // Streaming functionality
@@ -462,8 +607,7 @@
                     updateStreamStats();
                     break;
                 case 'connected':
-                    const method = data.method || 'unknown';
-                    showStatus(`Connected to browser stream (${method})`, 'success');
+                    showStatus('Connected to browser stream', 'success');
                     break;
                 case 'error':
                     showStatus(`Stream error: ${data.message}`, 'error');
@@ -565,6 +709,8 @@
             entry.innerHTML = `<strong>${decision.action}</strong>: ${decision.reason || 'No reason provided'}`;
             decisionsDiv.appendChild(entry);
             decisionsDiv.scrollTop = decisionsDiv.scrollHeight;
+            
+            console.log('✅ Decision added to UI:', decision);
         }
 
         function addScreenshot(screenshot) {
@@ -576,6 +722,18 @@
             img.style.border = '1px solid #ddd';
             img.style.borderRadius = '4px';
             screenshotsDiv.appendChild(img);
+            
+            console.log('✅ Screenshot added to UI');
+        }
+
+        function clearDecisions() {
+            const decisionsDiv = document.getElementById('decisions');
+            decisionsDiv.innerHTML = '';
+        }
+
+        function clearScreenshots() {
+            const screenshotsDiv = document.getElementById('screenshots');
+            screenshotsDiv.innerHTML = '';
         }
 
         function updateTokenUsage(usage) {
@@ -597,17 +755,41 @@
             }
 
             try {
+                // First get job info to know the format
+                const infoResponse = await fetch(`/job/${currentJobId}/info`);
+                const jobInfo = await infoResponse.json();
+                
+                if (jobInfo.error) {
+                    showStatus('Job information not found', 'error');
+                    return;
+                }
+                
+                showStatus(`Downloading ${jobInfo.format?.toUpperCase() || 'TXT'} file...`, 'info');
+                
                 const response = await fetch(`/download/${currentJobId}`);
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `result_${currentJobId}.txt`;
+                    
+                    // Use proper filename from headers or construct one
+                    const disposition = response.headers.get('Content-Disposition');
+                    let filename = `result_${currentJobId}.${jobInfo.extension || 'txt'}`;
+                    if (disposition) {
+                        const filenameMatch = disposition.match(/filename="?([^"]+)"?/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    a.download = filename;
                     a.click();
                     window.URL.revokeObjectURL(url);
+                    
+                    showStatus(`✅ Downloaded: ${filename}`, 'success');
                 } else {
-                    showStatus('Download failed', 'error');
+                    showStatus(`Download failed: ${response.statusText}`, 'error');
                 }
             } catch (error) {
                 showStatus(`Download error: ${error.message}`, 'error');
@@ -615,13 +797,10 @@
         }
 
         function updateStreamQuality() {
-            // This would require reconnecting to stream with new quality
-            // For now, just show a message
             showStatus('Quality change will take effect on next connection', 'info');
         }
 
         function takeScreenshot() {
-            // This would capture the current frame
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const img = document.getElementById('stream-frame');
@@ -636,9 +815,10 @@
             link.click();
         }
 
-        // Initialize
+        // Initialize format detection on page load
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 CDP Streaming Interface Loaded');
+            console.log('🚀 Universal Agent Interface Loaded');
+            updateFormatIndicator();
         });
     </script>
 </body>
