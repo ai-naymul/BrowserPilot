@@ -1,662 +1,822 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>AI-Agent-Scraper</title>
-<style>
- body{font-family:Arial;margin:0;padding:0;display:flex;height:100vh}
- #left{flex:0 0 350px;padding:20px;border-right:1px solid #ddd;overflow-y:auto}
- #right{flex:1;display:flex;flex-direction:column}
- #view-controls{padding:10px;background:#f0f0f0;border-bottom:1px solid #ddd}
- #screens{flex:1;overflow:auto;background:#000;position:relative}
- 
- /* Screenshot view styles */
- .screenshot-view img{width:100%;height:auto}
- 
- /* VNC view styles */
- .vnc-view {
-   width: 100%;
-   height: 100%;
-   position: relative;
- }
- .vnc-info {
-   position: absolute;
-   top: 10px;
-   left: 10px;
-   background: rgba(0,0,0,0.8);
-   color: white;
-   padding: 10px;
-   border-radius: 5px;
-   font-size: 12px;
- }
- .vnc-status {
-   position: absolute;
-   top: 10px;
-   right: 10px;
-   padding: 5px 10px;
-   border-radius: 3px;
-   font-size: 12px;
-   font-weight: bold;
- }
- .vnc-status.connected { background: #4CAF50; color: white; }
- .vnc-status.connecting { background: #FF9800; color: white; }
- .vnc-status.disconnected { background: #f44336; color: white; }
- 
- #token-stats {
-   margin-top: 20px;
-   padding: 10px;
-   background: #f5f5f5;
-   border-radius: 5px;
-   font-size: 12px;
- }
- .token-row {
-   display: flex;
-   justify-content: space-between;
-   margin: 2px 0;
- }
- .token-label {
-   font-weight: bold;
- }
- #decisions-log {
-   margin-top: 10px;
-   max-height: 200px;
-   overflow-y: auto;
-   background: #fafafa;
-   border: 1px solid #ddd;
-   padding: 5px;
-   font-size: 11px;
- }
- .decision-entry {
-   margin: 5px 0;
-   padding: 5px;
-   background: white;
-   border-left: 3px solid #007acc;
- }
- 
- /* Control styles */
- .view-option {
-   margin-right: 15px;
- }
- .view-option input[type="radio"] {
-   margin-right: 5px;
- }
- 
- /* Hidden by default */
- .hidden { display: none !important; }
- 
- /* Debug styles */
- .debug-info {
-   position: fixed;
-   bottom: 10px;
-   right: 10px;
-   background: rgba(255,0,0,0.8);
-   color: white;
-   padding: 10px;
-   border-radius: 5px;
-   font-size: 12px;
-   max-width: 300px;
-   z-index: 1000;
- }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Browser Automation with Smart Format Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d4edda; color: #155724; }
+        .status.error { background: #f8d7da; color: #721c24; }
+        .status.info { background: #d1ecf1; color: #0c5460; }
+        
+        /* Format detection indicator */
+        .format-indicator {
+            background: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 12px;
+            display: none;
+        }
+        .format-indicator.active {
+            display: block;
+        }
+        
+        /* Streaming specific styles */
+        .stream-container {
+            position: relative;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            margin: 20px 0;
+        }
+        .stream-video {
+            width: 100%;
+            height: auto;
+            display: block;
+            cursor: pointer;
+        }
+        .stream-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .stream-controls {
+            padding: 10px;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+        .stream-controls button {
+            background: #28a745;
+            margin-right: 5px;
+        }
+        .stream-controls button:hover {
+            background: #1e7e34;
+        }
+        .stream-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .stream-status.connected {
+            background: #28a745;
+            color: white;
+        }
+        .stream-status.disconnected {
+            background: #dc3545;
+            color: white;
+        }
+        .stream-status.connecting {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .logs {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-entry {
+            margin: 2px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .log-entry.error { color: #dc3545; }
+        .log-entry.success { color: #28a745; }
+        .log-entry.info { color: #007bff; }
+        
+        .token-usage {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .token-usage h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .token-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .token-stat {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .token-stat .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .token-stat .label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
-<div id="left">
-  <h3>Prompt</h3>
-  <textarea id="prompt" rows="8" style="width:100%;">go to https://www.ycombinator.com/jobs and save open roles as txt</textarea>
-  <label>Format:
-    <select id="fmt">
-      <option>txt</option><option>md</option><option>json</option><option>html</option>
-    </select>
-  </label><br/>
-  <label><input type="checkbox" id="headless" checked/> Headless</label><br/>
-  <label><input type="checkbox" id="enable-vnc"/> Enable Real-time Browser View</label><br/><br/>
-  <button onclick="handleRun()">Run</button>
-  <div id="status"></div>
-  <a id="download" style="display:none;">Download result</a>
-  
-  <div id="token-stats" style="display:none;">
-    <h4 style="margin-top:0;">Token Usage</h4>
-    <div class="token-row">
-      <span class="token-label">Total Tokens:</span>
-      <span id="total-tokens">0</span>
-    </div>
-    <div class="token-row">
-      <span class="token-label">Prompt Tokens:</span>
-      <span id="prompt-tokens">0</span>
-    </div>
-    <div class="token-row">
-      <span class="token-label">Response Tokens:</span>
-      <span id="response-tokens">0</span>
-    </div>
-    <div class="token-row">
-      <span class="token-label">API Calls:</span>
-      <span id="api-calls">0</span>
-    </div>
-  </div>
-  
-  <div id="decisions-log" style="display:none;">
-    <h4 style="margin-top:0;">Recent Decisions</h4>
-    <div id="decisions-content"></div>
-  </div>
-</div>
-
-<div id="right">
-  <div id="view-controls">
-    <div class="view-option">
-      <input type="radio" id="view-screenshot" name="view-mode" value="screenshot" checked>
-      <label for="view-screenshot">Screenshots</label>
-    </div>
-    <div class="view-option">
-      <input type="radio" id="view-vnc" name="view-mode" value="vnc">
-      <label for="view-vnc">Real-time Browser</label>
-    </div>
-    <span id="vnc-availability" style="color:#999;font-size:12px;">(Enable VNC option to use real-time view)</span>
-  </div>
-  
-  <div id="screens">
-    <!-- Screenshot view -->
-    <div id="screenshot-container" class="screenshot-view">
-      <!-- Screenshots will be added here -->
-    </div>
-    
-    <!-- VNC view -->
-    <div id="vnc-container" class="vnc-view hidden">
-      <div id="vnc-screen"></div>
-      <div class="vnc-info">
-        <div>Real-time Browser View</div>
-        <div id="vnc-details">Waiting for connection...</div>
-      </div>
-      <div id="vnc-status" class="vnc-status disconnected">Disconnected</div>
-    </div>
-  </div>
-</div>
-
-<!-- Debug info (will be hidden in production) -->
-<div id="debug-info" class="debug-info" style="display:none;"></div>
-
-<script>
-// Debug function
-function debugLog(message) {
-  console.log(message);
-  const debugDiv = document.getElementById('debug-info');
-  if (debugDiv) {
-    debugDiv.style.display = 'block';
-    debugDiv.innerHTML = message + '<br>' + debugDiv.innerHTML;
-    // Keep only last 5 messages
-    const lines = debugDiv.innerHTML.split('<br>');
-    if (lines.length > 5) {
-      debugDiv.innerHTML = lines.slice(0, 5).join('<br>');
-    }
-  }
-}
-
-// Global variables
-let totalTokens = 0;
-let totalPromptTokens = 0;
-let totalResponseTokens = 0;
-let apiCallCount = 0;
-let currentJobId = null;
-let vnc = null;
-let vncEnabled = false;
-let RFB = null; // Will be set when noVNC loads
-
-
-
-// Add this function to create VNC session before starting job
-async function createVNCSession(jobId) {
-    try {
-        const response = await fetch(`/vnc/create/${jobId}`, {
-            method: 'POST'
-        });
-        return await response.json();
-    } catch (error) {
-        console.error('Failed to create VNC session:', error);
-        return null;
-    }
-}
-
-// Modify your real-time browser button handler
-document.getElementById('vnc-button').addEventListener('click', async () => {
-    const jobId = generateJobId(); // You'll need to implement this
-    const vncInfo = await createVNCSession(jobId);
-    
-    if (vncInfo && vncInfo.enabled) {
-        // Connect to VNC
-        connectToVNC(vncInfo);
-    } else {
-        console.error('Failed to create VNC session');
-    }
-});
-
-// Wrapper function for the run button
-function handleRun() {
-  debugLog('Run button clicked');
-  try {
-    run();
-  } catch (error) {
-    debugLog('Error in run(): ' + error.message);
-    console.error('Error in run():', error);
-  }
-}
-
-// View mode management
-function initViewControls() {
-  debugLog('Initializing view controls');
-  const viewRadios = document.querySelectorAll('input[name="view-mode"]');
-  viewRadios.forEach(radio => {
-    radio.addEventListener('change', switchViewMode);
-  });
-}
-
-function switchViewMode() {
-  const selectedMode = document.querySelector('input[name="view-mode"]:checked').value;
-  const screenshotContainer = document.getElementById('screenshot-container');
-  const vncContainer = document.getElementById('vnc-container');
-  
-  if (selectedMode === 'screenshot') {
-    screenshotContainer.classList.remove('hidden');
-    vncContainer.classList.add('hidden');
-  } else if (selectedMode === 'vnc') {
-    if (vncEnabled) {
-      screenshotContainer.classList.add('hidden');
-      vncContainer.classList.remove('hidden');
-    } else {
-      // Switch back to screenshot if VNC not available
-      document.getElementById('view-screenshot').checked = true;
-      alert('VNC is not enabled for this session. Please enable "Real-time Browser View" option and restart.');
-    }
-  }
-}
-
-// VNC management
-function initVNC(vncInfo) {
-  if (!vncInfo.enabled) return;
-  
-  debugLog('Initializing VNC with info: ' + JSON.stringify(vncInfo));
-  
-  vncEnabled = true;
-  document.getElementById('vnc-availability').textContent = '(VNC enabled - you can switch to real-time view)';
-  document.getElementById('view-vnc').disabled = false;
-  
-  const vncScreen = document.getElementById('vnc-screen');
-  const vncDetails = document.getElementById('vnc-details');
-  const vncStatus = document.getElementById('vnc-status');
-  
-  try {
-    // Clear any existing VNC connection
-    if (vnc) {
-      vnc.disconnect();
-    }
-    
-    // Check if RFB is available
-    if (!RFB) {
-      throw new Error('noVNC RFB class not loaded');
-    }
-    
-    // Initialize noVNC RFB
-    vnc = new RFB(vncScreen, vncInfo.websocket_url, {
-      credentials: {},
-      repeaterID: '',
-      shared: true,
-      local_cursor: true,
-      view_only: false
-    });
-    
-    vncDetails.textContent = `Port: ${vncInfo.port}, Display: :${vncInfo.display}`;
-    
-    // VNC event handlers
-    vnc.addEventListener('connect', () => {
-      debugLog('VNC connected');
-      vncStatus.textContent = 'Connected';
-      vncStatus.className = 'vnc-status connected';
-    });
-    
-    vnc.addEventListener('disconnect', () => {
-      debugLog('VNC disconnected');
-      vncStatus.textContent = 'Disconnected';
-      vncStatus.className = 'vnc-status disconnected';
-    });
-    
-    vnc.addEventListener('credentialsrequired', () => {
-      debugLog('VNC credentials required');
-      vncStatus.textContent = 'Auth Required';
-      vncStatus.className = 'vnc-status connecting';
-    });
-    
-    vnc.addEventListener('securityfailure', (e) => {
-      debugLog('VNC security failure: ' + e.toString());
-      vncStatus.textContent = 'Security Failure';
-      vncStatus.className = 'vnc-status disconnected';
-    });
-    
-    vncStatus.textContent = 'Connecting...';
-    vncStatus.className = 'vnc-status connecting';
-    
-  } catch (error) {
-    debugLog('Failed to initialize VNC: ' + error.message);
-    vncDetails.textContent = `Error: ${error.message}`;
-    vncStatus.textContent = 'Error';
-    vncStatus.className = 'vnc-status disconnected';
-  }
-}
-
-function disconnectVNC() {
-  if (vnc) {
-    vnc.disconnect();
-    vnc = null;
-  }
-  vncEnabled = false;
-  document.getElementById('vnc-availability').textContent = '(Enable VNC option to use real-time view)';
-  document.getElementById('view-vnc').disabled = true;
-  document.getElementById('view-screenshot').checked = true;
-  switchViewMode();
-}
-
-// Token stats management
-function updateTokenStats(tokenUsage) {
-  if (tokenUsage) {
-    totalTokens += tokenUsage.total_tokens || 0;
-    totalPromptTokens += tokenUsage.prompt_tokens || 0;
-    totalResponseTokens += tokenUsage.response_tokens || 0;
-    apiCallCount++;
-    
-    document.getElementById('total-tokens').textContent = totalTokens.toLocaleString();
-    document.getElementById('prompt-tokens').textContent = totalPromptTokens.toLocaleString();
-    document.getElementById('response-tokens').textContent = totalResponseTokens.toLocaleString();
-    document.getElementById('api-calls').textContent = apiCallCount;
-    document.getElementById('token-stats').style.display = 'block';
-  }
-}
-
-function addDecisionToLog(decision) {
-  const decisionsContent = document.getElementById('decisions-content');
-  const entry = document.createElement('div');
-  entry.className = 'decision-entry';
-  
-  let actionText = `Action: ${decision.action}`;
-  if (decision.selector) actionText += `\nSelector: ${decision.selector}`;
-  if (decision.text) actionText += `\nText: ${decision.text}`;
-  if (decision.url) actionText += `\nURL: ${decision.url}`;
-  if (decision.error) actionText += `\nError: ${decision.error}`;
-  
-  entry.textContent = actionText;
-  decisionsContent.insertBefore(entry, decisionsContent.firstChild);
-  
-  // Keep only last 10 decisions
-  while (decisionsContent.children.length > 10) {
-    decisionsContent.removeChild(decisionsContent.lastChild);
-  }
-  
-  document.getElementById('decisions-log').style.display = 'block';
-}
-
-function resetStats() {
-  totalTokens = 0;
-  totalPromptTokens = 0;
-  totalResponseTokens = 0;
-  apiCallCount = 0;
-  document.getElementById('token-stats').style.display = 'none';
-  document.getElementById('decisions-log').style.display = 'none';
-  document.getElementById('decisions-content').innerHTML = '';
-}
-
-async function run() {
-  debugLog('Starting run function');
-  
-  // Clean up previous session
-  if (currentJobId) {
-    disconnectVNC();
-  }
-  
-  document.getElementById("screenshot-container").innerHTML = "";
-  resetStats();
-  
-  const body = {
-    prompt: document.getElementById("prompt").value,
-    format: document.getElementById("fmt").value,
-    headless: document.getElementById("headless").checked,
-    enable_vnc: document.getElementById("enable-vnc").checked
-  };
-  
-  debugLog('Sending request with body: ' + JSON.stringify(body));
-  
-  try {
-    const res = await fetch("/job", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(body)
-    });
-    
-    debugLog('Response status: ' + res.status);
-    
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
-    }
-    
-    const jobResponse = await res.json();
-    currentJobId = jobResponse.job_id;
-    
-    debugLog('Job ID: ' + currentJobId);
-    
-    document.getElementById("status").textContent = "Job " + currentJobId;
-    
-    // Connect to WebSocket
-    const wsUrl = `ws://${location.host}/ws/${currentJobId}`;
-    debugLog('Connecting to WebSocket: ' + wsUrl);
-    
-    const sock = new WebSocket(wsUrl);
-    
-    sock.onopen = () => {
-      debugLog('WebSocket connected');
-    };
-    
-    sock.onmessage = ev => {
-      debugLog('WebSocket message received');
-      try {
-        const msg = JSON.parse(ev.data);
+    <div class="container">
+        <h1>🤖 Universal Browser Automation with Smart Format Detection</h1>
         
-        // Handle different message types
-        if (msg.type === 'screenshot' || msg.screenshot) {
-          const screenshot = msg.screenshot || msg.data;
-          if (screenshot) {
-            const img = new Image();
-            img.src = "data:image/png;base64," + screenshot;
-            document.getElementById("screenshot-container").prepend(img);
-          }
-        }
+        <div class="form-group">
+            <label for="prompt">Prompt (mention format in your request for auto-detection)</label>
+            <textarea id="prompt" placeholder="Examples:&#10;- go to https://www.ycombinator.com/jobs and save open roles as txt&#10;- visit firecrawl.dev pricing page and save to PDF format&#10;- search for AI tools and export results as CSV">go to https://www.ycombinator.com/jobs and save open roles as txt</textarea>
+        </div>
         
-        if (msg.type === 'decision' || msg.decision) {
-          const decision = msg.decision || msg.data;
-          if (decision) {
-            addDecisionToLog(decision);
-            if (decision.token_usage) {
-              updateTokenStats(decision.token_usage);
+        <div class="form-group">
+            <label for="format">Output Format (will be overridden if format is mentioned in prompt):</label>
+            <select id="format">
+                <option value="txt">Plain Text (TXT)</option>
+                <option value="md">Markdown (MD)</option>
+                <option value="json">JSON</option>
+                <option value="html">HTML</option>
+                <option value="csv">CSV</option>
+                <option value="pdf">PDF</option>
+            </select>
+            <div id="format-indicator" class="format-indicator">
+                <strong>🎯 Format Detection:</strong> <span id="detected-format-text"></span>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="headless"> Headless Mode
+            </label>
+        </div>
+        
+        <div class="form-group">
+            <label>
+                <input type="checkbox" id="enable-streaming" checked> Enable Real-time Browser Streaming
+            </label>
+        </div>
+        
+        <button onclick="startJob()">🚀 Run Universal Agent</button>
+        <button onclick="downloadResult()" id="download-btn" disabled>📥 Download Result</button>
+        <button onclick="createStreamingSession()" id="stream-btn">🎥 Create Streaming Session</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <!-- 1. Token Usage Display -->
+    <div class="container">
+        <div class="token-usage">
+            <h3>📊 Token Usage</h3>
+            <div class="token-stats">
+                <div class="token-stat">
+                    <div class="value" id="total-tokens">0</div>
+                    <div class="label">Total Tokens</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value" id="prompt-tokens">0</div>
+                    <div class="label">Prompt Tokens</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value" id="response-tokens">0</div>
+                    <div class="label">Response Tokens</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value" id="api-calls">0</div>
+                    <div class="label">API Calls</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Real-time Browser Streaming -->
+    <div class="container">
+        <h3>🎥 Real-time Browser Streaming</h3>
+        <div class="stream-container" id="stream-container" style="display: none;">
+            <img id="stream-frame" class="stream-video" alt="Browser Stream">
+            <div class="stream-overlay">
+                <span id="stream-status" class="stream-status disconnected">Disconnected</span>
+                <span id="stream-fps" style="margin-left: 10px;">0 FPS</span>
+            </div>
+            <div class="stream-controls">
+                <button onclick="connectStream()">🔗 Connect</button>
+                <button onclick="disconnectStream()">🔌 Disconnect</button>
+                <button onclick="takeScreenshot()">📸 Screenshot</button>
+                <span style="margin-left: 10px;">Quality: </span>
+                <select id="stream-quality" onchange="updateStreamQuality()">
+                    <option value="60">Low (60%)</option>
+                    <option value="80" selected>Medium (80%)</option>
+                    <option value="100">High (100%)</option>
+                </select>
+            </div>
+        </div>
+        <div id="stream-placeholder" style="text-align: center; padding: 40px; color: #6c757d;">
+            <p>Enable streaming option to use real-time browser view</p>
+        </div>
+    </div>
+
+    <!-- 3. Recent Decisions -->
+    <div class="container">
+        <h3>🧠 Recent Decisions</h3>
+        <div id="decisions" class="logs"></div>
+    </div>
+
+    <!-- 4. Smart Proxy Status (placeholder - will be created dynamically) -->
+    <div class="container" id="proxy-container" style="display: none;">
+        <h3>🔄 Smart Proxy Status</h3>
+        <div id="proxy-stats" class="token-usage">
+            <div class="token-stats" id="proxy-stats-grid"></div>
+        </div>
+    </div>
+
+    <!-- 5. Screenshots -->
+    <div class="container">
+        <h3>📸 Screenshots</h3>
+        <div id="screenshots"></div>
+    </div>
+
+    <script>
+        let currentJobId = null;
+        let websocket = null;
+        let streamWebSocket = null;
+        let totalTokenUsage = { prompt_tokens: 0, response_tokens: 0, total_tokens: 0, api_calls: 0 };
+        let streamStats = { frameCount: 0, startTime: null, lastFrameTime: null };
+
+        // Format detection from prompt
+        function detectFormatFromPrompt(prompt) {
+            const promptLower = prompt.toLowerCase();
+            const formatPatterns = {
+                'pdf': [/\bpdf\b/, /pdf format/, /save.*pdf/, /as pdf/, /to pdf/],
+                'csv': [/\bcsv\b/, /csv format/, /save.*csv/, /as csv/, /to csv/],
+                'json': [/\bjson\b/, /json format/, /save.*json/, /as json/, /to json/],
+                'html': [/\bhtml\b/, /html format/, /save.*html/, /as html/, /to html/],
+                'md': [/\bmarkdown\b/, /md format/, /save.*markdown/, /as markdown/, /to md/],
+                'txt': [/\btext\b/, /txt format/, /save.*text/, /as text/, /to txt/, /plain text/]
+            };
+            
+            for (const [format, patterns] of Object.entries(formatPatterns)) {
+                for (const pattern of patterns) {
+                    if (pattern.test(promptLower)) {
+                        return format;
+                    }
+                }
             }
-          }
+            return null;
         }
-        
-        if (msg.type === 'vnc_info' || msg.vnc) {
-          const vncInfo = msg.vnc || msg.data;
-          initVNC(vncInfo);
+
+        // Update format indicator
+        function updateFormatIndicator() {
+            const prompt = document.getElementById('prompt').value;
+            const selectedFormat = document.getElementById('format').value;
+            const detectedFormat = detectFormatFromPrompt(prompt);
+            const indicator = document.getElementById('format-indicator');
+            const indicatorText = document.getElementById('detected-format-text');
+            
+            if (detectedFormat && detectedFormat !== selectedFormat) {
+                indicator.classList.add('active');
+                indicatorText.textContent = `'${detectedFormat.toUpperCase()}' detected in prompt, will override dropdown selection`;
+                indicator.style.borderColor = '#ffc107';
+                indicator.style.backgroundColor = '#fff3cd';
+            } else if (detectedFormat && detectedFormat === selectedFormat) {
+                indicator.classList.add('active');
+                indicatorText.textContent = `'${detectedFormat.toUpperCase()}' detected in prompt, matches dropdown selection`;
+                indicator.style.borderColor = '#28a745';
+                indicator.style.backgroundColor = '#d4edda';
+            } else {
+                indicator.classList.remove('active');
+            }
         }
-        
-        if (msg.type === 'status' || msg.status) {
-          const status = msg.status || msg.data;
-          if (status === "saved") {
-            const link = document.getElementById("download");
-            link.href = `/download/${currentJobId}`;
-            link.textContent = "Download";
-            link.style.display = "block";
-          }
+
+        // Add event listeners for format detection
+        document.getElementById('prompt').addEventListener('input', updateFormatIndicator);
+        document.getElementById('format').addEventListener('change', updateFormatIndicator);
+
+        // Main job management
+        async function startJob() {
+            const prompt = document.getElementById('prompt').value;
+            const format = document.getElementById('format').value;
+            const headless = document.getElementById('headless').checked;
+            const streaming = document.getElementById('enable-streaming').checked;
+
+            if (!prompt.trim()) {
+                showStatus('Please enter a prompt', 'error');
+                return;
+            }
+
+            // Detect format from prompt
+            const detectedFormat = detectFormatFromPrompt(prompt);
+            const finalFormat = detectedFormat || format;
+
+            try {
+                showStatus(`Creating job with ${finalFormat.toUpperCase()} format...`, 'info');
+                
+                const response = await fetch('/job', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        format: finalFormat,
+                        headless: headless,
+                        enable_streaming: streaming
+                    })
+                });
+
+                const data = await response.json();
+                currentJobId = data.job_id;
+                
+                showStatus(`Job created: ${currentJobId} (Format: ${finalFormat.toUpperCase()})`, 'success');
+                
+                // Clear previous data
+                clearDecisions();
+                clearScreenshots();
+                
+                // Connect to WebSocket for updates
+                connectWebSocket();
+                
+                // Connect to streaming if enabled
+                if (streaming && data.streaming_enabled) {
+                    document.getElementById('stream-container').style.display = 'block';
+                    document.getElementById('stream-placeholder').style.display = 'none';
+                    setTimeout(() => connectStream(), 2000); // Wait for browser to start
+                }
+                
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
         }
-        
-        if (msg.type === 'error' || msg.error) {
-          const error = msg.error || msg.data;
-          debugLog('Agent error: ' + error);
+
+        async function createStreamingSession() {
+            if (!currentJobId) {
+                currentJobId = 'manual-' + Date.now();
+            }
+
+            try {
+                showStatus('Creating streaming session...', 'info');
+                
+                const response = await fetch(`/streaming/create/${currentJobId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.enabled) {
+                    document.getElementById('stream-container').style.display = 'block';
+                    document.getElementById('stream-placeholder').style.display = 'none';
+                    showStatus('Streaming session created successfully', 'success');
+                    setTimeout(() => connectStream(), 1000);
+                } else {
+                    showStatus(`Failed to create streaming session: ${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            }
         }
-      } catch (error) {
-        debugLog('Error parsing WebSocket message: ' + error.message);
-      }
-    };
-    
-    sock.onclose = () => {
-      debugLog('WebSocket connection closed');
-    };
-    
-    sock.onerror = (error) => {
-      debugLog('WebSocket error: ' + error.toString());
-    };
-    
-  } catch (error) {
-    debugLog('Error in run function: ' + error.message);
-    document.getElementById("status").textContent = "Error: " + error.message;
-  }
-}
 
-// Load noVNC dynamically with multiple fallback options
-async function loadNoVNC() {
-  const cdnOptions = [
-    'https://cdn.jsdelivr.net/npm/@novnc/novnc@1.6.0/lib/rfb.min.js'
-  ];
-  
-  for (let i = 0; i < cdnOptions.length; i++) {
-    try {
-      debugLog(`Loading noVNC from CDN ${i + 1}/${cdnOptions.length}: ${cdnOptions[i]}`);
-      await loadNoVNCFromURL(cdnOptions[i]);
-      debugLog('noVNC loaded successfully');
-      return;
-    } catch (error) {
-      debugLog(`CDN ${i + 1} failed: ${error.message}`);
-    }
-  }
-  
-  // If all CDNs fail, try a simple inline implementation
-  debugLog('All CDN attempts failed, trying inline fallback...');
-  await loadNoVNCInlineFallback();
-}
+        function connectWebSocket() {
+            if (!currentJobId) return;
 
-// Load noVNC from specific URL
-function loadNoVNCFromURL(url) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = url;
-    
-    script.onload = () => {
-      // Check if RFB is available in global scope
-      if (window.RFB) {
-        RFB = window.RFB;
-        resolve();
-      } else {
-        reject(new Error('RFB not found in global scope'));
-      }
-    };
-    
-    script.onerror = () => {
-      reject(new Error('Failed to load script'));
-    };
-    
-    // Set timeout to avoid hanging
-    setTimeout(() => {
-      reject(new Error('Script load timeout'));
-    }, 10000);
-    
-    document.head.appendChild(script);
-  });
-}
+            websocket = new WebSocket(`ws://localhost:8000/ws/${currentJobId}`);
 
-// Inline fallback - create a minimal RFB stub for testing
-async function loadNoVNCInlineFallback() {
-  debugLog('Creating minimal RFB fallback...');
-  
-  // Create a minimal RFB class that logs connection attempts
-  window.RFB = class RFBFallback {
-    constructor(target, url, options) {
-      this.target = target;
-      this.url = url;
-      this.options = options;
-      this.connected = false;
-      
-      debugLog('RFB Fallback: Attempting connection to ' + url);
-      
-      // Create a placeholder canvas
-      const canvas = document.createElement('canvas');
-      canvas.width = 800;
-      canvas.height = 600;
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      canvas.style.background = '#000';
-      
-      // Clear target and add canvas
-      target.innerHTML = '';
-      target.appendChild(canvas);
-      
-      // Draw placeholder text
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#fff';
-      ctx.font = '16px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('VNC Connection Placeholder', canvas.width / 2, canvas.height / 2);
-      ctx.fillText('(noVNC library not available)', canvas.width / 2, canvas.height / 2 + 25);
-      
-      // Simulate connection after a delay
-      setTimeout(() => {
-        this.connected = true;
-        this.dispatchEvent(new CustomEvent('connect'));
-      }, 1000);
-    }
-    
-    addEventListener(event, handler) {
-      if (!this.eventHandlers) this.eventHandlers = {};
-      this.eventHandlers[event] = handler;
-    }
-    
-    dispatchEvent(event) {
-      if (this.eventHandlers && this.eventHandlers[event.type]) {
-        this.eventHandlers[event.type](event);
-      }
-    }
-    
-    disconnect() {
-      this.connected = false;
-      this.dispatchEvent(new CustomEvent('disconnect'));
-    }
-  };
-  
-  RFB = window.RFB;
-  debugLog('RFB fallback created');
-}
+            websocket.onopen = () => {
+                console.log('📡 WebSocket connected');
+            };
 
-// Initialize everything when page loads
-document.addEventListener('DOMContentLoaded', async () => {
-  debugLog('Page loaded, initializing...');
-  
-  initViewControls();
-  
-  try {
-    await loadNoVNC();
-  } catch (error) {
-    debugLog('noVNC loading failed: ' + error.message);
-  }
-  
-  // Hide debug info after 10 seconds unless there are errors
-  setTimeout(() => {
-    const debugDiv = document.getElementById('debug-info');
-    if (debugDiv && !debugDiv.innerHTML.includes('Error') && !debugDiv.innerHTML.includes('Failed')) {
-      debugDiv.style.display = 'none';
-    }
-  }, 10000);
-});
+            websocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
 
-// Clean up on page unload
-window.addEventListener('beforeunload', () => {
-  if (currentJobId) {
-    disconnectVNC();
-    // Optionally notify server to clean up VNC session
-    fetch(`/vnc/${currentJobId}`, { method: 'DELETE' }).catch(() => {});
-  }
-});
+            websocket.onclose = () => {
+                console.log('📡 WebSocket disconnected');
+            };
 
-</script>
+            websocket.onerror = (error) => {
+                console.error('📡 WebSocket error:', error);
+            };
+        }
+
+        function handleWebSocketMessage(data) {
+            console.log('📨 WebSocket message received:', data);
+            
+            switch (data.type) {
+                case 'decision':
+                    addDecision(data.decision);
+                    if (data.decision.token_usage) {
+                        updateTokenUsage(data.decision.token_usage);
+                    }
+                    break;
+                case 'screenshot':
+                    addScreenshot(data.screenshot);
+                    break;
+                case 'page_info':
+                    showStatus(`Step ${data.step}: ${data.url} (${data.interactive_elements} elements) [${data.format?.toUpperCase() || 'TXT'}]`, 'info');
+                    break;
+                case 'extraction':
+                    if (data.status === 'starting') {
+                        showStatus(`Starting extraction (attempt ${data.attempt}) in ${data.format?.toUpperCase() || 'TXT'} format...`, 'info');
+                    } else if (data.status === 'completed') {
+                        showStatus(`✅ Extraction completed! Format: ${data.format?.toUpperCase() || 'TXT'}`, 'success');
+                        document.getElementById('download-btn').disabled = false;
+                        
+                        // Update download button text
+                        const format = data.format || 'TXT';
+                        document.getElementById('download-btn').textContent = `📥 Download ${format.toUpperCase()} File`;
+                    }
+                    break;
+                case 'streaming_info':
+                    if (data.streaming.enabled) {
+                        showStatus('Streaming available', 'success');
+                    }
+                    break;
+                case 'proxy_stats':
+                    updateProxyStats(data.stats);
+                    break;
+
+                case 'error':
+                    showStatus(`❌ ${data.message}`, 'error');
+                    if (data.proxy_stats) {
+                        updateProxyStats(data.proxy_stats);
+                    }
+                    break;
+                default:
+                    if (data.status) {
+                        if (data.status === 'started') {
+                            showStatus(`Status: ${data.status} | Format: ${data.detected_format?.toUpperCase() || 'TXT'}`, 'info');
+                        } else if (data.status === 'finished') {
+                            showStatus(`Status: ${data.status} | Final format: ${data.final_format?.toUpperCase() || 'TXT'}`, 'success');
+                            document.getElementById('download-btn').disabled = false;
+                        } else {
+                            showStatus(`Status: ${data.status}`, 'info');
+                        }
+                    }
+            }
+        }
+
+        function updateProxyStats(stats) {
+            // Show the proxy container when stats are received
+            const proxyContainer = document.getElementById('proxy-container');
+            proxyContainer.style.display = 'block';
+            
+            const statsGrid = document.getElementById('proxy-stats-grid');
+            statsGrid.innerHTML = `
+                <div class="token-stat">
+                    <div class="value">${stats.available || 0}</div>
+                    <div class="label">Available Proxies</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.healthy || 0}</div>
+                    <div class="label">Healthy</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.blocked || 0}</div>
+                    <div class="label">Blocked</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.retry_count || 0}</div>
+                    <div class="label">Retries</div>
+                </div>
+                <div class="token-stat">
+                    <div class="value">${stats.captcha_solve_count || 0}</div>
+                    <div class="label">CAPTCHAs Solved</div>
+                </div>
+            `;
+        }
+
+        // Streaming functionality
+        function connectStream() {
+            if (!currentJobId) {
+                showStatus('No job ID available for streaming', 'error');
+                return;
+            }
+
+            if (streamWebSocket) {
+                streamWebSocket.close();
+            }
+
+            updateStreamStatus('connecting');
+            
+            streamWebSocket = new WebSocket(`ws://localhost:8000/stream/${currentJobId}`);
+
+            streamWebSocket.onopen = () => {
+                console.log('🎥 Stream WebSocket connected');
+                updateStreamStatus('connected');
+                streamStats.startTime = Date.now();
+                streamStats.frameCount = 0;
+            };
+
+            streamWebSocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleStreamMessage(data);
+            };
+
+            streamWebSocket.onclose = () => {
+                console.log('🎥 Stream WebSocket disconnected');
+                updateStreamStatus('disconnected');
+            };
+
+            streamWebSocket.onerror = (error) => {
+                console.error('🎥 Stream WebSocket error:', error);
+                updateStreamStatus('disconnected');
+            };
+        }
+
+        function disconnectStream() {
+            if (streamWebSocket) {
+                streamWebSocket.close();
+                streamWebSocket = null;
+            }
+            updateStreamStatus('disconnected');
+        }
+
+        function handleStreamMessage(data) {
+            switch (data.type) {
+                case 'frame':
+                    displayFrame(data.data);
+                    updateStreamStats();
+                    break;
+                case 'connected':
+                    showStatus('Connected to browser stream', 'success');
+                    break;
+                case 'error':
+                    showStatus(`Stream error: ${data.message}`, 'error');
+                    break;
+                case 'ping':
+                    // Send pong back
+                    if (streamWebSocket) {
+                        streamWebSocket.send(JSON.stringify({type: 'pong'}));
+                    }
+                    break;
+            }
+        }
+
+        function displayFrame(base64Data) {
+            const streamFrame = document.getElementById('stream-frame');
+            streamFrame.src = `data:image/jpeg;base64,${base64Data}`;
+        }
+
+        function updateStreamStats() {
+            streamStats.frameCount++;
+            streamStats.lastFrameTime = Date.now();
+            
+            if (streamStats.startTime) {
+                const elapsed = (Date.now() - streamStats.startTime) / 1000;
+                const fps = Math.round(streamStats.frameCount / elapsed);
+                document.getElementById('stream-fps').textContent = `${fps} FPS`;
+            }
+        }
+
+        function updateStreamStatus(status) {
+            const statusElement = document.getElementById('stream-status');
+            statusElement.className = `stream-status ${status}`;
+            statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        }
+
+        // Stream interaction handlers
+        document.getElementById('stream-frame').addEventListener('click', (e) => {
+            if (!streamWebSocket || streamWebSocket.readyState !== WebSocket.OPEN) {
+                return;
+            }
+
+            const rect = e.target.getBoundingClientRect();
+            const x = Math.round((e.clientX - rect.left) * (1280 / rect.width));
+            const y = Math.round((e.clientY - rect.top) * (800 / rect.height));
+
+            // Send mouse click
+            streamWebSocket.send(JSON.stringify({
+                type: 'mouse',
+                eventType: 'mousePressed',
+                x: x,
+                y: y,
+                button: 'left',
+                clickCount: 1
+            }));
+
+            setTimeout(() => {
+                streamWebSocket.send(JSON.stringify({
+                    type: 'mouse',
+                    eventType: 'mouseReleased',
+                    x: x,
+                    y: y,
+                    button: 'left'
+                }));
+            }, 100);
+        });
+
+        // Keyboard event handling
+        document.addEventListener('keydown', (e) => {
+            if (!streamWebSocket || streamWebSocket.readyState !== WebSocket.OPEN) {
+                return;
+            }
+
+            // Only send keyboard events when stream frame is focused
+            if (document.activeElement === document.getElementById('stream-frame')) {
+                streamWebSocket.send(JSON.stringify({
+                    type: 'keyboard',
+                    eventType: 'keyDown',
+                    key: e.key,
+                    code: e.code,
+                    keyCode: e.keyCode,
+                    text: e.key.length === 1 ? e.key : ''
+                }));
+            }
+        });
+
+        // Utility functions
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        function addDecision(decision) {
+            const decisionsDiv = document.getElementById('decisions');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry info';
+            entry.innerHTML = `<strong>${decision.action}</strong>: ${decision.reason || 'No reason provided'}`;
+            decisionsDiv.appendChild(entry);
+            decisionsDiv.scrollTop = decisionsDiv.scrollHeight;
+            
+            console.log('✅ Decision added to UI:', decision);
+        }
+
+        function addScreenshot(screenshot) {
+            const screenshotsDiv = document.getElementById('screenshots');
+            const img = document.createElement('img');
+            img.src = `data:image/png;base64,${screenshot}`;
+            img.style.maxWidth = '100%';
+            img.style.margin = '10px 0';
+            img.style.border = '1px solid #ddd';
+            img.style.borderRadius = '4px';
+            screenshotsDiv.appendChild(img);
+            
+            console.log('✅ Screenshot added to UI');
+        }
+
+        function clearDecisions() {
+            const decisionsDiv = document.getElementById('decisions');
+            decisionsDiv.innerHTML = '';
+        }
+
+        function clearScreenshots() {
+            const screenshotsDiv = document.getElementById('screenshots');
+            screenshotsDiv.innerHTML = '';
+        }
+
+        function updateTokenUsage(usage) {
+            totalTokenUsage.prompt_tokens += usage.prompt_tokens || 0;
+            totalTokenUsage.response_tokens += usage.response_tokens || 0;
+            totalTokenUsage.total_tokens += usage.total_tokens || 0;
+            totalTokenUsage.api_calls += 1;
+
+            document.getElementById('total-tokens').textContent = totalTokenUsage.total_tokens;
+            document.getElementById('prompt-tokens').textContent = totalTokenUsage.prompt_tokens;
+            document.getElementById('response-tokens').textContent = totalTokenUsage.response_tokens;
+            document.getElementById('api-calls').textContent = totalTokenUsage.api_calls;
+        }
+
+        async function downloadResult() {
+            if (!currentJobId) {
+                showStatus('No job to download', 'error');
+                return;
+            }
+
+            try {
+                // First get job info to know the format
+                const infoResponse = await fetch(`/job/${currentJobId}/info`);
+                const jobInfo = await infoResponse.json();
+                
+                if (jobInfo.error) {
+                    showStatus('Job information not found', 'error');
+                    return;
+                }
+                
+                showStatus(`Downloading ${jobInfo.format?.toUpperCase() || 'TXT'} file...`, 'info');
+                
+                const response = await fetch(`/download/${currentJobId}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    
+                    // Use proper filename from headers or construct one
+                    const disposition = response.headers.get('Content-Disposition');
+                    let filename = `result_${currentJobId}.${jobInfo.extension || 'txt'}`;
+                    if (disposition) {
+                        const filenameMatch = disposition.match(/filename="?([^"]+)"?/);
+                        if (filenameMatch) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    a.download = filename;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    showStatus(`✅ Downloaded: ${filename}`, 'success');
+                } else {
+                    showStatus(`Download failed: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Download error: ${error.message}`, 'error');
+            }
+        }
+
+        function updateStreamQuality() {
+            showStatus('Quality change will take effect on next connection', 'info');
+        }
+
+        function takeScreenshot() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = document.getElementById('stream-frame');
+            
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const link = document.createElement('a');
+            link.download = `screenshot_${Date.now()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Initialize format detection on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Universal Agent Interface Loaded');
+            updateFormatIndicator();
+        });
+    </script>
 </body>
 </html>

@@ -6,3 +6,9 @@ pydantic==2.7.1
 bs4==0.0.2
 lxml==5.2.1
 markdownify==0.11.6
+numpy==2.3.1
+pandas==2.3.0
+python-dateutil==2.9.0.post0
+pytz==2025.2
+tzdata==2025.2
+reportlab==4.4.2
