@@ -18,7 +18,7 @@ Think of it as having a really smart intern who never gets tired, never makes mi
 
 Trust me, it's pretty cool watching an AI navigate websites like a human
 
-[![Demo Video]](https://www.veed.io/view/34c948d5-9019-4055-b28a-67779917642f?panel=share)
+[Demo Video](https://www.veed.io/view/34c948d5-9019-4055-b28a-67779917642f?panel=share)
 
 ## ✨ Why You'll Love This
 

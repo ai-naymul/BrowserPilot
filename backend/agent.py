@@ -101,6 +101,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
             print(f"🔗 Found URL in prompt: {start_url}")
         else:
             start_url = determine_starting_url(prompt)
+            # start_url = 'www.google.com'
             print(f"🔗 Starting at: {start_url}")
         
         try:
@@ -397,10 +398,6 @@ def determine_starting_url(prompt: str) -> str:
     if any(word in prompt_lower for word in ["search", "find", "look for", "google"]):
         return "https://www.google.com"
     
-    # Professional networks
-    if "linkedin" in prompt_lower or "professional profile" in prompt_lower:
-        return "https://www.linkedin.com"
-    
     # Code repositories
     if "github" in prompt_lower or "code repository" in prompt_lower:
         return "https://www.github.com"
@@ -408,14 +405,6 @@ def determine_starting_url(prompt: str) -> str:
     # E-commerce
     if any(word in prompt_lower for word in ["buy", "purchase", "product", "price", "amazon"]):
         return "https://www.amazon.com"
-    
-    # News and articles
-    if any(word in prompt_lower for word in ["news", "article", "breaking"]):
-        return "https://news.google.com"
-    
-    # Job listings
-    if any(word in prompt_lower for word in ["job", "career", "hiring", "position"]):
-        return "https://www.linkedin.com/jobs"
     
     # Default to Google for most tasks
     return "https://www.google.com"
