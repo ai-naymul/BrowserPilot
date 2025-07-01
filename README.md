@@ -63,7 +63,8 @@ Trust me, it's pretty cool watching an AI navigate websites like a human
 
 2. **Install the good stuff**
    ```bash
-   pip install -r requirements.txt
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   uv pip install -r requirements.txt
    ```
 
 3. **Add your secrets**
