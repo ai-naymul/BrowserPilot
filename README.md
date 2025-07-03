@@ -18,10 +18,7 @@ Think of it as having a really smart intern who never gets tired, never makes mi
 
 Trust me, it's pretty cool watching an AI navigate websites like a human
 
-<video width="100%" controls>
-  <source src="media/demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![Demo Video](media/demo.mp4)
 
 ## ✨ Why You'll Love This
 
