@@ -196,14 +196,11 @@ export class App {
           <!-- Status Display -->
           <div id="status-display" class="mb-8"></div>
 
-          <!-- Real-time Views -->
-          <div class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-            <!-- Browser Streaming -->
-            <div id="streaming-viewer" class="bg-white rounded-xl shadow-sm border border-gray-200"></div>
-            
-            <!-- Decision Log -->
-            <div id="decision-log" class="bg-white rounded-xl shadow-sm border border-gray-200"></div>
-          </div>
+          <!-- Browser Streaming - Full Width -->
+          <div id="streaming-viewer" class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8"></div>
+
+          <!-- Decision Log - Full Width -->
+          <div id="decision-log" class="bg-white rounded-xl shadow-sm border border-gray-200 mb-8"></div>
 
           <!-- Screenshot Gallery -->
           <div id="screenshot-gallery" class="bg-white rounded-xl shadow-sm border border-gray-200"></div>
