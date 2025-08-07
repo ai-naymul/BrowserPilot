@@ -396,7 +396,7 @@ def determine_starting_url(prompt: str) -> str:
     
     # Search-related tasks
     if any(word in prompt_lower for word in ["search", "find", "look for", "google"]):
-        return "https://www.google.com"
+        return "https://duckduckgo.com/"
     
     # Code repositories
     if "github" in prompt_lower or "code repository" in prompt_lower:
@@ -407,7 +407,7 @@ def determine_starting_url(prompt: str) -> str:
         return "https://www.amazon.com"
     
     # Default to Google for most tasks
-    return "https://www.google.com"
+    return "https://duckduckgo.com/"
 
 def determine_max_steps(prompt: str) -> int:
     """Determine max steps based on task complexity"""
