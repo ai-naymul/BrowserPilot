@@ -1,27 +1,10 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  root: '.',
-  publicDir: 'public',
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true,
+  plugins: [react()],
+  optimizeDeps: {
+    exclude: ['lucide-react'],
   },
-  server: {
-    port: 3000,
-    proxy: {
-      '/job': 'http://localhost:8000',
-      '/download': 'http://localhost:8000',
-      '/streaming': 'http://localhost:8000',
-      '/proxy': 'http://localhost:8000',
-      '/ws': {
-        target: 'ws://localhost:8000',
-        ws: true,
-      },
-      '/stream': {
-        target: 'ws://localhost:8000',
-        ws: true,
-      }
-    }
-  }
-})
+});
