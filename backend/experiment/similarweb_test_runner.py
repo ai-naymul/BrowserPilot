@@ -16,8 +16,8 @@ import sys
 import os
 
 from playwright.async_api import async_playwright
-from smart_browser_controller import SmartBrowserController
-from proxy_manager import SmartProxyManager
+from smart_browser_controller import EnhancedSmartBrowserController
+from proxy_manager import AdvancedProxyManager
 from anti_bot_detection import AntiBotVisionModel
 from fingerprint_evasion import AdvancedFingerprintEvasion
 from similarweb_extractor import SimilarWebExtractor
@@ -54,7 +54,7 @@ class SimilarWebTestResult:
         self.page_validated = False
         self.timestamp = time.time()
 
-class EnhancedSmartBrowserController(SmartBrowserController):
+class EnhancedSmartBrowserController(EnhancedSmartBrowserController):
     """Enhanced browser controller with complete fingerprint evasion"""
     
     def __init__(self, headless: bool, proxy: dict | None, enable_streaming: bool = False):
@@ -211,7 +211,7 @@ class SimilarWebScraper:
     def __init__(self, use_proxies: bool = True, headless: bool = False):
         self.use_proxies = use_proxies
         self.headless = headless
-        self.proxy_manager = SmartProxyManager()
+        self.proxy_manager = AdvancedProxyManager()
         self.extractor = SimilarWebExtractor()
         self.results = []
         self.stats = {
@@ -270,7 +270,7 @@ class SimilarWebScraper:
         return test_urls[:count]
 
     async def test_single_url(self, url: str, test_number: int, total_tests: int) -> SimilarWebTestResult:
-        """Test scraping a single SimilarWeb URL with comprehensive tracking"""
+        """Test scraping with proper proxy handling - FIXED"""
         result = SimilarWebTestResult()
         result.url = url
         result.domain = url.split('/')[-2] if url.endswith('/') else url.split('/')[-1]
@@ -280,19 +280,25 @@ class SimilarWebScraper:
         
         start_time = time.time()
         
-        # Get best proxy if using proxies
+        # ✅ FIXED: Properly get and pass proxy
         proxy = None
         if self.use_proxies:
             proxy_info = self.proxy_manager.get_best_proxy(exclude_blocked_for="similarweb.com")
-            proxy = proxy_info.to_playwright_dict() if proxy_info else None
-            result.proxy_used = proxy.get('server', 'None') if proxy else 'None'
+            if proxy_info:
+                proxy = proxy_info.to_playwright_dict()
+                result.proxy_used = proxy.get('server', 'None')
+            else:
+                result.proxy_used = 'None - No proxies available'
+        else:
+            result.proxy_used = 'Disabled'
         
         logger.info(f"🔄 Using proxy: {result.proxy_used}")
         
         try:
+            # ✅ FIXED: Pass proxy properly to browser controller
             async with EnhancedSmartBrowserController(
-                headless=self.headless, 
-                proxy=proxy,
+                headless=self.headless,
+                proxy=proxy,  # ✅ PASS THE ACTUAL PROXY DICT
                 enable_streaming=False
             ) as browser:
                 

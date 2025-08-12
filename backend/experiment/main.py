@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from pathlib import Path
 from smart_browser_controller import SmartBrowserController  # Updated import
-from proxy_manager import SmartProxyManager  # Updated import
+from proxy_manager import AdvancedProxyManager  # Updated import
 from agent import run_agent
 from fastapi.staticfiles import StaticFiles
 
@@ -16,7 +16,7 @@ streaming_sessions = {} # job_id → browser_controller
 job_info = {} # job_id → { format, content_type, extension, prompt }
 
 # Initialize global smart proxy manager
-smart_proxy_manager = SmartProxyManager()
+smart_proxy_manager = AdvancedProxyManager()
 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -304,7 +304,7 @@ def reload_proxies():
     """Reload proxy list from environment"""
     try:
         global smart_proxy_manager
-        smart_proxy_manager = SmartProxyManager()
+        smart_proxy_manager = AdvancedProxyManager()
         stats = smart_proxy_manager.get_proxy_stats()
         return {
             "success": True,
