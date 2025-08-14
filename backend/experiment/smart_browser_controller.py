@@ -423,8 +423,28 @@ class EnhancedSmartBrowserController(BrowserController):
             # Enhanced launch options
             launch_options = {
                 "headless": self.headless,
-                "args": launch_args,
-                "ignore_default_args": ["--enable-automation"],  # Remove automation flag
+                "args": launch_args + [
+                    "--disable-background-mode",
+                    "--disable-background-timer-throttling",
+                    "--disable-backgrounding-occluded-windows",
+                    "--disable-renderer-backgrounding",
+                    "--disable-features=TranslateUI,BlinkGenPropertyTrees",
+                    "--disable-default-apps",
+                    "--disable-extensions-http-throttling",
+                    "--aggressive-cache-discard",
+                    "--disable-hang-monitor",
+                    "--disable-prompt-on-repost",
+                    "--disable-client-side-phishing-detection",
+                    "--disable-component-update",
+                    "--no-default-browser-check",
+                    "--no-first-run",
+                    "--disable-default-apps",
+                    "--disable-popup-blocking",  # But control popups programmatically
+                ],
+                "ignore_default_args": [
+                    "--enable-automation",
+                    "--enable-blink-features=IdleDetection"
+                ]
             }
             
             # Add proxy if available
@@ -585,34 +605,80 @@ class EnhancedSmartBrowserController(BrowserController):
     async def _setup_request_interception(self):
         """Set up request interception for dynamic modification"""
         
-        async def handle_route(route):
-            headers = route.request.headers
+        async def handle_route(route):  # This receives a Route object
+            """Handle route interception with safe header filtering"""
             
-            # Dynamically modify headers
+            # Access the request through route.request
+            request = route.request  # This is the Request object
+            headers = dict(request.headers)  # Get headers from Request
+            
+            # List of unsafe headers that browsers manage automatically
+            unsafe_headers = {
+                'content-length', 'content-encoding', 'transfer-encoding',
+                'connection', 'upgrade', 'host', 'accept-encoding',
+                'accept-charset', 'access-control-request-headers',
+                'access-control-request-method', 'origin', 'referer',
+                'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform',
+                'sec-fetch-dest', 'sec-fetch-mode', 'sec-fetch-site',
+                'sec-fetch-user', 'user-agent'
+            }
+            
+            # Dynamically modify headers (but filter out unsafe ones)
             if random.random() < 0.1:  # 10% chance to modify
-                # Add random header variation
-                headers.update(self._generate_dynamic_request_headers())
+                dynamic_headers = self._generate_dynamic_request_headers()
+                
+                # Only add safe headers
+                for key, value in dynamic_headers.items():
+                    if key.lower() not in unsafe_headers:
+                        headers[key] = value
             
-            await route.continue_(headers=headers)
+            # Filter out any unsafe headers that might have been added
+            safe_headers = {k: v for k, v in headers.items() 
+                        if k.lower() not in unsafe_headers}
+            
+            try:
+                # Call continue_() on the Route object, not Request
+                await route.continue_(headers=safe_headers)
+            except Exception as e:
+                logger.warning(f"Header modification failed: {e}")
+                try:
+                    # Try continuing with original headers on Route object
+                    await route.continue_()
+                except Exception as fallback_error:
+                    logger.error(f"Route continuation failed completely: {fallback_error}")
+                    try:
+                        # Last resort: fulfill on Route object
+                        await route.fulfill(
+                            status=200,
+                            headers={'content-type': 'text/html'},
+                            body="<html><body>Request intercepted</body></html>"
+                        )
+                    except Exception as fulfill_error:
+                        logger.error(f"Route fulfill also failed: {fulfill_error}")
         
         # Enable request interception for all requests
         await self.page.route("**/*", handle_route)
 
     def _generate_dynamic_request_headers(self) -> Dict:
-        """Generate dynamic request headers"""
-        headers = {}
+        """Generate dynamic request headers (safe ones only)"""
+        safe_headers = {}
         
-        # Randomly add headers
+        # Only add headers that are safe to modify
         if random.random() < 0.2:
-            headers["Cache-Control"] = random.choice(["no-cache", "max-age=0", "no-store"])
+            safe_headers["Cache-Control"] = random.choice(["no-cache", "max-age=0"])
         
         if random.random() < 0.1:
-            headers["Pragma"] = "no-cache"
+            safe_headers["Pragma"] = "no-cache"
         
         if random.random() < 0.05:
-            headers["X-Requested-With"] = "XMLHttpRequest"
+            safe_headers["X-Requested-With"] = "XMLHttpRequest"
         
-        return headers
+        # Add custom headers that are safe
+        if random.random() < 0.1:
+            safe_headers["X-Custom-Request"] = f"session-{random.randint(1000, 9999)}"
+        
+        return safe_headers
+
 
     async def smart_navigate(self, url: str, wait_until: str = "domcontentloaded", timeout: int = 30000) -> bool:
         """Navigate with advanced anti-detection and bypass techniques"""
