@@ -1,0 +1,337 @@
+import asyncio
+import time
+import random
+import logging
+import re
+from urllib.parse import urlparse
+from playwright.async_api import async_playwright
+from browser_controller import BrowserController
+from fingerprint_evasion import AdvancedFingerprintEvasion
+from proxy_manager import AdvancedProxyManager, ProxyType
+import base64
+from typing import Dict
+logger = logging.getLogger(__name__)
+from similarweb_extractor import SimilarWebExtractor
+class EnhancedSmartBrowserController(BrowserController):
+    """Enhanced browser controller with complete fingerprint evasion - FIXED"""
+    
+    def __init__(self, headless: bool, proxy: dict | None, enable_streaming: bool = False):
+        # Don't call super().__init__() to avoid conflicts
+        self.headless = headless
+        self.proxy = proxy
+        self.enable_streaming = enable_streaming
+        
+        # Browser objects
+        self.play = None
+        self.browser = None
+        self.page = None
+        self.context = None  # ✅ ADD MISSING CONTEXT ATTRIBUTE
+        
+        # Enhanced components
+        self.fingerprint_evasion = AdvancedFingerprintEvasion()
+        self.current_fingerprint_profile = None
+        
+        # Initialize proxy and vision components
+        from anti_bot_detection import AntiBotVisionModel
+        from proxy_manager import AdvancedProxyManager
+        
+        self.vision_model = AntiBotVisionModel()
+        self.proxy_manager = AdvancedProxyManager(self.vision_model)
+        self.current_proxy = proxy
+        self.max_proxy_retries = 5
+        self.max_captcha_solve_attempts = 3
+
+    async def __aenter__(self):
+        """Initialize with advanced fingerprint evasion - COMPLETELY FIXED"""
+        try:
+            # Get random fingerprint profile FIRST
+            self.current_fingerprint_profile = self.fingerprint_evasion.get_random_profile()
+            logger.info(f"🎭 Using fingerprint profile: {self.current_fingerprint_profile['name']}")
+            
+            # Initialize Playwright
+            self.play = await async_playwright().start()
+            
+            # ✅ FIXED: Use launch_persistent_context for better stability
+            user_data_dir = f"/tmp/stealth-profile-{random.randint(1000, 9999)}"
+            
+            # Enhanced launch options WITHOUT user-data-dir in args
+            launch_options = {
+                "headless": self.headless,
+                "args": [
+                    "--incognito",
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--disable-web-security",
+                    "--disable-features=VizDisplayCompositor",
+                    f"--window-size={self.current_fingerprint_profile['viewport']['width']},{self.current_fingerprint_profile['viewport']['height']}",
+                    "--window-position=0,0",
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-extensions",
+                    "--no-first-run",
+                    "--disable-default-apps",
+                    "--remote-debugging-port=0",
+                    # Advanced anti-fingerprinting flags
+                    "--disable-background-timer-throttling",
+                    "--disable-backgrounding-occluded-windows",
+                    "--disable-renderer-backgrounding",
+                    "--disable-features=TranslateUI",
+                    "--disable-ipc-flooding-protection",
+                    "--enable-features=NetworkService,NetworkServiceLogging",
+                    "--disable-component-extensions-with-background-pages",
+                    "--disable-background-networking",
+                    "--force-fieldtrials=*BackgroundTracing/default/",
+                    "--metrics-recording-only",
+                    "--no-report-upload",
+                    "--disable-sync",
+                    "--disable-features=InterestFeedContentSuggestions",
+                    "--disable-dev-tools",
+                    "--disable-plugins-discovery"
+                ]
+            }
+            
+            # Add proxy to launch options if available
+            if self.proxy:
+                logger.info(f"🔗 Using proxy: {self.proxy}")
+                launch_options["proxy"] = self.proxy
+            
+            # ✅ FIXED: Use launch_persistent_context instead of launch
+            self.context = await self.play.chromium.launch_persistent_context(
+                user_data_dir=user_data_dir,
+                **launch_options,
+                # ✅ CORRECT: Set user agent and viewport in context creation
+                user_agent=self.current_fingerprint_profile["user_agent"],
+                viewport=self.current_fingerprint_profile["viewport"],
+                locale=self.current_fingerprint_profile["language"],
+                timezone_id=self.current_fingerprint_profile["timezone"],
+                permissions=["geolocation", "notifications"],
+                extra_http_headers={
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                    "Accept-Language": f"{self.current_fingerprint_profile['language']},en;q=0.9",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "Sec-Ch-Ua": self._generate_sec_ch_ua(self.current_fingerprint_profile),
+                    "Sec-Ch-Ua-Mobile": "?0",
+                    "Sec-Ch-Ua-Platform": f'"{self.current_fingerprint_profile["platform"]}"',
+                    "Sec-Fetch-Dest": "document",
+                    "Sec-Fetch-Mode": "navigate",
+                    "Sec-Fetch-Site": "none",
+                    "Sec-Fetch-User": "?1",
+                    "Upgrade-Insecure-Requests": "1"
+                }
+            )
+            
+            # Get the browser reference from context
+            self.browser = self.context.browser
+            
+            # Create new page from context
+            self.page = await self.context.new_page()
+            
+            # Inject advanced fingerprint evasion script
+            fingerprint_script = self.fingerprint_evasion.generate_anti_fingerprintjs_script(
+                self.current_fingerprint_profile
+            )
+            await self.page.add_init_script(fingerprint_script)
+            
+            logger.info("✅ Enhanced browser initialized successfully")
+            return self
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize enhanced browser: {e}")
+            raise
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Cleanup browser resources - FIXED"""
+        try:
+            if self.context:  # ✅ NOW CONTEXT EXISTS
+                await self.context.close()
+            if self.play:
+                await self.play.stop()
+        except Exception as e:
+            logger.error(f"❌ Error cleaning up browser: {e}")
+
+    def _generate_sec_ch_ua(self, profile: dict) -> str:
+        """Generate realistic Sec-Ch-Ua header"""
+        if "Chrome" in profile["user_agent"]:
+            version = re.search(r'Chrome/(\d+)', profile["user_agent"])
+            if version:
+                chrome_version = version.group(1)
+                return f'"Not_A Brand";v="8", "Chromium";v="{chrome_version}", "Google Chrome";v="{chrome_version}"'
+        elif "Safari" in profile["user_agent"] and "Chrome" not in profile["user_agent"]:
+            return '"Not_A Brand";v="99", "Safari";v="17"'
+        elif "Firefox" in profile["user_agent"]:
+            return '"Not_A Brand";v="99", "Firefox";v="121"'
+        
+        return '"Not_A Brand";v="8", "Chromium";v="120"'
+
+    # ✅ FIXED: Override smart_navigate to fix coroutine issue
+    async def smart_navigate(self, url: str, wait_until: str = "domcontentloaded", timeout: int = 30000) -> bool:
+        """Navigate with proper async handling - FIXED"""
+        site_domain = urlparse(url).netloc
+        
+        for attempt in range(self.max_proxy_retries):
+            try:
+                logger.info(f"🌐 Enhanced navigation attempt {attempt + 1}/{self.max_proxy_retries}")
+                logger.info(f"🎯 Target: {url}")
+                logger.info(f"🔄 Proxy: {self.proxy.get('server', 'None') if self.proxy else 'None'}")
+                
+                start_time = time.time()
+                
+                # ✅ FIXED: Proper async navigation
+                response = await self.page.goto(url, wait_until=wait_until, timeout=timeout)
+                response_time = time.time() - start_time
+                
+                # Wait for page to stabilize
+                await asyncio.sleep(random.uniform(3, 6))
+                
+                # Handle popups
+                await self.handle_similarweb_popups()
+                
+                # Check for anti-bot systems using vision
+                screenshot_bytes = await self.page.screenshot(type='png')
+                screenshot_b64 = base64.b64encode(screenshot_bytes).decode('utf-8')
+                
+                # ✅ FIXED: Await the async method properly
+                is_antibot, detection_type, suggested_action = await self.proxy_manager.detect_anti_bot_with_vision(
+                    self.page, f"navigate to {url}"
+                )
+                
+                if not is_antibot:
+                    # Success!
+                    logger.info(f"✅ Successfully navigated to: {url}")
+                    if self.proxy:
+                        proxy_info = next((p for p in self.proxy_manager.proxies 
+                                         if p.to_playwright_dict().get('server') == self.proxy.get('server')), None)
+                        if proxy_info:
+                            self.proxy_manager.mark_proxy_success(proxy_info, response_time)
+                    return True
+                else:
+                    logger.warning(f"🚫 Anti-bot detected: {detection_type}, action: {suggested_action}")
+                    
+                    # Handle different types of anti-bot detection
+                    if suggested_action in ["rotate_proxy", "retry"] and attempt < self.max_proxy_retries - 1:
+                        # Get new proxy and restart
+                        new_proxy_info = self.proxy_manager.get_best_proxy(exclude_blocked_for=site_domain)
+                        if new_proxy_info:
+                            new_proxy = new_proxy_info.to_playwright_dict()
+                            logger.info(f"🔄 Rotating to new proxy: {new_proxy['server']}")
+                            await self._restart_browser_with_proxy(new_proxy)
+                            await asyncio.sleep(random.uniform(5, 15))
+                            continue
+                    
+                    elif suggested_action == "abort":
+                        logger.error(f"❌ Aborting due to unresolvable anti-bot: {detection_type}")
+                        return False
+                    
+            except Exception as e:
+                logger.error(f"❌ Navigation failed on attempt {attempt + 1}: {e}")
+                await asyncio.sleep(random.uniform(3, 10))
+                
+        logger.error(f"❌ Failed to navigate to {url} after all retries")
+        return False
+
+    async def _restart_browser_with_proxy(self, new_proxy: dict):
+        """Restart browser with new proxy"""
+        try:
+            # Close current context
+            if self.context:
+                await self.context.close()
+            
+            # Update proxy
+            self.proxy = new_proxy
+            
+            # Re-initialize browser with new proxy
+            await self.__aenter__()
+            
+            logger.info("✅ Browser restarted with new proxy")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to restart browser: {e}")
+            raise
+
+    # Add all other required methods...
+    async def handle_similarweb_popups(self):
+        """Handle SimilarWeb popups"""
+        try:
+            logger.info("🔍 Checking for SimilarWeb popups...")
+            await asyncio.sleep(3)
+            
+            popup_selectors = [
+                '[class*="modal"]', '[class*="popup"]', '[class*="dialog"]',
+                '[class*="signup"]', '[class*="login"]', '[class*="register"]'
+            ]
+            
+            for selector in popup_selectors:
+                try:
+                    elements = await self.page.query_selector_all(selector)
+                    for element in elements:
+                        if await element.is_visible():
+                            close_selectors = [
+                                '[class*="close"]', '[aria-label*="close"]',
+                                'button:has-text("×")', 'button:has-text("✕")'
+                            ]
+                            
+                            for close_selector in close_selectors:
+                                try:
+                                    close_btn = await element.query_selector(close_selector)
+                                    if close_btn and await close_btn.is_visible():
+                                        await close_btn.click()
+                                        logger.info("✅ Closed popup")
+                                        await asyncio.sleep(2)
+                                        return True
+                                except:
+                                    continue
+                except:
+                    continue
+            
+            await self.page.keyboard.press('Escape')
+            await asyncio.sleep(1)
+            return True
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Popup handling failed: {e}")
+            return False
+
+    async def extract_similarweb_data_with_vision(self, url: str) -> dict:
+        """Extract SimilarWeb data using vision approach"""
+        try:
+            extractor = SimilarWebExtractor()
+            return await extractor.extract_similarweb_data_with_vision(self, url)
+        except Exception as e:
+            logger.error(f"❌ Vision extraction failed: {e}")
+            return {'error': str(e), 'extraction_success': False}
+
+    # Add missing methods from BrowserController
+    async def get_page_state(self, include_screenshot: bool = True, highlight_elements: bool = True):
+        """Get page state"""
+        # Use the same method from your browser_controller.py
+        try:
+            await self.page.wait_for_load_state("domcontentloaded", timeout=10000)
+            await asyncio.sleep(1)
+            
+            url = self.page.url
+            title = await self.page.title()
+            screenshot = None
+            
+            if include_screenshot:
+                screenshot_bytes = await self.page.screenshot(
+                    full_page=False,
+                    clip={'x': 0, 'y': 0, 'width': 1250, 'height': 800}
+                )
+                screenshot = base64.b64encode(screenshot_bytes).decode('utf-8')
+            
+            # Return a simple PageState-like object
+            from browser_controller import PageState
+            return PageState(url, title, [], {}, screenshot)
+            
+        except Exception as e:
+            logger.error(f"Failed to get page state: {e}")
+            from browser_controller import PageState
+            return PageState("", "", [], {}, None)
+
+    async def scroll_page(self, direction: str = "down", amount: int = 500):
+        """Scroll the page"""
+        if direction == "down":
+            await self.page.mouse.wheel(0, amount)
+        elif direction == "up":
+            await self.page.mouse.wheel(0, -amount)
+        await asyncio.sleep(1)

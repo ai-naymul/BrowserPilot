@@ -88,6 +88,7 @@ class BrowserController:
         }
         
         if self.proxy:
+            logger.info(f"Using proxy: {self.proxy}")
             launch_options["proxy"] = self.proxy
             
         self.browser = await self.play.chromium.launch(**launch_options)
