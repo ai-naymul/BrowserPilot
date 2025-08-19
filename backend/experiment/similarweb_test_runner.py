@@ -397,12 +397,12 @@ class SimilarWebScraper:
                 logger.error("⚠️ Navigation timeout after 60 seconds")
                 nav_success = False
                 result.error = "Navigation timeout"
-                browser.force_cleanup()
+                await browser.force_cleanup()
             except Exception as nav_error:
                 logger.error(f"⚠️ Navigation error: {nav_error}")
                 nav_success = False
                 result.error = f"Navigation failed: {str(nav_error)}"
-                browser.force_cleanup()
+                await browser.force_cleanup()
             
             result.navigation_time = time.time() - nav_start
             result.attempts = 1
