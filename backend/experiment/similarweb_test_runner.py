@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import sys
 import os
-
+import re
 from playwright.async_api import async_playwright
 from smart_browser_controller import EnhancedSmartBrowserController
 from proxy_manager import AdvancedProxyManager
@@ -53,6 +53,9 @@ class SimilarWebTestResult:
         self.confidence_score = 0.0
         self.page_validated = False
         self.timestamp = time.time()
+        html_saved: bool = False
+        cleanup_successful: bool = False
+        browser_restart_count: int = 0
 
 class EnhancedSmartBrowserController(EnhancedSmartBrowserController):
     """Enhanced browser controller with complete fingerprint evasion"""
@@ -222,7 +225,82 @@ class SimilarWebScraper:
             'captcha_encounters': 0,
             'proxy_rotations': 0
         }
+        self.url_results = {
+            'passed': [],
+            'failed': [],
+            'blocked': [],
+            'timeout': []
+        }
+        self.domain_stats = {}
 
+    def track_url_result(self, result: SimilarWebTestResult):
+        """Track URL results for statistics"""
+        try:
+            url_info = {
+                'url': result.url,
+                'domain': result.domain,
+                'timestamp': result.timestamp,
+                'total_time': result.total_time,
+                'error': result.error,
+                'proxy_used': result.proxy_used
+            }
+            
+            # Categorize result
+            if result.success:
+                self.url_results['passed'].append(url_info)
+            elif 'timeout' in result.error.lower():
+                self.url_results['timeout'].append(url_info)
+            elif any(block_term in result.error.lower() for block_term in ['blocked', 'captcha', 'cloudflare', 'access denied']):
+                self.url_results['blocked'].append(url_info)
+            else:
+                self.url_results['failed'].append(url_info)
+            
+            # Track domain-specific stats
+            domain = result.domain
+            if domain not in self.domain_stats:
+                self.domain_stats[domain] = {
+                    'total': 0, 'passed': 0, 'failed': 0, 'blocked': 0, 'timeout': 0
+                }
+            
+            self.domain_stats[domain]['total'] += 1
+            if result.success:
+                self.domain_stats[domain]['passed'] += 1
+            elif 'timeout' in result.error.lower():
+                self.domain_stats[domain]['timeout'] += 1
+            elif any(block_term in result.error.lower() for block_term in ['blocked', 'captcha', 'cloudflare']):
+                self.domain_stats[domain]['blocked'] += 1
+            else:
+                self.domain_stats[domain]['failed'] += 1
+                
+            logger.info(f"📈 {domain}: {self.domain_stats[domain]}")
+            
+        except Exception as e:
+            logger.error(f"❌ Error tracking URL result: {e}")
+
+    def print_url_statistics(self):
+        """Print comprehensive URL statistics"""
+        print(f"\n" + "="*80)
+        print(f"📊 URL PROCESSING STATISTICS")
+        print(f"="*80)
+        print(f"✅ Passed: {len(self.url_results['passed'])}")
+        print(f"❌ Failed: {len(self.url_results['failed'])}")
+        print(f"🚫 Blocked: {len(self.url_results['blocked'])}")
+        print(f"⏰ Timeout: {len(self.url_results['timeout'])}")
+        
+        total_urls = sum(len(urls) for urls in self.url_results.values())
+        if total_urls > 0:
+            print(f"📈 Success Rate: {(len(self.url_results['passed']) / total_urls) * 100:.1f}%")
+        
+        print(f"\n📊 DOMAIN BREAKDOWN:")
+        for domain, stats in self.domain_stats.items():
+            success_rate = (stats['passed'] / stats['total']) * 100 if stats['total'] > 0 else 0
+            print(f"   {domain}: {stats['passed']}/{stats['total']} ({success_rate:.1f}%)")
+            if stats['blocked'] > 0:
+                print(f"      🚫 Blocked: {stats['blocked']}")
+            if stats['timeout'] > 0:
+                print(f"      ⏰ Timeout: {stats['timeout']}")
+            if stats['failed'] > 0:
+                print(f"      ❌ Failed: {stats['failed']}")
     def generate_test_urls(self, count: int = 100) -> List[str]:
         """Generate comprehensive test URLs for SimilarWeb"""
         base_domains = [
@@ -262,7 +340,6 @@ class SimilarWebScraper:
             "nytimes.com", "wsj.com", "reuters.com", "bloomberg.com", "forbes.com",
             "techcrunch.com", "theverge.com", "wired.com", "arstechnica.com", "mashable.com"
         ]
-        
         selected_domains = random.sample(base_domains, min(count, len(base_domains)))
         test_urls = [f"https://www.similarweb.com/website/{domain}/" for domain in selected_domains]
         
@@ -270,17 +347,18 @@ class SimilarWebScraper:
         return test_urls[:count]
 
     async def test_single_url(self, url: str, test_number: int, total_tests: int) -> SimilarWebTestResult:
-        """Test scraping with proper proxy handling - FIXED"""
+        """Test scraping with proper proxy handling and browser cleanup - FIXED"""
         result = SimilarWebTestResult()
         result.url = url
         result.domain = url.split('/')[-2] if url.endswith('/') else url.split('/')[-1]
         
         logger.info(f"\n🎯 Test {test_number}/{total_tests}: {result.domain}")
-        logger.info(f"📍 URL: {url}")
+        logger.info(f"🔗 URL: {url}")
         
         start_time = time.time()
+        browser = None  # ✅ Initialize browser variable
         
-        # ✅ FIXED: Properly get and pass proxy
+        # Get proxy info
         proxy = None
         if self.use_proxies:
             proxy_info = self.proxy_manager.get_best_proxy(exclude_blocked_for="similarweb.com")
@@ -295,71 +373,152 @@ class SimilarWebScraper:
         logger.info(f"🔄 Using proxy: {result.proxy_used}")
         
         try:
-            # ✅ FIXED: Pass proxy properly to browser controller
-            async with EnhancedSmartBrowserController(
+            # ✅ FIXED: Proper browser initialization with cleanup tracking
+            browser = EnhancedSmartBrowserController(
                 headless=self.headless,
-                proxy=proxy,  # ✅ PASS THE ACTUAL PROXY DICT
+                proxy=proxy,
                 enable_streaming=False
-            ) as browser:
+            )
+            
+            # Enter context manager
+            await browser.__aenter__()
+            
+            result.fingerprint_profile = browser.current_fingerprint_profile['name']
+            logger.info(f"🎭 Fingerprint: {result.fingerprint_profile}")
+            
+            # Navigation phase with timeout
+            nav_start = time.time()
+            try:
+                nav_success = await asyncio.wait_for(
+                    browser.smart_navigate(url), 
+                    timeout=60.0  # 60 second timeout
+                )
+            except asyncio.TimeoutError:
+                logger.error("⚠️ Navigation timeout after 60 seconds")
+                nav_success = False
+                result.error = "Navigation timeout"
+                browser.force_cleanup()
+            except Exception as nav_error:
+                logger.error(f"⚠️ Navigation error: {nav_error}")
+                nav_success = False
+                result.error = f"Navigation failed: {str(nav_error)}"
+                browser.force_cleanup()
+            
+            result.navigation_time = time.time() - nav_start
+            result.attempts = 1
+            
+            if not nav_success:
+                logger.error("❌ Navigation failed")
+                return result
+            
+            logger.info(f"✅ Navigation successful ({result.navigation_time:.1f}s)")
+            
+            # ✅ ADD: Save HTML content
+            html_saved = await self.save_html_content(browser, result.domain, url)
+            result.html_saved = html_saved
+            
+            # Handle popups
+            popup_handled = await browser.handle_similarweb_popups()
+            logger.info(f"🔍 Popup handling: {'✅ Success' if popup_handled else '⚠️ No popups'}")
+            
+            # Extraction phase
+            extract_start = time.time()
+            extracted_data = await browser.extract_similarweb_data_with_vision(url)
+            result.extraction_time = time.time() - extract_start
+            
+            if extracted_data.get('extraction_success', False):
+                result.success = True
+                result.extraction_success = True
+                result.data_extracted = extracted_data
+                result.page_validated = extracted_data.get('validation_results', {}).get('is_valid_similarweb_page', False)
                 
-                result.fingerprint_profile = browser.current_fingerprint_profile['name']
-                logger.info(f"🎭 Fingerprint: {result.fingerprint_profile}")
+                # Extract metrics found
+                metrics = extracted_data.get('data', {})
+                result.metrics_found = [k for k, v in metrics.items() if v and v != 'null']
+                result.confidence_score = extracted_data.get('confidence_scores', {}).get('primary', 0.0)
                 
-                # Navigation phase
-                nav_start = time.time()
-                nav_success = await browser.smart_navigate(url)
-                result.navigation_time = time.time() - nav_start
-                result.attempts = 1
+                logger.info(f"✅ Extraction successful ({result.extraction_time:.1f}s)")
+                logger.info(f"📊 Metrics found: {result.metrics_found}")
+                logger.info(f"🎯 Confidence: {result.confidence_score:.2f}")
                 
-                if not nav_success:
-                    result.error = "Smart navigation failed"
-                    logger.error("❌ Navigation failed")
-                    return result
-                
-                logger.info(f"✅ Navigation successful ({result.navigation_time:.1f}s)")
-                
-                # Handle popups
-                popup_handled = await browser.handle_similarweb_popups()
-                logger.info(f"🔍 Popup handling: {'✅ Success' if popup_handled else '⚠️ No popups'}")
-                
-                # Extraction phase
-                extract_start = time.time()
-                extracted_data = await browser.extract_similarweb_data_with_vision(url)
-                result.extraction_time = time.time() - extract_start
-                
-                if extracted_data.get('extraction_success', False):
-                    result.success = True
-                    result.extraction_success = True
-                    result.data_extracted = extracted_data
-                    result.page_validated = extracted_data.get('validation_results', {}).get('is_valid_similarweb_page', False)
-                    
-                    # Extract metrics found
-                    metrics = extracted_data.get('data', {})
-                    result.metrics_found = [k for k, v in metrics.items() if v and v != 'null']
-                    result.confidence_score = extracted_data.get('confidence_scores', {}).get('primary', 0.0)
-                    
-                    logger.info(f"✅ Extraction successful ({result.extraction_time:.1f}s)")
-                    logger.info(f"📊 Metrics found: {result.metrics_found}")
-                    logger.info(f"🎯 Confidence: {result.confidence_score:.2f}")
-                    
-                    self.stats['successful_extractions'] += 1
-                else:
-                    result.error = extracted_data.get('error', 'Data extraction failed')
-                    logger.warning(f"❌ Extraction failed: {result.error}")
-                
-                self.stats['successful_navigations'] += 1
-                
+                self.stats['successful_extractions'] += 1
+            else:
+                result.error = extracted_data.get('error', 'Data extraction failed')
+                logger.warning(f"❌ Extraction failed: {result.error}")
+            
+            self.stats['successful_navigations'] += 1
+            
         except Exception as e:
             result.error = str(e)
             logger.error(f"❌ Test failed with exception: {e}")
         
+        finally:
+            # ✅ CRITICAL: Always cleanup browser regardless of success/failure
+            if browser is not None:
+                try:
+                    await browser.__aexit__(None, None, None)
+                    logger.info("🧹 Browser cleaned up successfully")
+                except Exception as cleanup_error:
+                    logger.error(f"⚠️ Browser cleanup error: {cleanup_error}")
+            
+            # Force garbage collection to free memory
+            import gc
+            gc.collect()
+        
         result.total_time = time.time() - start_time
         self.stats['total_attempts'] += 1
+        
+        # ✅ ADD: Track URL results
+        self.track_url_result(result)
         
         logger.info(f"⏱️ Total time: {result.total_time:.1f}s")
         
         return result
 
+
+
+    async def save_html_content(self, browser, domain: str, url: str) -> bool:
+        """Save HTML content with domain/tool name"""
+        try:
+            # Create HTML directory if it doesn't exist
+            html_dir = Path("scraped_html")
+            html_dir.mkdir(exist_ok=True)
+            
+            # Get page content
+            html_content = await browser.page.content()
+            page_title = await browser.page.title()
+            
+            # Clean domain name for filename
+            clean_domain = re.sub(r'[^\w\-_.]', '_', domain)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            
+            # Create filename with domain/tool name
+            if "similarweb.com" in url:
+                tool_name = "similarweb"
+                filename = f"{tool_name}_{clean_domain}_{timestamp}.html"
+            else:
+                tool_name = clean_domain
+                filename = f"{tool_name}_{timestamp}.html"
+            
+            html_file = html_dir / filename
+            
+            # Save HTML with metadata
+            with open(html_file, 'w', encoding='utf-8') as f:
+                f.write(f"<!-- SCRAPED FROM: {url} -->\n")
+                f.write(f"<!-- DOMAIN: {domain} -->\n")
+                f.write(f"<!-- TOOL: {tool_name} -->\n")
+                f.write(f"<!-- TITLE: {page_title} -->\n")
+                f.write(f"<!-- TIMESTAMP: {timestamp} -->\n")
+                f.write(f"<!-- PROXY: {browser.proxy.get('server', 'None') if browser.proxy else 'None'} -->\n")
+                f.write("<!-- ========================================= -->\n\n")
+                f.write(html_content)
+            
+            logger.info(f"💾 HTML saved: {html_file}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to save HTML: {e}")
+            return False
     async def run_comprehensive_test(self, num_urls: int = 100) -> Dict:
         """Run comprehensive test with detailed analysis"""
         logger.info(f"🚀 Starting comprehensive SimilarWeb test")
@@ -392,13 +551,17 @@ class SimilarWebScraper:
         analysis = self.analyze_results(results, total_test_time)
         failure_analysis = self.analyze_failures(results)
         
-        # Save results
+        self.print_url_statistics()
+    
+        # Save results with URL tracking
         self.save_comprehensive_results(results, analysis, failure_analysis)
         
         return {
             'results': results,
             'analysis': analysis,
             'failure_analysis': failure_analysis,
+            'url_statistics': self.url_results,  # ✅ ADD
+            'domain_statistics': self.domain_stats,  # ✅ ADD
             'total_time': total_test_time
         }
 

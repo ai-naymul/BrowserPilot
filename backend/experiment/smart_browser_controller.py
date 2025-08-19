@@ -137,13 +137,33 @@ class EnhancedSmartBrowserController(BrowserController):
         except Exception as e:
             logger.error(f"❌ Failed to initialize enhanced browser: {e}")
             raise
+    
+
+    async def force_cleanup(self):
+        """Force cleanup all browser resources"""
+        try:
+            if self.page and not self.page.is_closed():
+                await self.page.close()
+            if self.context:
+                await self.context.close()
+            if self.browser:
+                await self.browser.close()
+            if self.play:
+                await self.play.stop()
+            logger.info("🧹 Force cleanup completed")
+        except Exception as e:
+            logger.error(f"⚠️ Force cleanup error: {e}")
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Cleanup browser resources - FIXED"""
+        """Cleanup browser resources - COMPLETE"""
         try:
-            if self.context:  # ✅ NOW CONTEXT EXISTS
+            if hasattr(self, 'page') and self.page:
+                await self.page.close()
+            if hasattr(self, 'context') and self.context:
                 await self.context.close()
-            if self.play:
+            if hasattr(self, 'browser') and self.browser:
+                await self.browser.close()
+            if hasattr(self, 'play') and self.play:
                 await self.play.stop()
         except Exception as e:
             logger.error(f"❌ Error cleaning up browser: {e}")
@@ -229,16 +249,42 @@ class EnhancedSmartBrowserController(BrowserController):
         return False
 
     async def _restart_browser_with_proxy(self, new_proxy: dict):
-        """Restart browser with new proxy"""
+        """Restart browser with new proxy - SIMPLE FIX"""
         try:
-            # Close current context
-            if self.context:
-                await self.context.close()
+            logger.info("🔄 Closing previous browser before restart...")
+            
+            # ✅ CLOSE PREVIOUS BROWSER COMPLETELY
+            if hasattr(self, 'page') and self.page:
+                try:
+                    await self.page.close()
+                except:
+                    pass
+            
+            if hasattr(self, 'context') and self.context:
+                try:
+                    await self.context.close()
+                except:
+                    pass
+            
+            if hasattr(self, 'browser') and self.browser:
+                try:
+                    await self.browser.close()
+                except:
+                    pass
+            
+            if hasattr(self, 'play') and self.play:
+                try:
+                    await self.play.stop()
+                except:
+                    pass
+            
+            # Small delay to ensure cleanup
+            await asyncio.sleep(1)
             
             # Update proxy
             self.proxy = new_proxy
             
-            # Re-initialize browser with new proxy
+            # ✅ RE-INITIALIZE FRESH BROWSER
             await self.__aenter__()
             
             logger.info("✅ Browser restarted with new proxy")

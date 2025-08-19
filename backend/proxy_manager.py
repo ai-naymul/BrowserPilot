@@ -135,7 +135,7 @@ class SmartProxyManager:
             5. **Verification pages** - Phone verification, email verification, identity checks
             6. **Error pages** - 403 Forbidden, 429 Rate Limited, 503 Service Unavailable
             7. **Loading/waiting pages** - Indefinite loading, "Please wait while we verify"
-            
+            8. **Create account** - Indicate either there is no data for that tool or there is but its asking to create account check using the html content or the page title
             Respond with JSON:
             {{
                 "is_anti_bot": true/false,
