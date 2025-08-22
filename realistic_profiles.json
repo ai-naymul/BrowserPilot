@@ -1,0 +1,2602 @@
+[
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1536,
+      864
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 6,
+      "memory": 12
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "viewport": [
+      1440,
+      900
+    ],
+    "timezone": "America/Los_Angeles",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Europe/London",
+    "hardware": {
+      "cores": 10,
+      "memory": 24
+    },
+    "profile_type": "mac_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+    "viewport": [
+      1600,
+      900
+    ],
+    "timezone": "Europe/Berlin",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1280,
+      720
+    ],
+    "timezone": "Europe/Paris",
+    "hardware": {
+      "cores": 2,
+      "memory": 4
+    },
+    "profile_type": "home_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "Asia/Tokyo",
+    "hardware": {
+      "cores": 12,
+      "memory": 32
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+    "viewport": [
+      1680,
+      1050
+    ],
+    "timezone": "Australia/Sydney",
+    "hardware": {
+      "cores": 16,
+      "memory": 64
+    },
+    "profile_type": "linux_users"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "viewport": [
+      1920,
+      1080
+    ],
+    "timezone": "America/New_York",
+    "hardware": {
+      "cores": 8,
+      "memory": 16
+    },
+    "profile_type": "business_windows"
+  },
+  {
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+    "viewport": [
+      1366,
+      768
+    ],
+    "timezone": "America/Chicago",
+    "hardware": {
+      "cores": 4,
+      "memory": 8
+    },
+    "profile_type": "business_windows"
+  }
+]

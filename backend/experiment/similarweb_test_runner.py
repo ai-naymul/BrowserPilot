@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import sys
 import os
-
+import re
 from playwright.async_api import async_playwright
 from smart_browser_controller import EnhancedSmartBrowserController
 from proxy_manager import AdvancedProxyManager
@@ -140,7 +140,7 @@ class EnhancedSmartBrowserController(EnhancedSmartBrowserController):
             
         context = await self.browser.new_context(**context_options)
         self.page = await context.new_page()
-        
+        self.context = context
         # Inject advanced fingerprint evasion script
         fingerprint_script = self.fingerprint_evasion.generate_anti_fingerprintjs_script(
             self.current_fingerprint_profile
@@ -214,13 +214,30 @@ class SimilarWebScraper:
         self.proxy_manager = AdvancedProxyManager()
         self.extractor = SimilarWebExtractor()
         self.results = []
+        
+        # ✅ ADD: Session tracking
+        # self.current_browser = None
+        # self.session_start_time = None
+        # self.requests_in_session = 0
+        
         self.stats = {
             'total_attempts': 0,
             'successful_navigations': 0,
             'successful_extractions': 0,
             'anti_bot_encounters': 0,
             'captcha_encounters': 0,
-            'proxy_rotations': 0
+            'proxy_rotations': 0,
+            'session_rotations': 0,
+            # Add these new metrics
+            'residential_proxy_success': 0,
+            'mobile_proxy_success': 0,
+            'residential_proxy_failures': 0,
+            'mobile_proxy_failures': 0,
+            'bypass_attempts': 0,
+            'bypass_successes': 0,
+            'fingerprint_rotations': 0,
+            'html_saves': 0,
+            'vision_analysis_calls': 0
         }
 
     def generate_test_urls(self, count: int = 100) -> List[str]:
@@ -262,7 +279,6 @@ class SimilarWebScraper:
             "nytimes.com", "wsj.com", "reuters.com", "bloomberg.com", "forbes.com",
             "techcrunch.com", "theverge.com", "wired.com", "arstechnica.com", "mashable.com"
         ]
-        
         selected_domains = random.sample(base_domains, min(count, len(base_domains)))
         test_urls = [f"https://www.similarweb.com/website/{domain}/" for domain in selected_domains]
         
@@ -270,85 +286,69 @@ class SimilarWebScraper:
         return test_urls[:count]
 
     async def test_single_url(self, url: str, test_number: int, total_tests: int) -> SimilarWebTestResult:
-        """Test scraping with proper proxy handling - FIXED"""
+        """Test scraping with existing browser session"""
         result = SimilarWebTestResult()
         result.url = url
         result.domain = url.split('/')[-2] if url.endswith('/') else url.split('/')[-1]
         
         logger.info(f"\n🎯 Test {test_number}/{total_tests}: {result.domain}")
-        logger.info(f"📍 URL: {url}")
         
         start_time = time.time()
         
-        # ✅ FIXED: Properly get and pass proxy
-        proxy = None
-        if self.use_proxies:
-            proxy_info = self.proxy_manager.get_best_proxy(exclude_blocked_for="similarweb.com")
-            if proxy_info:
-                proxy = proxy_info.to_playwright_dict()
-                result.proxy_used = proxy.get('server', 'None')
-            else:
-                result.proxy_used = 'None - No proxies available'
-        else:
-            result.proxy_used = 'Disabled'
-        
-        logger.info(f"🔄 Using proxy: {result.proxy_used}")
-        
+        # ✅ CHANGE: Use existing browser instead of creating new one
         try:
-            # ✅ FIXED: Pass proxy properly to browser controller
-            async with EnhancedSmartBrowserController(
-                headless=self.headless,
-                proxy=proxy,  # ✅ PASS THE ACTUAL PROXY DICT
-                enable_streaming=False
-            ) as browser:
+            browser = self.current_browser  # Use existing browser
+            
+            result.fingerprint_profile = browser.current_fingerprint_profile['name']
+            result.proxy_used = getattr(browser, 'proxy', {}).get('server', 'None') if hasattr(browser, 'proxy') else 'None'
+            
+            logger.info(f"🎭 Profile: {result.fingerprint_profile}")
+            logger.info(f"🔄 Proxy: {result.proxy_used}")
+            
+            # Navigation phase
+            nav_start = time.time()
+            nav_success = await browser.smart_navigate(url)
+            result.navigation_time = time.time() - nav_start
+            result.attempts = 1
+            
+            if not nav_success:
+                result.error = "Smart navigation failed"
+                logger.error("❌ Navigation failed")
+                return result
+            
+            logger.info(f"✅ Navigation successful ({result.navigation_time:.1f}s)")
+            
+            # Handle popups
+            popup_handled = await browser.handle_similarweb_popups()
+            logger.info(f"🔍 Popup handling: {'✅ Success' if popup_handled else '⚠️ No popups'}")
+            
+            # Extraction phase  
+            extract_start = time.time()
+            extracted_data = await browser.extract_similarweb_data_with_vision(url)
+            result.extraction_time = time.time() - extract_start
+            
+            if extracted_data.get('extraction_success', False):
+                result.success = True
+                result.extraction_success = True
+                result.data_extracted = extracted_data
                 
-                result.fingerprint_profile = browser.current_fingerprint_profile['name']
-                logger.info(f"🎭 Fingerprint: {result.fingerprint_profile}")
+                # Extract metrics found
+                metrics = extracted_data.get('data', {})
+                result.metrics_found = [k for k, v in metrics.items() if v and v != 'null']
+                result.confidence_score = extracted_data.get('confidence_scores', {}).get('primary', 0.0)
                 
-                # Navigation phase
-                nav_start = time.time()
-                nav_success = await browser.smart_navigate(url)
-                result.navigation_time = time.time() - nav_start
-                result.attempts = 1
+                logger.info(f"✅ Extraction successful ({result.extraction_time:.1f}s)")
+                logger.info(f"📊 Metrics found: {result.metrics_found}")
                 
-                if not nav_success:
-                    result.error = "Smart navigation failed"
-                    logger.error("❌ Navigation failed")
-                    return result
+                self.stats['successful_extractions'] += 1
+
                 
-                logger.info(f"✅ Navigation successful ({result.navigation_time:.1f}s)")
-                
-                # Handle popups
-                popup_handled = await browser.handle_similarweb_popups()
-                logger.info(f"🔍 Popup handling: {'✅ Success' if popup_handled else '⚠️ No popups'}")
-                
-                # Extraction phase
-                extract_start = time.time()
-                extracted_data = await browser.extract_similarweb_data_with_vision(url)
-                result.extraction_time = time.time() - extract_start
-                
-                if extracted_data.get('extraction_success', False):
-                    result.success = True
-                    result.extraction_success = True
-                    result.data_extracted = extracted_data
-                    result.page_validated = extracted_data.get('validation_results', {}).get('is_valid_similarweb_page', False)
-                    
-                    # Extract metrics found
-                    metrics = extracted_data.get('data', {})
-                    result.metrics_found = [k for k, v in metrics.items() if v and v != 'null']
-                    result.confidence_score = extracted_data.get('confidence_scores', {}).get('primary', 0.0)
-                    
-                    logger.info(f"✅ Extraction successful ({result.extraction_time:.1f}s)")
-                    logger.info(f"📊 Metrics found: {result.metrics_found}")
-                    logger.info(f"🎯 Confidence: {result.confidence_score:.2f}")
-                    
-                    self.stats['successful_extractions'] += 1
-                else:
-                    result.error = extracted_data.get('error', 'Data extraction failed')
-                    logger.warning(f"❌ Extraction failed: {result.error}")
-                
-                self.stats['successful_navigations'] += 1
-                
+            else:
+                result.error = extracted_data.get('error', 'Data extraction failed')
+                logger.warning(f"❌ Extraction failed: {result.error}")
+            
+            self.stats['successful_navigations'] += 1
+            
         except Exception as e:
             result.error = str(e)
             logger.error(f"❌ Test failed with exception: {e}")
@@ -356,16 +356,114 @@ class SimilarWebScraper:
         result.total_time = time.time() - start_time
         self.stats['total_attempts'] += 1
         
-        logger.info(f"⏱️ Total time: {result.total_time:.1f}s")
+        return result
+
+    async def test_single_url_fresh(self, url: str, test_number: int, total_tests: int, browser) -> SimilarWebTestResult:
+        """Test scraping with fresh browser instance"""
+        result = SimilarWebTestResult()
+        result.url = url
+        result.domain = url.split('/')[-2] if url.endswith('/') else url.split('/')[-1]
+        
+        logger.info(f"\n🎯 Test {test_number}/{total_tests}: {result.domain} (Fresh Browser)")
+        
+        start_time = time.time()
+        
+        try:
+            result.fingerprint_profile = browser.current_fingerprint_profile['name']
+            result.proxy_used = getattr(browser, 'proxy', {}).get('server', 'None') if hasattr(browser, 'proxy') else 'None'
+            # After getting proxy info
+            if result.proxy_used != 'None':
+                proxy_type = 'mobile' if 'mobile' in result.proxy_used.lower() else 'residential'
+                if result.success:
+                    self.stats[f'{proxy_type}_proxy_success'] += 1
+                else:
+                    self.stats[f'{proxy_type}_proxy_failures'] += 1
+            
+            logger.info(f"🎭 Fresh Profile: {result.fingerprint_profile}")
+            logger.info(f"🔄 Fresh Proxy: {result.proxy_used}")
+            
+            # Navigation phase
+            nav_start = time.time()
+            nav_success = await browser.smart_navigate(url)
+            result.navigation_time = time.time() - nav_start
+            result.attempts = 1
+            
+            if not nav_success:
+                result.error = "Smart navigation failed"
+                logger.error("❌ Navigation failed")
+                return result
+            
+            logger.info(f"✅ Navigation successful ({result.navigation_time:.1f}s)")
+            
+            # Handle popups
+            popup_handled = await browser.handle_similarweb_popups()
+            logger.info(f"🔍 Popup handling: {'✅ Success' if popup_handled else '⚠️ No popups'}")
+            
+            # Extraction phase  
+            extract_start = time.time()
+            extracted_data = await browser.extract_similarweb_data_with_vision(url)
+            result.extraction_time = time.time() - extract_start
+            
+            if extracted_data.get('extraction_success', False):
+                result.success = True
+                result.extraction_success = True
+                result.data_extracted = extracted_data
+                
+                # Extract metrics found
+                metrics = extracted_data.get('data', {})
+                result.metrics_found = [k for k, v in metrics.items() if v and v != 'null']
+                result.confidence_score = extracted_data.get('confidence_scores', {}).get('primary', 0.0)
+                
+                logger.info(f"✅ Extraction successful ({result.extraction_time:.1f}s)")
+                logger.info(f"📊 Metrics found: {result.metrics_found}")
+                
+                self.stats['successful_extractions'] += 1
+                if extracted_data.get('extraction_success', False):
+                    # Save HTML
+                    await self._save_page_html(browser, result.domain, url)
+
+            else:
+                result.error = extracted_data.get('error', 'Data extraction failed')
+                logger.warning(f"❌ Extraction failed: {result.error}")
+            
+            self.stats['successful_navigations'] += 1
+            
+        except Exception as e:
+            result.error = str(e)
+            logger.error(f"❌ Test failed with exception: {e}")
+        
+        result.total_time = time.time() - start_time
+        self.stats['total_attempts'] += 1
         
         return result
 
+    async def _save_page_html(self, browser, domain: str, url: str):
+        """Save HTML content of successfully scraped page"""
+        try:
+            # Create output directory
+            html_dir = Path("scraped_html")
+            html_dir.mkdir(exist_ok=True)
+            
+            # Get page content
+            html_content = await browser.page.content()
+            
+            # Clean domain name for filename
+            clean_domain = re.sub(r'[^a-zA-Z0-9_-]', '_', domain)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"{clean_domain}_{timestamp}.html"
+            
+            # Save HTML
+            html_file = html_dir / filename
+            with open(html_file, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            
+            logger.info(f"💾 Saved HTML: {html_file}")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to save HTML for {domain}: {e}")
     async def run_comprehensive_test(self, num_urls: int = 100) -> Dict:
-        """Run comprehensive test with detailed analysis"""
-        logger.info(f"🚀 Starting comprehensive SimilarWeb test")
-        logger.info(f"📊 Testing {num_urls} URLs")
-        logger.info(f"🔄 Using proxies: {self.use_proxies}")
-        logger.info(f"🖥️ Headless mode: {self.headless}")
+        """Run comprehensive test with fresh browser for each URL"""
+        logger.info(f"🚀 Starting fresh browser approach test with {num_urls} URLs")
         
         test_urls = self.generate_test_urls(num_urls)
         results = []
@@ -373,26 +471,53 @@ class SimilarWebScraper:
         test_start_time = time.time()
         
         for i, url in enumerate(test_urls, 1):
-            result = await self.test_single_url(url, i, len(test_urls))
-            results.append(result)
-            
-            # Intelligent delay between requests
-            if i < len(test_urls):
-                if result.success:
-                    delay = random.uniform(10, 25)  # Shorter delay on success
-                else:
-                    delay = random.uniform(20, 45)  # Longer delay on failure
+            try:
+                # ✅ ALWAYS create fresh browser for each test
+                logger.info(f"🔄 Creating fresh browser session for test {i}")
                 
-                logger.info(f"⏱️ Waiting {delay:.1f}s before next test...")
-                await asyncio.sleep(delay)
+                # Get new proxy for this test
+                proxy = self._get_proxy_for_session() if self.use_proxies else None
+                
+                # Create completely new browser instance
+                browser = EnhancedSmartBrowserController(
+                    headless=self.headless,
+                    proxy=proxy,
+                    enable_streaming=False
+                )
+                
+                # Start fresh browser session
+                await browser.__aenter__()
+                
+                # Test with fresh browser
+                result = await self.test_single_url_fresh(url, i, len(test_urls), browser)
+                results.append(result)
+                
+                # ✅ ALWAYS close browser after each test
+                logger.info(f"🗑️ Closing browser session for test {i}")
+                await browser.__aexit__(None, None, None)
+                
+                # Update stats
+                self.stats['session_rotations'] += 1
+                
+                # Realistic delay between tests (fresh user sessions)
+                if i < len(test_urls):
+                    delay = random.uniform(30, 120)  # 30-120 seconds between fresh sessions
+                    logger.info(f"⏱️ Fresh session delay: {delay:.1f}s")
+                    await asyncio.sleep(delay)
+                    
+            except Exception as e:
+                logger.error(f"❌ Test {i} failed: {e}")
+                results.append(self._create_error_result(url, str(e)))
+        
+        # Clean up final session
+        if hasattr(self, 'current_browser') and self.current_browser:
+            await self.current_browser.__aexit__(None, None, None)
         
         total_test_time = time.time() - test_start_time
         
-        # Comprehensive analysis
+        # Analysis and saving (keep existing code)
         analysis = self.analyze_results(results, total_test_time)
         failure_analysis = self.analyze_failures(results)
-        
-        # Save results
         self.save_comprehensive_results(results, analysis, failure_analysis)
         
         return {
@@ -401,6 +526,42 @@ class SimilarWebScraper:
             'failure_analysis': failure_analysis,
             'total_time': total_test_time
         }
+
+    def _should_rotate_session(self) -> bool:
+        """Check if current session should be rotated"""
+        if not self.current_browser:
+            return True
+        
+        # Check fingerprint evasion session
+        if self.current_browser.fingerprint_evasion.should_end_session():
+            return True
+        
+        # Rotate after too many requests in session
+        if self.requests_in_session > 12:
+            return True
+        
+        # Rotate after session duration
+        if self.session_start_time and (time.time() - self.session_start_time) > 3600:  # 1 hour
+            return True
+        
+        return False
+
+    def _get_proxy_for_session(self):
+        """Get proxy for new session - don't rotate too frequently"""
+        proxy_info = self.proxy_manager.get_best_proxy(exclude_blocked_for="similarweb.com")
+        if proxy_info:
+            return proxy_info.to_playwright_dict()
+        return None
+
+    def _create_error_result(self, url: str, error: str) -> SimilarWebTestResult:
+        """Create error result object"""
+        result = SimilarWebTestResult()
+        result.url = url
+        result.domain = url.split('/')[-2] if url.endswith('/') else url.split('/')[-1]
+        result.success = False
+        result.error = error
+        result.total_time = 0
+        return result
 
     def analyze_results(self, results: List[SimilarWebTestResult], total_time: float) -> Dict:
         """Comprehensive results analysis"""
@@ -417,7 +578,7 @@ class SimilarWebScraper:
         metric_coverage = {}
         for metric in all_metrics:
             coverage_count = sum(1 for r in results 
-                               if metric in r.metrics_found)
+                            if metric in r.metrics_found)
             metric_coverage[metric] = {
                 'found_count': coverage_count,
                 'coverage_rate': coverage_count / total_tests * 100 if total_tests > 0 else 0
@@ -440,6 +601,27 @@ class SimilarWebScraper:
             stats['success_rate'] = (stats['success'] / stats['total']) * 100 if stats['total'] > 0 else 0
             stats['avg_time'] = stats['avg_time'] / stats['total'] if stats['total'] > 0 else 0
         
+        # Add proxy type analysis
+        proxy_type_performance = {
+            'residential': {
+                'total_attempts': self.stats['residential_proxy_success'] + self.stats['residential_proxy_failures'],
+                'successes': self.stats['residential_proxy_success'],
+                'success_rate': 0
+            },
+            'mobile': {
+                'total_attempts': self.stats['mobile_proxy_success'] + self.stats['mobile_proxy_failures'], 
+                'successes': self.stats['mobile_proxy_success'],
+                'success_rate': 0
+            }
+        }
+        
+        for proxy_type in proxy_type_performance:
+            total = proxy_type_performance[proxy_type]['total_attempts']
+            if total > 0:
+                proxy_type_performance[proxy_type]['success_rate'] = \
+                    (proxy_type_performance[proxy_type]['successes'] / total) * 100
+        
+        # ✅ FIXED: Return the complete analysis dictionary
         return {
             'total_tests': total_tests,
             'successful_navigations': successful_tests,
@@ -449,9 +631,11 @@ class SimilarWebScraper:
             'overall_success_rate': (successful_extractions / total_tests) * 100 if total_tests > 0 else 0,
             'metric_coverage': metric_coverage,
             'proxy_performance': proxy_performance,
+            'proxy_type_performance': proxy_type_performance,  # ✅ ADDED HERE
             'average_time_per_test': total_time / total_tests if total_tests > 0 else 0,
             'total_test_time': total_time,
-            'test_stats': self.stats
+            'test_stats': self.stats,
+            'html_files_saved': self.stats.get('html_saves', 0)  # ✅ ADDED HERE
         }
 
     def analyze_failures(self, results: List[SimilarWebTestResult]) -> Dict:

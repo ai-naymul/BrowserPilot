@@ -5,17 +5,173 @@ import time
 from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 import logging
+import time
+import hashlib
 
 logger = logging.getLogger(__name__)
 
 class AdvancedFingerprintEvasion:
     def __init__(self, browser_data_path: str = "browsers.json"):
-        """Initialize with dynamic browser data from JSON file"""
         self.browser_data = self._load_browser_data(browser_data_path)
-        self.used_fingerprints = set()  # Track used fingerprints to avoid patterns
+        
+        # ✅ ADD: Load realistic profiles
+        self.realistic_profiles = self._load_realistic_profiles()
+        self.current_session = None
+        
+        # Keep existing used_fingerprints tracking
+        self.used_fingerprints = set()
         self.fingerprint_rotation_count = 0
         self.last_rotation_time = time.time()
+
+
+    def _load_realistic_profiles(self) -> Dict:
+        """Load the generated realistic profiles"""
+        try:
+            with open("realistic_profiles.json", 'r') as f:
+                profiles = json.load(f)
+                logger.info(f"✅ Loaded {len(profiles)} realistic profiles")
+                
+                # Group by type for easy selection
+                grouped = {
+                    'business_windows': [],
+                    'mac_users': [], 
+                    'home_windows': [],
+                    'linux_users': []
+                }
+                
+                for profile in profiles:
+                    profile_type = profile.get('profile_type', 'business_windows')
+                    if profile_type in grouped:
+                        grouped[profile_type].append(profile)
+                
+                return grouped
+                
+        except FileNotFoundError:
+            logger.warning("⚠️ realistic_profiles.json not found, using fallback profiles")
+            return self._get_fallback_profiles()
+    def start_new_session(self, session_duration_hours: float = None):
+        """Start a new user session with consistent profile"""
+        if session_duration_hours is None:
+            session_duration_hours = random.uniform(0.5, 4.0)
+            
+        # Choose profile pool based on realistic distribution  
+        if random.random() < 0.75:  # 75% Windows users
+            profile_pool = 'business_windows'
+        elif random.random() < 0.9:  # 15% Mac users  
+            profile_pool = 'mac_users'
+        elif random.random() < 0.95:  # 5% home Windows
+            profile_pool = 'home_windows'
+        else:  # 5% Linux users
+            profile_pool = 'linux_users'
         
+        available_profiles = self.realistic_profiles.get(profile_pool, self.realistic_profiles['business_windows'])
+        base_profile = random.choice(available_profiles)
+        
+        self.current_session = {
+            'id': hashlib.md5(f"{time.time()}_{random.random()}".encode()).hexdigest()[:12],
+            'start_time': time.time(),
+            'duration_target': session_duration_hours * 3600,
+            'base_profile': base_profile,
+            'requests_made': 0,
+            'success_count': 0,
+            'failure_count': 0,
+            'personal_browsing_speed': random.uniform(0.7, 1.8)
+        }
+        
+        logger.info(f"👤 Started session {self.current_session['id']} ({profile_pool})")
+        return self.current_session
+
+    def get_session_profile(self) -> Dict:
+        """Get consistent profile for current session"""
+        if not self.current_session:
+            self.start_new_session()
+        
+        base = self.current_session['base_profile']
+        session_id = self.current_session['id']
+        
+        # Build consistent profile with minimal variation
+        profile = {
+            'name': f"Session_{session_id}_{base['viewport'][0]}x{base['viewport'][1]}",
+            'user_agent': base['user_agent'],
+            'viewport': {
+                'width': base['viewport'][0], 
+                'height': base['viewport'][1] - random.randint(80, 120)  # Browser chrome
+            },
+            'screen': {
+                'width': base['viewport'][0],
+                'height': base['viewport'][1],
+                'colorDepth': 24
+            },
+            'timezone': base['timezone'],
+            'language': 'en-US',
+            'languages': ['en-US', 'en'],
+            'platform': 'Win32' if 'Windows' in base['user_agent'] else 'MacIntel' if 'Macintosh' in base['user_agent'] else 'Linux x86_64',
+            'hardware_concurrency': base['hardware']['cores'],
+            'device_memory': base['hardware']['memory'], 
+            'max_touch_points': 0,  # Desktop only
+            'session_id': session_id,
+            'fingerprint_hash': f"session_{session_id}"
+        }
+        
+        self.current_session['requests_made'] += 1
+        return profile
+
+    def should_end_session(self) -> bool:
+        """Check if current session should end"""
+        if not self.current_session:
+            return True
+            
+        session_duration = time.time() - self.current_session['start_time']
+        
+        # End session based on realistic user behavior
+        if session_duration > self.current_session['duration_target']:
+            return True
+        if self.current_session['requests_made'] > 15:  # User gets tired
+            return True
+        if self.current_session['failure_count'] >= 3:  # User gives up
+            return True
+        if random.random() < 0.1:  # Sometimes users just leave
+            return True
+            
+        return False
+
+    def record_session_result(self, success: bool):
+        """Record result for current session"""
+        if self.current_session:
+            if success:
+                self.current_session['success_count'] += 1
+            else:
+                self.current_session['failure_count'] += 1
+    def _get_fallback_profiles(self) -> Dict:
+        """Fallback profiles if generated ones not available"""
+        return {
+            'business_windows': [
+                {
+                    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'viewport': (1920, 1080),
+                    'timezone': 'America/New_York',
+                    'hardware': {'cores': 8, 'memory': 16},
+                    'profile_type': 'business_windows'
+                },
+                {
+                    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+                    'viewport': (1366, 768),
+                    'timezone': 'America/Chicago',
+                    'hardware': {'cores': 4, 'memory': 8},
+                    'profile_type': 'business_windows'
+                }
+                # Add more fallback profiles...
+            ],
+            'mac_users': [
+                {
+                    'user_agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'viewport': (1440, 900),
+                    'timezone': 'America/Los_Angeles',
+                    'hardware': {'cores': 8, 'memory': 16},
+                    'profile_type': 'mac_users'
+                }
+            ]
+        }
     def _load_browser_data(self, path: str) -> Dict:
         """Load browser data from JSON file"""
         try:
@@ -98,126 +254,18 @@ class AdvancedFingerprintEvasion:
     #     }
     
     def get_random_profile(self) -> Dict:
-        """Generate a completely unique, dynamic fingerprint profile"""
-        self.fingerprint_rotation_count += 1
+        """Get profile - now uses session-based approach"""
+        # Use session profile if we have an active session
+        if self.current_session and not self.should_end_session():
+            return self.get_session_profile()
         
-        # Choose random platform and browser
-        platform_type = random.choice(['desktop', 'mobile'])
+        # Start new session if needed
+        if self.should_end_session():
+            if self.current_session:
+                logger.info(f"👋 Ending session {self.current_session['id']} after {self.current_session['requests_made']} requests")
+            self.start_new_session()
         
-        if platform_type == 'desktop':
-            os_type = random.choice(['windows', 'linux', 'darwin'])
-        else:
-            os_type = random.choice(['android', 'ios'])
-        
-        browser_type = self._choose_browser_type(platform_type, os_type)
-        
-        # Get random user agent
-        user_agent = self._get_random_user_agent(platform_type, os_type, browser_type)
-        
-        # Generate initial values with guaranteed safe bounds
-        viewport = self._generate_dynamic_viewport(platform_type, os_type)
-        screen = self._generate_dynamic_screen(viewport, platform_type)
-        
-        # BULLETPROOF: Ensure viewport is always within safe bounds
-        viewport['width'] = max(320, min(4000, viewport['width']))
-        viewport['height'] = max(480, min(3000, viewport['height']))
-        
-        # Generate other components
-        hardware = self._generate_dynamic_hardware(platform_type)
-        locale_data = self._generate_dynamic_locale()
-        webgl_data = self._generate_dynamic_webgl(platform_type, os_type, browser_type)
-        noise_params = self._generate_noise_parameters()
-        
-        # Create unique profile hash to track usage
-        profile_hash = self._generate_profile_hash(user_agent, viewport, screen)
-        
-        # COMPLETELY SAFE collision avoidance
-        collision_attempts = 0
-        max_attempts = 20  # Reduced to prevent excessive attempts
-        
-        while profile_hash in self.used_fingerprints and collision_attempts < max_attempts:
-            collision_attempts += 1
-            
-            # Strategy: Generate completely new components instead of modifying existing ones
-            try:
-                if collision_attempts <= 10:
-                    # Generate new viewport completely
-                    viewport = self._generate_dynamic_viewport(platform_type, os_type)
-                    # Ensure it's within safe bounds
-                    viewport['width'] = max(320, min(4000, viewport['width']))
-                    viewport['height'] = max(480, min(3000, viewport['height']))
-                    screen = self._generate_dynamic_screen(viewport, platform_type)
-                    
-                else:
-                    # Complete regeneration
-                    browser_type = self._choose_browser_type(platform_type, os_type)
-                    user_agent = self._get_random_user_agent(platform_type, os_type, browser_type)
-                    viewport = self._generate_dynamic_viewport(platform_type, os_type)
-                    viewport['width'] = max(320, min(4000, viewport['width']))
-                    viewport['height'] = max(480, min(3000, viewport['height']))
-                    screen = self._generate_dynamic_screen(viewport, platform_type)
-                    hardware = self._generate_dynamic_hardware(platform_type)
-                    webgl_data = self._generate_dynamic_webgl(platform_type, os_type, browser_type)
-                    noise_params = self._generate_noise_parameters()
-                
-                # Generate new hash
-                profile_hash = self._generate_profile_hash(user_agent, viewport, screen)
-                
-            except Exception as e:
-                logger.error(f"Error in collision resolution: {e}")
-                # Break out of loop on any error
-                break
-        
-        # Force uniqueness if still colliding
-        if profile_hash in self.used_fingerprints:
-            timestamp_entropy = str(time.time_ns())
-            profile_hash = hashlib.sha256(f"{profile_hash}_{timestamp_entropy}".encode()).hexdigest()
-            logger.warning(f"⚠️ Forced unique hash after {collision_attempts} attempts")
-        
-        self.used_fingerprints.add(profile_hash)
-        
-        # Clean up old fingerprints
-        if len(self.used_fingerprints) > 1000:  # Reduced size
-            self.used_fingerprints = set(list(self.used_fingerprints)[-500:])
-        
-        # FINAL SAFETY CHECK - ensure all dimensions are valid
-        viewport['width'] = max(320, min(4000, int(viewport['width'])))
-        viewport['height'] = max(480, min(3000, int(viewport['height'])))
-        
-        # Ensure screen dimensions are also safe
-        screen['width'] = max(320, min(4000, int(screen.get('width', viewport['width']))))
-        screen['height'] = max(480, min(3000, int(screen.get('height', viewport['height'] + 100))))
-        
-        profile = {
-            "name": f"Dynamic_{platform_type}_{os_type}_{browser_type}_{self.fingerprint_rotation_count}",
-            "user_agent": user_agent,
-            "viewport": viewport,
-            "screen": screen,
-            "timezone": locale_data['timezone'],
-            "language": locale_data['language'],
-            "languages": locale_data['languages'],
-            "platform": self._get_platform_string(os_type, platform_type),
-            "hardware_concurrency": hardware['cores'],
-            "device_memory": hardware['memory'],
-            "max_touch_points": hardware['touch_points'],
-            "webgl_vendor": webgl_data['vendor'],
-            "webgl_renderer": webgl_data['renderer'],
-            "canvas_noise": noise_params['canvas'],
-            "audio_noise": noise_params['audio'],
-            "headers": self._generate_dynamic_headers(browser_type, platform_type, user_agent),
-            "cipher_suites": self._get_cipher_suites(browser_type),
-            "http_version": random.choice(["h2", "http/1.1"]),
-            "connection_info": self._generate_connection_info(),
-            "battery_info": self._generate_battery_info(platform_type),
-            "media_devices": self._generate_media_devices(),
-            "plugins": self._generate_plugins(browser_type, platform_type),
-            "dns_prefresh": random.choice([True, False]),
-            "do_not_track": random.choice([None, "1", "0"]),
-            "fingerprint_hash": profile_hash
-        }
-        
-        logger.info(f"🎭 Generated unique profile: {profile['name']} (Hash: {profile_hash[:8]}...)")
-        return profile
+        return self.get_session_profile()
 
 
     

@@ -1193,7 +1193,8 @@ class AdvancedProxyManager:
         logger.info(f"   Mobile: {len(self.mobile_proxies)}")
         logger.info(f"   Total: {len(self.proxies)}")
 
-    def get_best_proxy(self, prefer_type: ProxyType = ProxyType.RESIDENTIAL, exclude_blocked_for: str = None) -> Optional[ProxyInfo]:
+    def get_best_proxy(self, prefer_type: ProxyType = ProxyType.RESIDENTIAL, exclude_blocked_for: str = None, 
+                    exclude_current: str = None) -> Optional[ProxyInfo]:  # 🔧 ADD exclude_current parameter
         """Get best proxy with intelligent selection"""
         
         # First try preferred type (residential)
@@ -1201,8 +1202,9 @@ class AdvancedProxyManager:
         available_preferred = [
             p for p in preferred_proxies
             if p.health != ProxyHealth.FAILED and 
-               p.consecutive_failures < self.max_consecutive_failures and
-               (not exclude_blocked_for or exclude_blocked_for not in p.blocked_sites)
+            p.consecutive_failures < self.max_consecutive_failures and
+            (not exclude_blocked_for or exclude_blocked_for not in p.blocked_sites) and
+            (not exclude_current or p.to_playwright_dict().get('server') != exclude_current)  # 🔧 ADD this line
         ]
         
         if available_preferred:
@@ -1400,3 +1402,36 @@ class AdvancedProxyManager:
             return False
         
         return False
+    def export_proxy_performance(self, filename: str = "proxy_performance.json"):
+        """Export proxy performance data for analysis"""
+        data = {
+            "timestamp": time.time(),
+            "stats": self.get_proxy_stats(),
+            "proxy_details": [
+                {
+                    "id": p.session_id,
+                    "type": p.proxy_type.value,
+                    "health": p.health.value,
+                    "health_score": p.health_score,
+                    "success_rate": p.success_rate,
+                    "response_time": p.response_time,
+                    "success_count": p.success_count,
+                    "failure_count": p.failure_count,
+                    "antibot_detections": p.antibot_detections,
+                    "blocked_sites": list(p.blocked_sites),
+                    "similarweb_success": p.similarweb_success,
+                    "similarweb_failures": p.similarweb_failures,
+                    "similarweb_success_rate": p.similarweb_success_rate
+                }
+                for p in self.proxies
+            ],
+            "performance_metrics": dict(self.proxy_performance),
+            "similarweb_specific": dict(self.similarweb_specific_stats)
+        }
+        
+        try:
+            with open(filename, 'w') as f:
+                json.dump(data, f, indent=2)
+            logger.info(f"📊 Exported proxy performance to {filename}")
+        except Exception as e:
+            logger.error(f"Failed to export proxy performance: {e}")

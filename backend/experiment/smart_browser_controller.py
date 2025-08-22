@@ -401,7 +401,9 @@ class EnhancedSmartBrowserController(BrowserController):
         """Initialize with ultra-dynamic fingerprint evasion"""
         try:
             # Get completely unique fingerprint profile
+            # Get session-based fingerprint profile
             self.current_fingerprint_profile = self.fingerprint_evasion.get_random_profile()
+            logger.info(f"👤 Session: {self.current_fingerprint_profile.get('session_id', 'unknown')}")
             logger.info(f"🎭 Using dynamic fingerprint: {self.current_fingerprint_profile['name']}")
             logger.info(f"🔐 Fingerprint hash: {self.current_fingerprint_profile['fingerprint_hash'][:16]}...")
             
@@ -501,7 +503,46 @@ class EnhancedSmartBrowserController(BrowserController):
         except Exception as e:
             logger.error(f"❌ Failed to initialize enhanced browser: {e}")
             raise
+    async def _simulate_realistic_user_behavior(self):
+        """Simulate what real users do after page loads"""
+        # Wait for page to load (users always wait a bit)
+        await asyncio.sleep(random.uniform(2, 5))
+        
+        # Sometimes scroll to see content (70% of users)
+        if random.random() < 0.7:
+            scroll_amount = random.randint(200, 600)
+            await self.page.mouse.wheel(0, scroll_amount)
+            await asyncio.sleep(random.uniform(1, 3))
+        
+        # Sometimes move mouse while reading (50% of users)
+        if random.random() < 0.5:
+            viewport = self.current_fingerprint_profile['viewport']
+            for _ in range(random.randint(1, 3)):
+                x = random.randint(100, viewport['width'] - 100)
+                y = random.randint(100, viewport['height'] - 100)
+                await self.page.mouse.move(x, y)
+                await asyncio.sleep(random.uniform(0.5, 1.5))
 
+    def get_realistic_delay(self) -> float:
+        """Get delay based on current session's user behavior"""
+        session = self.fingerprint_evasion.current_session
+        if not session:
+            return random.uniform(15, 30)
+        
+        # Base delay adjusted by this user's browsing speed
+        base_delay = random.uniform(15, 35)
+        personal_delay = base_delay * session['personal_browsing_speed']
+        
+        # Longer delay after failures (user would be confused/frustrated)
+        failure_rate = session['failure_count'] / max(1, session['requests_made'])
+        if failure_rate > 0.3:
+            personal_delay *= random.uniform(1.5, 3.0)
+        
+        return personal_delay
+
+    def record_navigation_result(self, success: bool):
+        """Record navigation result in session"""
+        self.fingerprint_evasion.record_session_result(success)
 
     def _build_dynamic_launch_args(self, exclude_user_data_dir: bool = False) -> List[str]:
         """Build dynamic browser launch arguments with safety checks"""
@@ -733,7 +774,13 @@ class EnhancedSmartBrowserController(BrowserController):
                         
                         if bypass_result and bypass_result.get('success'):
                             logger.info(f"✅ Bypass successful! Navigated to: {bypass_result['url']}")
-                            return True
+                            navigation_success = True
+                            self.record_navigation_result(navigation_success)
+                            if navigation_success:
+                                # Simulate realistic user behavior
+                                await self._simulate_realistic_user_behavior()
+
+                            return navigation_success
                     else:
                         # Success!
                         logger.info(f"✅ Successfully navigated to: {url}")
@@ -751,7 +798,13 @@ class EnhancedSmartBrowserController(BrowserController):
                                              if p.to_playwright_dict().get('server') == self.proxy.get('server')), None)
                             if proxy_info:
                                 self.proxy_manager.mark_proxy_success(proxy_info, response_time)
-                        return True
+                        navigation_success = True
+                        self.record_navigation_result(navigation_success)
+                        if navigation_success:
+                            # Simulate realistic user behavior
+                            await self._simulate_realistic_user_behavior()
+
+                        return navigation_success
                 else:
                     logger.warning(f"🚫 Anti-bot detected: {detection_type}, action: {suggested_action}")
                     
@@ -769,13 +822,20 @@ class EnhancedSmartBrowserController(BrowserController):
                     
                     elif suggested_action in ["rotate_proxy", "retry"] and attempt < self.max_proxy_retries - 1:
                         # Rotate proxy and fingerprint
+                        current_proxy_server = self.proxy.get('server') if self.proxy else None  # 🔧 ADD this line
                         await self._rotate_proxy_and_fingerprint(site_domain)
                         await asyncio.sleep(random.uniform(5, 15))
                         continue
                     
                     elif suggested_action == "abort":
                         logger.error(f"❌ Aborting due to unresolvable anti-bot: {detection_type}")
-                        return False
+                        navigation_success = False
+                        self.record_navigation_result(navigation_success)
+                        if navigation_success:
+                            # Simulate realistic user behavior
+                            await self._simulate_realistic_user_behavior()
+
+                        return navigation_success
                     
             except Exception as e:
                 logger.error(f"❌ Navigation failed on attempt {attempt + 1}: {e}")
@@ -789,18 +849,35 @@ class EnhancedSmartBrowserController(BrowserController):
                     
                     if bypass_result and bypass_result.get('success'):
                         logger.info(f"✅ Bypass successful after error! Navigated to: {bypass_result['url']}")
-                        return True
+                        navigation_success = True
+                        self.record_navigation_result(navigation_success)
+                        if navigation_success:
+                            # Simulate realistic user behavior
+                            await self._simulate_realistic_user_behavior()
+
+                        return navigation_success
                 
                 await asyncio.sleep(random.uniform(3, 10))
                 
         logger.error(f"❌ Failed to navigate to {url} after all retries")
-        return False
+        navigation_success = False
+        self.record_navigation_result(navigation_success)
+        if navigation_success:
+            # Simulate realistic user behavior
+            await self._simulate_realistic_user_behavior()
+        return navigation_success
 
     async def _rotate_fingerprint(self):
         """Rotate to a new fingerprint profile"""
         logger.info(f"🔄 Rotating fingerprint profile")
         
-        # Generate new profile
+        # 🔧 FIX: Force end current session
+        if hasattr(self, 'fingerprint_evasion') and self.fingerprint_evasion.current_session:
+            old_session = self.fingerprint_evasion.current_session['id']
+            self.fingerprint_evasion.current_session = None
+            logger.info(f"🔄 Ended session: {old_session}")
+        
+        # Generate new profile (will create new session)
         self.current_fingerprint_profile = self.fingerprint_evasion.get_random_profile()
         self.fingerprint_rotation_count += 1
         self.last_fingerprint_rotation = time.time()
@@ -822,11 +899,16 @@ class EnhancedSmartBrowserController(BrowserController):
     async def _rotate_proxy_and_fingerprint(self, site_domain: str):
         """Rotate both proxy and fingerprint"""
         try:
+            # 🔧 FIX: Force end current fingerprint session
+            if hasattr(self, 'fingerprint_evasion') and self.fingerprint_evasion.current_session:
+                logger.info(f"🔄 Ending current session: {self.fingerprint_evasion.current_session['id']}")
+                self.fingerprint_evasion.current_session = None  # Force new session
+            
             # Get new proxy
             new_proxy_info = self.proxy_manager.get_best_proxy(exclude_blocked_for=site_domain)
             if new_proxy_info:
                 new_proxy = new_proxy_info.to_playwright_dict()
-                logger.info(f"🔄 Rotating to new proxy: {new_proxy['server']}")
+                logger.info(f"🔄 Rotating to new proxy: {new_proxy}")
                 
                 # Close current context
                 if self.context:
@@ -840,11 +922,11 @@ class EnhancedSmartBrowserController(BrowserController):
                 
                 logger.info("✅ Browser restarted with new proxy and fingerprint")
             else:
-                # Just rotate fingerprint if no proxy available
+                # Just rotate fingerprint if no new proxy available
+                logger.warning("⚠️ No alternative proxy available, rotating fingerprint only")
                 await self._rotate_fingerprint()
-                
         except Exception as e:
-            logger.error(f"❌ Failed to rotate proxy/fingerprint: {e}")
+            logger.info(f"❌ Failed to rotate proxy and fingerprint: {e}")
 
     async def _handle_cloudflare_challenge(self):
         """Handle Cloudflare-specific challenges"""
@@ -1030,6 +1112,7 @@ class EnhancedSmartBrowserController(BrowserController):
     async def extract_similarweb_data_with_vision(self, url: str) -> dict:
         """Extract SimilarWeb data using vision approach"""
         try:
+            from similarweb_extractor import SimilarWebExtractor
             extractor = SimilarWebExtractor()
             return await extractor.extract_similarweb_data_with_vision(self, url)
         except Exception as e:
