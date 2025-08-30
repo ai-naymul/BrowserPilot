@@ -196,6 +196,11 @@ class EnhancedSmartBrowserController(BrowserController):
                 await self.browser.close()
             if hasattr(self, 'play') and self.play:
                 await self.play.stop()
+            self.page = self.context = self.browser = self.play = None
+            try:
+                self._initialized = False
+            except Exception:
+                pass
         except Exception as e:
             logger.error(f"❌ Error cleaning up browser: {e}")
 
@@ -316,50 +321,58 @@ class EnhancedSmartBrowserController(BrowserController):
         logger.error(f"❌ Failed to navigate to {url} after all retries")
         return False
 
-    async def _restart_browser_with_proxy(self, new_proxy: dict):
-        """Restart browser with new proxy - SIMPLE FIX"""
+    async def _restart_browser_with_proxy(self, new_proxy: dict | None):
+        """
+        Fully tear down the current Playwright stack and rebuild with `new_proxy`.
+
+        Works with SingleBrowserController as well (which uses an `_initialized`
+        guard to prevent double init). We explicitly reset that guard here so the
+        next __aenter__ actually re-creates the browser/context/page.
+        """
         try:
             logger.info("🔄 Closing previous browser before restart...")
-            
-            # ✅ CLOSE PREVIOUS BROWSER COMPLETELY
-            if hasattr(self, 'page') and self.page:
-                try:
-                    await self.page.close()
-                except:
-                    pass
-            
-            if hasattr(self, 'context') and self.context:
-                try:
-                    await self.context.close()
-                except:
-                    pass
-            
-            if hasattr(self, 'browser') and self.browser:
-                try:
-                    await self.browser.close()
-                except:
-                    pass
-            
-            if hasattr(self, 'play') and self.play:
+
+            # Best-effort close of page/context/browser (ignore close errors)
+            for name in ("page", "context", "browser"):
+                obj = getattr(self, name, None)
+                if obj:
+                    try:
+                        await obj.close()
+                    except Exception as e:
+                        logger.debug(f"⚠️ Error closing {name}: {e}")
+                    finally:
+                        setattr(self, name, None)
+
+            # Stop Playwright itself
+            if getattr(self, "play", None):
                 try:
                     await self.play.stop()
-                except:
-                    pass
-            
-            # Small delay to ensure cleanup
-            await asyncio.sleep(1)
-            
-            # Update proxy
+                except Exception as e:
+                    logger.debug(f"⚠️ Error stopping Playwright: {e}")
+                finally:
+                    self.play = None
+
+            # Give OS a moment to release ports/files
+            await asyncio.sleep(random.uniform(0.5, 1.5))
+
+            # Update proxy BEFORE re-enter so __aenter__ picks it up
             self.proxy = new_proxy
-            
-            # ✅ RE-INITIALIZE FRESH BROWSER
+
+            # Clear init guard so __aenter__ will actually rebuild everything
+            try:
+                self._initialized = False
+            except Exception:
+                pass
+
+            # Re-initialize (your __aenter__ handles fingerprint, context, page, etc.)
             await self.__aenter__()
-            
+
             logger.info("✅ Browser restarted with new proxy")
-            
+            return True
+
         except Exception as e:
             logger.error(f"❌ Failed to restart browser: {e}")
-            raise
+            return False
 
     # Add all other required methods...
     async def handle_similarweb_popups(self):
