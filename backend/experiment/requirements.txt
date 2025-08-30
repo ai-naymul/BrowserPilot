@@ -12,3 +12,4 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 tzdata==2025.2
 reportlab==4.4.2
+motor

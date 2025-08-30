@@ -247,9 +247,19 @@ class AdvancedProxyManager:
         logger.info(f"   Mobile: {len(self.mobile_proxies)}")
         logger.info(f"   Total: {len(self.proxies)}")
 
-    def get_best_proxy(self, prefer_type: ProxyType = ProxyType.RESIDENTIAL, exclude_blocked_for: str = None) -> Optional[ProxyInfo]:
+    def get_best_proxy(self, prefer_type: ProxyType = ProxyType.RESIDENTIAL, exclude_blocked_for: str = None, for_large_scale: bool = False) -> Optional[ProxyInfo]:
         """Get best proxy with intelligent selection"""
         
+        if for_large_scale:
+            # For 1000+ operations, strongly prefer residential
+            preferred_proxies = [p for p in self.proxies if p.proxy_type == ProxyType.RESIDENTIAL]
+            
+            # Only use mobile as absolute last resort
+            if not preferred_proxies:
+                mobile_proxies = [p for p in self.proxies if p.proxy_type == ProxyType.MOBILE]
+                if mobile_proxies:
+                    self.logger.warning("Using mobile proxy - monitor data usage!")
+                    return mobile_proxies[0]
         # First try preferred type (residential)
         preferred_proxies = [p for p in self.proxies if p.proxy_type == prefer_type]
         available_preferred = [

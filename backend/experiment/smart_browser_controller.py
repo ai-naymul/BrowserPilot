@@ -41,6 +41,37 @@ class EnhancedSmartBrowserController(BrowserController):
         self.max_proxy_retries = 5
         self.max_captcha_solve_attempts = 3
 
+    async def force_cleanup_with_timeout(self):
+        """Enhanced cleanup with timeouts to prevent event loop issues"""
+        cleanup_tasks = []
+        
+        if hasattr(self, 'page') and self.page:
+            cleanup_tasks.append(asyncio.create_task(self._safe_close(self.page, 'page')))
+        
+        if hasattr(self, 'context') and self.context:
+            cleanup_tasks.append(asyncio.create_task(self._safe_close(self.context, 'context')))
+        
+        if hasattr(self, 'browser') and self.browser:
+            cleanup_tasks.append(asyncio.create_task(self._safe_close(self.browser, 'browser')))
+        
+        if hasattr(self, 'play') and self.play:
+            cleanup_tasks.append(asyncio.create_task(self._safe_close(self.play, 'playwright', method='stop')))
+        
+        if cleanup_tasks:
+            try:
+                await asyncio.wait_for(asyncio.gather(*cleanup_tasks, return_exceptions=True), timeout=10.0)
+            except asyncio.TimeoutError:
+                logger.warning("Cleanup timeout - forcing termination")
+
+    async def _safe_close(self, obj, name: str, method: str = 'close'):
+        """Safely close browser objects with timeout"""
+        try:
+            close_method = getattr(obj, method)
+            await asyncio.wait_for(close_method(), timeout=3.0)
+            logger.debug(f"{name} closed successfully")
+        except Exception as e:
+            logger.error(f"Error closing {name}: {e}")
+            
     async def __aenter__(self):
         """Initialize with advanced fingerprint evasion - COMPLETELY FIXED"""
         try:
@@ -168,6 +199,43 @@ class EnhancedSmartBrowserController(BrowserController):
         except Exception as e:
             logger.error(f"❌ Error cleaning up browser: {e}")
 
+
+    # async def __aexit__(self, exc_type, exc_val, exc_tb):
+    #     """Enhanced cleanup to prevent event loop issues"""
+    #     try:
+    #         # Stop all running tasks first
+    #         if hasattr(self, 'page') and self.page:
+    #             try:
+    #                 await asyncio.wait_for(self.page.close(), timeout=5.0)
+    #             except asyncio.TimeoutError:
+    #                 self.logger.warning("Page close timeout")
+    #             except Exception as e:
+    #                 self.logger.error(f"Page close error: {e}")
+            
+    #         if hasattr(self, 'context') and self.context:
+    #             try:
+    #                 await asyncio.wait_for(self.context.close(), timeout=5.0)
+    #             except asyncio.TimeoutError:
+    #                 self.logger.warning("Context close timeout")
+                    
+    #         if hasattr(self, 'browser') and self.browser:
+    #             try:
+    #                 await asyncio.wait_for(self.browser.close(), timeout=5.0)
+    #             except asyncio.TimeoutError:
+    #                 self.logger.warning("Browser close timeout")
+                    
+    #         if hasattr(self, 'play') and self.play:
+    #             try:
+    #                 await asyncio.wait_for(self.play.stop(), timeout=5.0)
+    #             except asyncio.TimeoutError:
+    #                 self.logger.warning("Playwright stop timeout")
+                    
+    #         # Force cleanup
+    #         import gc
+    #         gc.collect()
+            
+    #     except Exception as e:
+    #         self.logger.error(f"Cleanup error: {e}")
     def _generate_sec_ch_ua(self, profile: dict) -> str:
         """Generate realistic Sec-Ch-Ua header"""
         if "Chrome" in profile["user_agent"]:
@@ -339,6 +407,7 @@ class EnhancedSmartBrowserController(BrowserController):
     async def extract_similarweb_data_with_vision(self, url: str) -> dict:
         """Extract SimilarWeb data using vision approach"""
         try:
+            # from similarweb_extractor import SimilarWebExtractor
             extractor = SimilarWebExtractor()
             return await extractor.extract_similarweb_data_with_vision(self, url)
         except Exception as e:
