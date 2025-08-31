@@ -886,7 +886,7 @@ async def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="SimilarWeb 1000 Tools Scraper")
-    parser.add_argument("--mongodb-uri", help="MongoDB connection URI", default="mongodb://admin:X7p9Q2r5T8z3V6b1N4m7K0j3L5s8D2f6@vmi1189275.contaboserver.net:30035/AIAggregator?authSource=admin&directConnection=true")
+    parser.add_argument("--mongodb-uri", help="MongoDB connection URI")
     parser.add_argument("--headless", action="store_true", default=False, help="Run in headless mode")
     parser.add_argument("--limit", type=int, default=1000, help="Number of tools to process")
     
