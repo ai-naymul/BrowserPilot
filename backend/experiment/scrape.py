@@ -310,6 +310,7 @@ class SimilarWeb1000Scraper:
             if DomainFilter.is_valid_for_similarweb(url):
                 domain = DomainFilter.extract_domain(url)
                 if domain:
+                    tool['etv'] = tool.get('stats', {}).get('traffic_data', {}).get('organic', {}).get('etv', 0.0)
                     tool['domain'] = domain
                     tool['similarweb_url'] = f"https://www.similarweb.com/website/{domain}/"
                     valid_tools.append(tool)
@@ -324,189 +325,7 @@ class SimilarWeb1000Scraper:
         self.logger.info(f"Valid tools for scraping: {len(valid_tools)}/{len(tools)}")
         return valid_tools
     
-    # async def scrape_single_tool(self, tool_data: Dict, max_attempts: int = 5) -> ToolResult:
-    #     """Scrape single tool with comprehensive error handling"""
-    #     tool_id = str(tool_data.get('_id', ''))
-    #     name = tool_data.get('name', 'Unknown')
-    #     url = tool_data.get('url', '')
-    #     domain = tool_data.get('domain', '')
-    #     similarweb_url = tool_data.get('similarweb_url', '')
-    #     etv = tool_data.get('etv', 0.0)
-        
-    #     result = ToolResult(
-    #         tool_id=tool_id, name=name, url=url, domain=domain,
-    #         similarweb_url=similarweb_url, etv=etv
-    #     )
-        
-    #     start_time = time.time()
-    #     self.logger.info(f"Scraping {name} ({domain}) - ETV: {etv}")
-        
-    #     for attempt in range(1, max_attempts + 1):
-    #         self.logger.info(f"Attempt {attempt}/{max_attempts} for {name}")
-            
-    #         attempt_record = ScrapingAttempt(
-    #             attempt_number=attempt,
-    #             timestamp=time.time(),
-    #             proxy_used="None",
-    #             success=False
-    #         )
-            
-    #         browser = None
-    #         try:
-    #             # Get proxy - prioritize residential for large scale
-    #             proxy = None
-    #             if self.proxy_manager.proxies:
-    #                 proxy_info = self.proxy_manager.get_best_proxy(
-    #                     prefer_type=ProxyType.RESIDENTIAL,
-    #                     exclude_blocked_for="similarweb.com",
-    #                     for_large_scale=True  # New parameter
-    #                 )
-    #                 if proxy_info:
-    #                     proxy = proxy_info.to_playwright_dict()
-    #                     attempt_record.proxy_used = proxy.get('server', 'Unknown')
-    #                     self.loggers['proxy'].info(f"Using proxy: {attempt_record.proxy_used}")
-                
-    #             # Initialize browser with enhanced cleanup
-    #             browser = EnhancedSmartBrowserController(
-    #                 headless=self.headless,
-    #                 proxy=proxy,
-    #                 enable_streaming=False
-    #             )
-                
-    #             await browser.__aenter__()
-                
-    #             # Navigate with timeout
-    #             nav_start = time.time()
-    #             try:
-    #                 nav_success = await asyncio.wait_for(
-    #                     browser.smart_navigate(similarweb_url),
-    #                     timeout=120.0  # 2 minute timeout
-    #                 )
-    #                 attempt_record.response_time = time.time() - nav_start
-                    
-    #                 if not nav_success:
-    #                     attempt_record.error = "Smart navigation failed"
-    #                     result.attempts.append(attempt_record)
-    #                     continue
-                        
-    #             except asyncio.TimeoutError:
-    #                 attempt_record.error = "Navigation timeout (120s)"
-    #                 attempt_record.response_time = time.time() - nav_start
-    #                 result.attempts.append(attempt_record)
-    #                 continue
-                
-    #             # Handle popups
-    #             await browser.handle_similarweb_popups()
-    #             await asyncio.sleep(3)  # Allow page to settle
-                
-    #             # VISION-FIRST VALIDATION (before saving HTML)
-    #             self.logger.info(f"Validating page for {name} using vision...")
-    #             validation_result = await self.validator.validate_page_before_saving(browser, domain)
-                
-    #             if validation_result.get('should_save_html', False):
-    #                 attempt_record.validation_passed = True
-    #                 self.stats['validation_passes'] += 1
-                    
-    #                 # Save HTML only after validation passes
-    #                 try:
-    #                     html_content = await browser.page.content()
-    #                     html_filename = f"{domain}_{attempt}_{int(time.time())}.html"
-    #                     html_path = self.html_dir / html_filename
-                        
-    #                     # Save with metadata
-    #                     with open(html_path, 'w', encoding='utf-8') as f:
-    #                         f.write(f"<!-- Tool: {name} -->\n")
-    #                         f.write(f"<!-- Domain: {domain} -->\n")
-    #                         f.write(f"<!-- ETV: {etv} -->\n")
-    #                         f.write(f"<!-- Validation: PASSED -->\n")
-    #                         f.write(f"<!-- Found Metrics: {validation_result.get('found_metrics', [])} -->\n")
-    #                         f.write("<!-- ================================== -->\n\n")
-    #                         f.write(html_content)
-                        
-    #                     attempt_record.html_saved = True
-    #                     result.html_files.append(str(html_path))
-    #                     self.stats['html_files_saved'] += 1
-                        
-    #                     self.logger.info(f"HTML saved for {name}: {html_filename}")
-                        
-    #                     # Extract data using your existing extractor
-    #                     try:
-    #                         extraction_result = await browser.extract_similarweb_data_with_vision(similarweb_url)
-                            
-    #                         if extraction_result.get('extraction_success', False):
-    #                             attempt_record.data_extracted = True
-    #                             attempt_record.success = True
-    #                             result.final_success = True
-    #                             result.extracted_data = extraction_result
-                                
-    #                             # Mark proxy success
-    #                             if proxy and proxy_info:
-    #                                 self.proxy_manager.mark_proxy_success(proxy_info, attempt_record.response_time)
-                                
-    #                             self.logger.info(f"SUCCESS: {name} - Data extracted")
-    #                             self.stats['successful_scrapes'] += 1
-    #                             result.attempts.append(attempt_record)
-    #                             break
-    #                         else:
-    #                             attempt_record.error = "Data extraction failed despite valid HTML"
-    #                             self.logger.warning(f"Extraction failed for {name}")
-                                
-    #                     except Exception as e:
-    #                         attempt_record.error = f"Extraction error: {str(e)}"
-    #                         self.logger.error(f"Extraction error for {name}: {e}")
-                    
-    #                 except Exception as e:
-    #                     attempt_record.error = f"HTML save error: {str(e)}"
-    #                     self.logger.error(f"Failed to save HTML for {name}: {e}")
-                        
-    #             else:
-    #                 # Validation failed - don't save HTML
-    #                 attempt_record.validation_passed = False
-    #                 self.stats['validation_failures'] += 1
-    #                 blocking_type = validation_result.get('blocking_type', 'unknown')
-    #                 attempt_record.error = f"Page validation failed: {blocking_type}"
-    #                 self.logger.warning(f"Validation failed for {name}: {blocking_type}")
-                    
-    #                 # Mark proxy failure for certain blocking types
-    #                 if blocking_type in ['login_required', 'upgrade_needed'] and proxy and proxy_info:
-    #                     self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", blocking_type)
-            
-    #         except Exception as e:
-    #             attempt_record.error = f"Browser error: {str(e)}"
-    #             self.logger.error(f"Browser error for {name}: {e}")
-                
-    #             if proxy and 'proxy_info' in locals():
-    #                 self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", "browser_error")
-            
-    #         finally:
-    #             # Critical cleanup
-    #             if browser:
-    #                 try:
-    #                     await browser.__aexit__(None, None, None)
-    #                     self.logger.debug(f"Browser cleanup completed for {name}")
-    #                 except Exception as e:
-    #                     self.logger.error(f"Browser cleanup error: {e}")
-                
-    #             gc.collect()
-    #             result.attempts.append(attempt_record)
-    #             self.stats['total_attempts'] += 1
-            
-    #         # Success break or delay before retry
-    #         if result.final_success:
-    #             break
-    #         elif attempt < max_attempts:
-    #             delay = random.uniform(20, 40)  # Longer delays for 1K scraping
-    #             self.logger.info(f"Waiting {delay:.1f}s before retry...")
-    #             await asyncio.sleep(delay)
-        
-    #     # Final result processing
-    #     result.total_time = time.time() - start_time
-    #     if not result.final_success:
-    #         result.final_error = result.attempts[-1].error if result.attempts else "Unknown error"
-    #         self.stats['failed_scrapes'] += 1
-    #         self.logger.warning(f"FAILED: {name} after {len(result.attempts)} attempts")
-        
-    #     return result
+    
     
 
     async def scrape_single_tool(self, tool_data: Dict, max_attempts: int = 5) -> ToolResult:
@@ -612,7 +431,7 @@ class SimilarWeb1000Scraper:
                             attempt_record.success = True
                             result.final_success = True
                                     
-                                    # Mark proxy success
+                            # Mark proxy success
                             if proxy and proxy_info:
                                 self.proxy_manager.mark_proxy_success(proxy_info, attempt_record.response_time)
                                     
@@ -666,36 +485,76 @@ class SimilarWeb1000Scraper:
             self.logger.warning(f"FAILED: {name} after {len(result.attempts)} attempts")
         
         return result
+    
     async def process_queue(self, queue: List, queue_name: str, max_attempts: int):
-        """Process a queue with progress tracking"""
+        """Process a queue with progress tracking and proper error handling"""
         results = []
         total = len(queue)
         
         self.logger.info(f"Processing {queue_name}: {total} items, {max_attempts} attempts each")
         
         for i, item in enumerate(queue, 1):
-            self.logger.info(f"{queue_name} Progress: {i}/{total} ({(i/total)*100:.1f}%)")
+            self.logger.info(f"{queue_name} Progress: {i}/{total} ({self.safe_percentage(i, total):.1f}%)")
             
-            if isinstance(item, dict):
-                result = await self.scrape_single_tool(item, max_attempts)
-            else:
-                # Retry queue item
-                result = await self.scrape_single_tool({
-                    '_id': item.tool_id,
-                    'name': item.name,
-                    'url': item.url,
-                    'domain': item.domain,
-                    'similarweb_url': item.similarweb_url,
-                    'etv': item.etv
-                }, max_attempts)
-                result.queue_processed = queue_name
+            try:
+                if isinstance(item, dict):
+                    result = await self.scrape_single_tool(item, max_attempts)
+                    result.queue_processed = queue_name
+                else:
+                    # Retry queue item
+                    result = await self.scrape_single_tool({
+                        '_id': item.tool_id,
+                        'name': item.name,
+                        'url': item.url,
+                        'domain': item.domain,
+                        'similarweb_url': item.similarweb_url,
+                        'etv': item.etv
+                    }, max_attempts)
+                    result.queue_processed = queue_name
+                
+                results.append(result)
+                
+                # Update instance results for real-time tracking
+                self.results.append(result)
+                
+                # Memory management - aggressive cleanup every 10 tools
+                if i % 10 == 0:
+                    # gc.collect()
+                    await asyncio.sleep(1)
+                
+                # Save checkpoint every 100 items
+                if i % 100 == 0:
+                    await self.save_checkpoint(results, f"{queue_name}_{i}", queue_name)
+                    self.print_current_stats(results)
             
-            results.append(result)
-            
-            # Save checkpoint every 100 items
-            if i % 100 == 0:
-                await self.save_checkpoint(results, f"{queue_name}_{i}")
-                self.print_current_stats()
+            except Exception as e:
+                # Create a failed result object for critical errors
+                self.logger.error(f"Critical error processing tool {i}: {e}")
+                
+                # Create minimal failed result
+                if isinstance(item, dict):
+                    tool_id = str(item.get('_id', ''))
+                    name = item.get('name', 'Unknown')
+                    domain = item.get('domain', '')
+                else:
+                    tool_id = item.tool_id
+                    name = item.name
+                    domain = item.domain
+                
+                failed_result = ToolResult(
+                    tool_id=tool_id,
+                    name=name,
+                    url=item.get('url', '') if isinstance(item, dict) else item.url,
+                    domain=domain,
+                    similarweb_url=item.get('similarweb_url', '') if isinstance(item, dict) else item.similarweb_url,
+                    etv=item.get('etv', 0.0) if isinstance(item, dict) else item.etv
+                )
+                failed_result.final_error = f"Critical error: {str(e)}"
+                failed_result.queue_processed = queue_name
+                
+                results.append(failed_result)
+                self.results.append(failed_result)
+                self.stats['failed_scrapes'] += 1
         
         return results
     
@@ -725,6 +584,7 @@ class SimilarWeb1000Scraper:
             
             # Retry queue 1 (2 attempts each)
             retry_1_results = []
+            retry_2_results = []
             if failed:
                 self.logger.info(f"Starting retry queue 1: {len(failed)} tools")
                 retry_1_results = await self.process_queue(failed, "retry_1", 2)
@@ -745,8 +605,6 @@ class SimilarWeb1000Scraper:
                     
                     self.logger.info(f"Final retry complete: {len(final_success)} additional success")
             
-            # Combine all results
-            self.results = primary_results + retry_1_results + (retry_2_results if 'retry_2_results' in locals() else [])
             
             self.stats['end_time'] = time.time()
             
@@ -760,16 +618,30 @@ class SimilarWeb1000Scraper:
             self.logger.error(f"Critical error in 1000-tool scraping: {e}")
             self.logger.error(traceback.format_exc())
             raise
+    def safe_percentage(self, numerator, denominator):
+        """Safe division to avoid division by zero errors"""
+        return (numerator / denominator * 100) if denominator > 0 else 0.0
     
-    async def save_checkpoint(self, results: List[ToolResult], checkpoint_name: str):
-        """Save intermediate results"""
+    async def save_checkpoint(self, results: List[ToolResult], checkpoint_name: str, queue_name: str = "unknown"):
+        """Save intermediate results with enhanced metadata"""
         checkpoint_file = self.results_dir / f"checkpoint_{checkpoint_name}.json"
+        
+        successful_results = [r for r in results if r.final_success]
         
         checkpoint_data = {
             'timestamp': datetime.now().isoformat(),
             'checkpoint_name': checkpoint_name,
+            'queue_name': queue_name,
             'total_results': len(results),
-            'successful': len([r for r in results if r.final_success]),
+            'successful': len(successful_results),
+            'failed': len(results) - len(successful_results),
+            'success_rate': self.safe_percentage(len(successful_results), len(results)),
+            'execution_stats': {
+                'html_files_saved': self.stats['html_files_saved'],
+                'total_attempts': self.stats['total_attempts'],
+                'validation_passes': self.stats['validation_passes'],
+                'validation_failures': self.stats['validation_failures']
+            },
             'results': [
                 {
                     'tool_id': r.tool_id,
@@ -780,16 +652,75 @@ class SimilarWeb1000Scraper:
                     'attempts': len(r.attempts),
                     'html_files': len(r.html_files),
                     'total_time': r.total_time,
-                    'final_error': r.final_error
+                    'final_error': r.final_error,
+                    'queue_processed': getattr(r, 'queue_processed', queue_name)
                 }
                 for r in results
             ]
         }
         
-        with open(checkpoint_file, 'w', encoding='utf-8') as f:
-            json.dump(checkpoint_data, f, indent=2)
+        try:
+            with open(checkpoint_file, 'w', encoding='utf-8') as f:
+                json.dump(checkpoint_data, f, indent=2)
+            
+            self.logger.info(f"Checkpoint saved: {checkpoint_file}")
+        except Exception as e:
+            self.logger.error(f"Failed to save checkpoint: {e}")
+
+    def analyze_results(self, results: List[ToolResult], total_time: float) -> Dict:
+        """Comprehensive results analysis with safe division"""
+        total_tests = len(results)
+        successful_tests = sum(1 for r in results if r.final_success)
+        successful_extractions = sum(1 for r in results if r.final_success)
         
-        self.logger.info(f"Checkpoint saved: {checkpoint_file}")
+        # Calculate all possible metrics coverage
+        all_metrics = set()
+        for result in results:
+            if result.extracted_data and result.extracted_data.get('data'):
+                all_metrics.update(result.extracted_data['data'].keys())
+        
+        metric_coverage = {}
+        for metric in all_metrics:
+            coverage_count = sum(1 for r in results 
+                            if r.extracted_data and r.extracted_data.get('data') and 
+                                metric in r.extracted_data.get('data', {}))
+            metric_coverage[metric] = {
+                'found_count': coverage_count,
+                'coverage_rate': self.safe_percentage(coverage_count, total_tests)
+            }
+        
+        # Proxy performance analysis
+        proxy_performance = {}
+        for result in results:
+            proxy = 'Unknown'
+            if result.attempts:
+                proxy = result.attempts[-1].proxy_used
+            if proxy not in proxy_performance:
+                proxy_performance[proxy] = {'total': 0, 'success': 0, 'avg_time': 0}
+            
+            proxy_performance[proxy]['total'] += 1
+            if result.final_success:
+                proxy_performance[proxy]['success'] += 1
+            proxy_performance[proxy]['avg_time'] += result.total_time
+        
+        # Calculate success rates and average times with safe division
+        for proxy, stats in proxy_performance.items():
+            stats['success_rate'] = self.safe_percentage(stats['success'], stats['total'])
+            stats['avg_time'] = stats['avg_time'] / stats['total'] if stats['total'] > 0 else 0
+        
+        return {
+            'total_tests': total_tests,
+            'successful_navigations': successful_tests,
+            'successful_extractions': successful_extractions,
+            'navigation_success_rate': self.safe_percentage(successful_tests, total_tests),
+            'extraction_success_rate': self.safe_percentage(successful_extractions, total_tests),
+            'overall_success_rate': self.safe_percentage(successful_extractions, total_tests),
+            'metric_coverage': metric_coverage,
+            'proxy_performance': proxy_performance,
+            'average_time_per_test': total_time / total_tests if total_tests > 0 else 0,
+            'total_test_time': total_time,
+            'test_stats': self.stats
+        }
     
     async def save_final_results(self):
         """Save comprehensive final results"""
@@ -862,28 +793,28 @@ class SimilarWeb1000Scraper:
         self.logger.info(f"Final results saved: {json_file}, {csv_file}")
     
     def generate_comprehensive_report(self) -> Dict:
-        """Generate final comprehensive report"""
+        """Generate final comprehensive report with safe calculations"""
         successful_results = [r for r in self.results if r.final_success]
         failed_results = [r for r in self.results if not r.final_success]
         
-        # Calculate detailed statistics
-        total_time = self.stats['end_time'] - self.stats['start_time']
+        # Calculate detailed statistics with safe division
+        total_time = self.stats['end_time'] - self.stats['start_time'] if self.stats.get('end_time') and self.stats.get('start_time') else 0
         avg_time_per_tool = total_time / len(self.results) if self.results else 0
         
         # Success by queue
-        primary_success = len([r for r in self.results if r.final_success and r.queue_processed == "primary"])
-        retry_1_success = len([r for r in self.results if r.final_success and r.queue_processed == "retry_1"])
-        retry_2_success = len([r for r in self.results if r.final_success and r.queue_processed == "retry_2"])
+        primary_success = len([r for r in self.results if r.final_success and getattr(r, 'queue_processed', '') == "primary"])
+        retry_1_success = len([r for r in self.results if r.final_success and getattr(r, 'queue_processed', '') == "retry_1"])
+        retry_2_success = len([r for r in self.results if r.final_success and getattr(r, 'queue_processed', '') == "retry_2"])
         
         # Proxy statistics
-        proxy_stats = self.proxy_manager.get_proxy_stats()
+        proxy_stats = self.proxy_manager.get_proxy_stats() if hasattr(self, 'proxy_manager') else {}
         
         report = {
             'execution_summary': {
                 'total_tools_processed': len(self.results),
                 'total_successful': len(successful_results),
                 'total_failed': len(failed_results),
-                'overall_success_rate': len(successful_results) / len(self.results) * 100 if self.results else 0,
+                'overall_success_rate': self.safe_percentage(len(successful_results), len(self.results)),
                 'total_execution_time_hours': total_time / 3600,
                 'average_time_per_tool_minutes': avg_time_per_tool / 60
             },
@@ -903,22 +834,40 @@ class SimilarWeb1000Scraper:
                 'total_tools_fetched': self.stats['total_tools_fetched'],
                 'valid_domains': self.stats['valid_domains'],
                 'invalid_domains': self.stats['invalid_domains'],
-                'filtering_success_rate': self.stats['valid_domains'] / self.stats['total_tools_fetched'] * 100 if self.stats['total_tools_fetched'] else 0
+                'filtering_success_rate': self.safe_percentage(self.stats['valid_domains'], self.stats['total_tools_fetched'])
             }
         }
         
         return report
     
-    def print_current_stats(self):
-        """Print current statistics to console"""
-        successful = len([r for r in self.results if r.final_success])
-        total_processed = len(self.results)
+    def print_current_stats(self, current_results=None):
+        """Print current statistics to console with safe division"""
+        results_to_use = current_results if current_results is not None else self.results
+        successful = len([r for r in results_to_use if r.final_success])
+        total_processed = len(results_to_use)
         
+        # Safety check for division by zero
+        if total_processed == 0:
+            print(f"\n{'='*60}")
+            print(f"CURRENT PROGRESS STATISTICS")
+            print(f"{'='*60}")
+            print(f"No results processed yet")
+            print(f"HTML Files Saved: {self.stats['html_files_saved']}")
+            print(f"Total Attempts: {self.stats['total_attempts']}")
+            print(f"Validation Passes: {self.stats['validation_passes']}")
+            print(f"Validation Failures: {self.stats['validation_failures']}")
+            
+            if self.stats['start_time']:
+                elapsed = time.time() - self.stats['start_time']
+                print(f"Elapsed Time: {elapsed/3600:.1f} hours")
+            print(f"{'='*60}\n")
+            return
+
         print(f"\n{'='*60}")
         print(f"CURRENT PROGRESS STATISTICS")
         print(f"{'='*60}")
         print(f"Processed: {total_processed}")
-        print(f"Successful: {successful} ({successful/total_processed*100:.1f}%)")
+        print(f"Successful: {successful} ({self.safe_percentage(successful, total_processed):.1f}%)")
         print(f"HTML Files Saved: {self.stats['html_files_saved']}")
         print(f"Total Attempts: {self.stats['total_attempts']}")
         print(f"Validation Passes: {self.stats['validation_passes']}")
@@ -927,7 +876,7 @@ class SimilarWeb1000Scraper:
         if self.stats['start_time']:
             elapsed = time.time() - self.stats['start_time']
             print(f"Elapsed Time: {elapsed/3600:.1f} hours")
-            if total_processed > 0:
+            if total_processed > 0 and hasattr(self, 'primary_queue'):
                 estimated_total_time = (elapsed / total_processed) * len(self.primary_queue)
                 print(f"Estimated Total Time: {estimated_total_time/3600:.1f} hours")
         print(f"{'='*60}\n")
@@ -937,7 +886,7 @@ async def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="SimilarWeb 1000 Tools Scraper")
-    parser.add_argument("--mongodb-uri", help="MongoDB connection URI")
+    parser.add_argument("--mongodb-uri", help="MongoDB connection URI", default="mongodb://admin:X7p9Q2r5T8z3V6b1N4m7K0j3L5s8D2f6@vmi1189275.contaboserver.net:30035/AIAggregator?authSource=admin&directConnection=true")
     parser.add_argument("--headless", action="store_true", default=False, help="Run in headless mode")
     parser.add_argument("--limit", type=int, default=1000, help="Number of tools to process")
     
