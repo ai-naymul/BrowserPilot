@@ -10,6 +10,11 @@ from fingerprint_evasion import AdvancedFingerprintEvasion
 from proxy_manager import AdvancedProxyManager, ProxyType
 import base64
 from typing import Dict
+from fingerprint_evasion import DynamicHeaderManager
+import time
+import asyncio
+import random
+from urllib.parse import urlparse
 logger = logging.getLogger(__name__)
 
 class EnhancedSmartBrowserController(BrowserController):
@@ -40,6 +45,115 @@ class EnhancedSmartBrowserController(BrowserController):
         self.current_proxy = proxy
         self.max_proxy_retries = 5
         self.max_captcha_solve_attempts = 3
+        self.header_manager = DynamicHeaderManager()
+        self.session_state = {
+            'visit_count': 0,
+            'last_domain': None,
+            'session_start': time.time()
+        }
+    
+
+    async def full_session_reset(self):
+        """Complete session reset to prevent fingerprint persistence"""
+        try:
+            # Clear all storage
+            await self.page.evaluate("""
+                // Clear all possible storage
+                localStorage.clear();
+                sessionStorage.clear();
+                if ('indexedDB' in window) {
+                    const dbs = await indexedDB.databases();
+                    dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+                }
+                // Clear cookies
+                document.cookie.split(";").forEach(c => {
+                    const eqPos = c.indexOf("=");
+                    const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+                    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                });
+            """)
+            
+            # Navigate to blank page to clear state
+            await self.page.goto("about:blank")
+            await asyncio.sleep(2)
+            
+            # Reset headers to defaults
+            await self.page.set_extra_http_headers({})
+            
+            logger.info("Full session reset completed")
+            
+        except Exception as e:
+            logger.error(f"Session reset failed: {e}")
+
+    async def _restart_browser_with_proxy(self, new_proxy: dict | None):
+        """Enhanced restart with full cleanup"""
+        await self.full_session_reset()
+        await super()._restart_browser_with_proxy(new_proxy)
+        
+        # Additional cooling period after restart
+        await asyncio.sleep(random.uniform(10, 30))
+
+    async def smart_navigate_with_headers(self, url: str, profile: Dict) -> bool:
+        """Navigate with dynamic, contextual headers"""
+        parsed_url = urlparse(url)
+        current_domain = parsed_url.netloc
+        
+        # Determine if this is first visit to domain
+        is_first_visit = (self.session_state['last_domain'] != current_domain)
+        self.session_state['visit_count'] += 1
+        
+        # Generate contextual headers
+        headers = self.header_manager.generate_dynamic_headers(
+            profile, url, is_first_visit
+        )
+        
+        # Apply headers before navigation
+        await self.page.set_extra_http_headers(headers)
+        
+        # Log headers for debugging (remove in production)
+        logger.debug(f"Headers for {url[:50]}...")
+        for key, value in headers.items():
+            logger.debug(f"  {key}: {value}")
+        
+        # Navigate with realistic timing
+        if not is_first_visit:
+            # Add think time for repeat visits
+            think_time = random.uniform(2, 8)
+            await asyncio.sleep(think_time)
+        
+        try:
+            response = await self.page.goto(
+                url, 
+                wait_until='domcontentloaded', 
+                timeout=30000
+            )
+            
+            self.session_state['last_domain'] = current_domain
+            
+            # Simulate human behavior - sometimes scroll or interact
+            if random.random() < 0.3:  # 30% chance
+                await self._simulate_human_interaction()
+            
+            return response and response.status < 400
+            
+        except Exception as e:
+            logger.error(f"Navigation failed: {e}")
+            return False
+
+    async def _simulate_human_interaction(self):
+        """Simulate realistic human interaction patterns"""
+        # Random scroll
+        if random.random() < 0.7:
+            scroll_amount = random.randint(100, 800)
+            await self.page.mouse.wheel(0, scroll_amount)
+            await asyncio.sleep(random.uniform(1, 3))
+        
+        # Random mouse movement (no clicks, just movement)
+        if random.random() < 0.4:
+            x = random.randint(100, 1000)
+            y = random.randint(100, 600) 
+            await self.page.mouse.move(x, y)
+            await asyncio.sleep(random.uniform(0.5, 2))
 
     async def force_cleanup_with_timeout(self):
         """Enhanced cleanup with timeouts to prevent event loop issues"""

@@ -40,6 +40,12 @@ class ProxyInfo:
     consecutive_failures: int = 0
     timeout_failures: int = 0
     redirect_failures: int = 0
+    last_used: float = 0
+    cooling_until: float = 0
+    requests_this_hour: int = 0
+    hourly_reset_time: float = 0
+    domain_specific_failures: Dict[str, int] = field(default_factory=dict)
+    consecutive_successes: int = 0
     
     @property
     def success_rate(self) -> float:
@@ -53,6 +59,32 @@ class ProxyInfo:
         if self.password:
             proxy_dict["password"] = self.password
         return proxy_dict
+    
+    def is_available(self, domain: str = None) -> bool:
+        """Check if proxy is available for use"""
+        current_time = time.time()
+        
+        # Check cooling period
+        if current_time < self.cooling_until:
+            return False
+            
+        # Check hourly rate limit (max 30 requests per hour per proxy)
+        if current_time > self.hourly_reset_time + 3600:
+            self.requests_this_hour = 0
+            self.hourly_reset_time = current_time
+            
+        if self.requests_this_hour >= 30:  # Conservative limit
+            return False
+            
+        # Check domain-specific failures
+        if domain and self.domain_specific_failures.get(domain, 0) >= 3:
+            return False
+            
+        # Check overall health
+        if self.consecutive_failures >= 3:
+            return False
+            
+        return True
 
 class AdvancedProxyManager:
     def __init__(self, vision_model=None):
@@ -65,6 +97,9 @@ class AdvancedProxyManager:
         self.max_consecutive_failures = 3
         self.timeout_threshold = 50  # 50 seconds
         
+        self.min_cooling_period = 300  # 5 minutes minimum
+        self.max_cooling_period = 1800  # 30 minutes maximum
+        self.requests_per_proxy_per_hour = 30
         # Load all proxy types
         self._load_webshare_residential_proxies()
         self._load_oxylabs_mobile_proxies()
@@ -247,77 +282,41 @@ class AdvancedProxyManager:
         logger.info(f"   Mobile: {len(self.mobile_proxies)}")
         logger.info(f"   Total: {len(self.proxies)}")
 
-    def get_best_proxy(self, prefer_type: ProxyType = ProxyType.RESIDENTIAL, exclude_blocked_for: str = None, for_large_scale: bool = False) -> Optional[ProxyInfo]:
-        """Get best proxy with intelligent selection"""
+    def get_best_proxy(self, prefer_type: ProxyType = ProxyType.RESIDENTIAL, 
+                  exclude_blocked_for: str = None) -> Optional[ProxyInfo]:
+        """Enhanced proxy selection with cooling periods"""
+        current_time = time.time()
         
-        if for_large_scale:
-            # For 1000+ operations, strongly prefer residential
-            preferred_proxies = [p for p in self.proxies if p.proxy_type == ProxyType.RESIDENTIAL]
-            
-            # Only use mobile as absolute last resort
-            if not preferred_proxies:
-                mobile_proxies = [p for p in self.proxies if p.proxy_type == ProxyType.MOBILE]
-                if mobile_proxies:
-                    self.logger.warning("Using mobile proxy - monitor data usage!")
-                    return mobile_proxies[0]
-        # First try preferred type (residential)
-        preferred_proxies = [p for p in self.proxies if p.proxy_type == prefer_type]
-        available_preferred = [
-            p for p in preferred_proxies
-            if p.health != ProxyHealth.FAILED and 
-               p.consecutive_failures < self.max_consecutive_failures and
-               (not exclude_blocked_for or exclude_blocked_for not in p.blocked_sites)
+        # Filter available proxies
+        available_proxies = [
+            p for p in self.proxies 
+            if p.is_available(exclude_blocked_for) and p.health != ProxyHealth.FAILED
         ]
         
-        if available_preferred:
-            # Sort by performance metrics
-            sorted_proxies = sorted(
-                available_preferred,
-                key=lambda p: (
-                    p.success_rate,
-                    -p.response_time,
-                    -p.timeout_failures,
-                    -p.redirect_failures,
-                    -p.last_used
-                ),
-                reverse=True
+        if not available_proxies:
+            logger.warning("No proxies currently available - all in cooling period")
+            # Return the proxy with shortest remaining cooling time
+            return min(self.proxies, key=lambda p: p.cooling_until - current_time)
+        
+        # Prioritize by type and performance
+        preferred_proxies = [p for p in available_proxies if p.proxy_type == prefer_type]
+        candidates = preferred_proxies if preferred_proxies else available_proxies
+        
+        # Sort by composite score: success rate, time since last use, consecutive successes
+        def proxy_score(proxy):
+            time_since_use = current_time - proxy.last_used
+            return (
+                proxy.success_rate * 1000 +  # Success rate weight
+                min(time_since_use / 60, 100) +  # Time bonus (max 100 points for >100 min)
+                proxy.consecutive_successes * 10  # Consecutive success bonus
             )
-            logger.info(f"🎯 Selected {prefer_type.value} proxy: {sorted_proxies[0].server}")
-            return sorted_proxies[0]
         
-        # Fallback to other types
-        other_type = ProxyType.MOBILE if prefer_type == ProxyType.RESIDENTIAL else ProxyType.RESIDENTIAL
-        other_proxies = [p for p in self.proxies if p.proxy_type == other_type]
-        available_other = [
-            p for p in other_proxies
-            if p.health != ProxyHealth.FAILED and 
-               p.consecutive_failures < self.max_consecutive_failures and
-               (not exclude_blocked_for or exclude_blocked_for not in p.blocked_sites)
-        ]
+        best_proxy = max(candidates, key=proxy_score)
+        best_proxy.last_used = current_time
+        best_proxy.requests_this_hour += 1
         
-        if available_other:
-            sorted_other = sorted(
-                available_other,
-                key=lambda p: (p.success_rate, -p.response_time, -p.last_used),
-                reverse=True
-            )
-            logger.info(f"🔄 Fallback to {other_type.value} proxy: {sorted_other[0].server}")
-            return sorted_other[0]
-        
-        # Last resort: reset failures and try again
-        logger.warning("⚠️ No healthy proxies available, resetting failure counters")
-        for proxy in self.proxies:
-            if proxy.consecutive_failures > 0:
-                proxy.consecutive_failures = max(0, proxy.consecutive_failures - 1)
-                proxy.health = ProxyHealth.DEGRADED
-        
-        # Try again after reset
-        available_reset = [p for p in self.proxies if p.health != ProxyHealth.FAILED]
-        if available_reset:
-            return available_reset[0]
-        
-        logger.error("❌ No proxies available at all!")
-        return None
+        logger.info(f"Selected proxy: {best_proxy.server} (Score: {proxy_score(best_proxy):.1f})")
+        return best_proxy
 
     async def detect_proxy_issues(self, page, proxy_info: ProxyInfo, start_time: float, url: str) -> Tuple[bool, str, str]:
         """Detect various proxy-related issues"""
@@ -355,28 +354,33 @@ class AdvancedProxyManager:
         return False, "", ""
 
     def mark_proxy_failure(self, proxy: ProxyInfo, site_url: str = None, failure_type: str = None):
-        """Enhanced proxy failure tracking"""
+        """Enhanced failure tracking with intelligent cooling"""
         proxy.failure_count += 1
         proxy.consecutive_failures += 1
+        proxy.consecutive_successes = 0
+        current_time = time.time()
         
-        # Track specific failure types
-        if failure_type == "timeout":
-            proxy.timeout_failures += 1
-        elif failure_type == "redirect":
-            proxy.redirect_failures += 1
+        # Domain-specific failure tracking
+        if site_url:
+            proxy.domain_specific_failures[site_url] = proxy.domain_specific_failures.get(site_url, 0) + 1
         
-        # Site-specific blocking
-        if site_url and failure_type in ["cloudflare", "rate_limit", "access_denied", "blocked"]:
-            proxy.blocked_sites.add(site_url)
-            proxy.health = ProxyHealth.BLOCKED
-            logger.warning(f"🚫 {proxy.proxy_type.value} proxy {proxy.server} blocked for {site_url}")
-        else:
-            proxy.health = ProxyHealth.DEGRADED
-        
-        # Mark as failed if too many consecutive failures
-        if proxy.consecutive_failures >= self.max_consecutive_failures:
+        # Calculate cooling period based on failure type and frequency
+        if failure_type in ["rate_limit", "429", "403"]:
+            # Aggressive cooling for rate limits
+            cooling_time = min(self.max_cooling_period, 
+                            self.min_cooling_period * (2 ** proxy.consecutive_failures))
+            proxy.cooling_until = current_time + cooling_time
+            logger.warning(f"Proxy {proxy.server} cooling for {cooling_time/60:.1f} minutes due to {failure_type}")
+            
+        elif failure_type in ["timeout", "connection_error"]:
+            # Moderate cooling for connection issues
+            cooling_time = self.min_cooling_period * proxy.consecutive_failures
+            proxy.cooling_until = current_time + cooling_time
+            
+        # Update health status
+        if proxy.consecutive_failures >= 5:
             proxy.health = ProxyHealth.FAILED
-            logger.error(f"❌ {proxy.proxy_type.value} proxy {proxy.server} marked as failed")
+            proxy.cooling_until = current_time + self.max_cooling_period
 
     def mark_proxy_success(self, proxy: ProxyInfo, response_time: float = 0):
         """Mark proxy as successful"""

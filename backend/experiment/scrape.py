@@ -109,7 +109,7 @@ class SingleBrowserController(EnhancedSmartBrowserController):
             return self
         
         # Get random fingerprint profile BEFORE browser initialization
-        self.current_fingerprint_profile = self.fingerprint_evasion.get_random_profile()
+        self.current_fingerprint_profile = self.fingerprint_evasion._load_stable_profiles()[0] 
         logging.info(f"Using fingerprint profile: {self.current_fingerprint_profile['name']}")
         
         # Initialize Playwright
@@ -208,7 +208,7 @@ class SimilarWeb1000Scraper:
         self.proxy_manager = AdvancedProxyManager()
         self.validator = SimilarWebValidator()
         self.extractor = SimilarWebExtractor()
-        
+        self.fingerprint_evasion = AdvancedFingerprintEvasion()
         # Create output directories under ./data
         data_dir = Path("data")
         data_dir.mkdir(exist_ok=True)
@@ -328,8 +328,8 @@ class SimilarWeb1000Scraper:
     
     
 
-    async def scrape_single_tool(self, tool_data: Dict, max_attempts: int = 5) -> ToolResult:
-        """Scrape single tool with comprehensive error handling"""
+    async def scrape_single_tool(self, tool_data: Dict, max_attempts: int = 3) -> ToolResult:
+        """Scrape with intelligent request distribution and proxy cooling"""
         tool_id = str(tool_data.get('_id', ''))
         name = tool_data.get('name', 'Unknown')
         url = tool_data.get('url', '')
@@ -345,6 +345,9 @@ class SimilarWeb1000Scraper:
         start_time = time.time()
         self.logger.info(f"Scraping {name} ({domain}) - ETV: {etv}")
         
+        # Get consistent fingerprint profile for entire scraping session
+        fingerprint_profile = self.fingerprint_evasion.get_consistent_profile()
+        
         for attempt in range(1, max_attempts + 1):
             self.logger.info(f"Attempt {attempt}/{max_attempts} for {name}")
             
@@ -356,47 +359,80 @@ class SimilarWeb1000Scraper:
             )
             
             try:
-                # Get proxy - prioritize residential for large scale
-                proxy = None
+                # Get proxy with proper availability checking
                 proxy_info = None
                 if self.proxy_manager.proxies:
                     proxy_info = self.proxy_manager.get_best_proxy(
                         prefer_type=ProxyType.RESIDENTIAL,
                         exclude_blocked_for="similarweb.com"
                     )
-                    if proxy_info:
-                        proxy = proxy_info.to_playwright_dict()
-                        attempt_record.proxy_used = proxy.get('server', 'Unknown')
-                        self.loggers['proxy'].info(f"Using proxy: {attempt_record.proxy_used}")
+                    
+                    if not proxy_info:
+                        # Wait for proxies to become available
+                        wait_time = 300  # 5 minutes
+                        self.logger.info(f"All proxies cooling - waiting {wait_time/60:.1f} minutes")
+                        await asyncio.sleep(wait_time)
+                        continue
+                        
+                    # Check if we need to wait for this specific proxy
+                    if not proxy_info.is_available("similarweb.com"):
+                        wait_time = max(60, proxy_info.cooling_until - time.time())
+                        self.logger.info(f"Waiting {wait_time:.0f}s for proxy to cool down")
+                        await asyncio.sleep(wait_time)
+                        continue
+                    
+                    # Human-like delay before starting (2-8 minutes between requests from same IP)
+                    if proxy_info.last_used > 1:
+                        time_since_last = time.time() - proxy_info.last_used
+                        min_gap = 2  # 2 minutes minimum
+                        if time_since_last < min_gap:
+                            wait_time = min_gap - time_since_last + random.uniform(0, 60)
+                            self.logger.info(f"Human-like delay: {wait_time:.0f}s")
+                            await asyncio.sleep(wait_time)
+                    
+                    proxy = proxy_info.to_playwright_dict()
+                    attempt_record.proxy_used = proxy.get('server', 'Unknown')
+                    self.loggers['proxy'].info(f"Using proxy: {attempt_record.proxy_used}")
                 
-                # Use proper async context manager - this prevents double browser instances
+                # Use enhanced browser controller
                 async with SingleBrowserController(
                     headless=self.headless,
                     proxy=proxy,
                     enable_streaming=False
                 ) as browser:
                     
-                    # Navigate with timeout
+                    # Navigate with enhanced headers and timeout
                     nav_start = time.time()
                     try:
+                        # Use enhanced navigation with dynamic headers
                         nav_success = await asyncio.wait_for(
-                            browser.smart_navigate(similarweb_url),
-                            timeout=120.0  # 2 minute timeout
+                            browser.smart_navigate(
+                                similarweb_url, 
+                                # profile=fingerprint_profile,
+                                # wait_until="domcontentloaded",
+                                # timeout=30000
+                            ),
+                            timeout=180.0  # 3 minute timeout
                         )
                         attempt_record.response_time = time.time() - nav_start
                         
                         if not nav_success:
                             attempt_record.error = "Smart navigation failed"
+                            # Mark proxy failure for navigation issues
+                            if proxy_info:
+                                self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", "navigation_failed")
                             continue
                             
                     except asyncio.TimeoutError:
                         attempt_record.error = "Navigation timeout (120s)"
                         attempt_record.response_time = time.time() - nav_start
+                        if proxy_info:
+                            self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", "timeout")
                         continue
                     
-                    # Handle popups
+                    # Handle popups with extended wait
                     await browser.handle_similarweb_popups()
-                    await asyncio.sleep(3)  # Allow page to settle
+                    await asyncio.sleep(random.uniform(3, 6))  # Human-like settling time
                     
                     # VISION-FIRST VALIDATION (before saving HTML)
                     self.logger.info(f"Validating page for {name} using vision...")
@@ -412,13 +448,15 @@ class SimilarWeb1000Scraper:
                             html_filename = f"{domain}_{attempt}_{int(time.time())}.html"
                             html_path = self.html_dir / html_filename
                             
-                            # Save with metadata
+                            # Save with enhanced metadata
                             with open(html_path, 'w', encoding='utf-8') as f:
                                 f.write(f"<!-- Tool: {name} -->\n")
                                 f.write(f"<!-- Domain: {domain} -->\n")
                                 f.write(f"<!-- ETV: {etv} -->\n")
                                 f.write(f"<!-- Validation: PASSED -->\n")
                                 f.write(f"<!-- Found Metrics: {validation_result.get('found_metrics', [])} -->\n")
+                                f.write(f"<!-- Proxy Used: {attempt_record.proxy_used} -->\n")
+                                f.write(f"<!-- Fingerprint: {fingerprint_profile['name']} -->\n")
                                 f.write("<!-- ================================== -->\n\n")
                                 f.write(html_content)
                             
@@ -430,14 +468,14 @@ class SimilarWeb1000Scraper:
                             attempt_record.data_extracted = True
                             attempt_record.success = True
                             result.final_success = True
-                                    
+                            
                             # Mark proxy success
-                            if proxy and proxy_info:
+                            if proxy_info:
                                 self.proxy_manager.mark_proxy_success(proxy_info, attempt_record.response_time)
-                                    
-                                self.logger.info(f"SUCCESS: {name} - Data extracted")
-                                self.stats['successful_scrapes'] += 1
-                                break  # Success - exit retry loop
+                            
+                            self.logger.info(f"SUCCESS: {name} - Data extracted")
+                            self.stats['successful_scrapes'] += 1
+                            break  # Success - exit retry loop
                         
                         except Exception as e:
                             attempt_record.error = f"HTML save error: {str(e)}"
@@ -451,30 +489,44 @@ class SimilarWeb1000Scraper:
                         attempt_record.error = f"Page validation failed: {blocking_type}"
                         self.logger.warning(f"Validation failed for {name}: {blocking_type}")
                         
-                        # Mark proxy failure for certain blocking types
-                        if blocking_type in ['login_required', 'upgrade_needed'] and proxy and proxy_info:
-                            self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", blocking_type)
+                        # Mark proxy failure for certain blocking types with appropriate cooling
+                        if proxy_info:
+                            if blocking_type in ['login_required', 'upgrade_needed', 'rate_limit', '403', 'blocked']:
+                                # These are serious blocks - need longer cooling
+                                self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", blocking_type)
+                            elif blocking_type in ['captcha', 'cloudflare']:
+                                # These might be temporary - shorter cooling
+                                self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", blocking_type)
             
             except Exception as e:
                 attempt_record.error = f"Browser error: {str(e)}"
                 self.logger.error(f"Browser error for {name}: {e}")
                 
-                if proxy and proxy_info:
+                # Mark proxy failure for browser errors
+                if proxy_info:
                     self.proxy_manager.mark_proxy_failure(proxy_info, "similarweb.com", "browser_error")
             
             finally:
                 # Browser cleanup is handled automatically by async context manager
-                # Just do garbage collection and record attempt
                 gc.collect()
                 result.attempts.append(attempt_record)
                 self.stats['total_attempts'] += 1
             
-            # Success break or delay before retry
+            # Success break or intelligent delay before retry
             if result.final_success:
                 break
             elif attempt < max_attempts:
-                delay = random.uniform(20, 40)  # Longer delays for 1K scraping
-                self.logger.info(f"Waiting {delay:.1f}s before retry...")
+                # Longer delays between attempts to respect rate limits
+                if attempt_record.error and any(keyword in attempt_record.error.lower() 
+                                            for keyword in ['403', 'blocked', 'rate', 'captcha']):
+                    # Serious errors need longer delays
+                    delay = random.uniform(300, 600)  # 5-10 minutes
+                    self.logger.info(f"Serious error detected - waiting {delay/60:.1f} minutes before retry...")
+                else:
+                    # Regular errors get shorter delays
+                    delay = random.uniform(60, 180)  # 1-3 minutes
+                    self.logger.info(f"Waiting {delay:.1f}s before retry...")
+                
                 await asyncio.sleep(delay)
         
         # Final result processing
@@ -886,7 +938,7 @@ async def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="SimilarWeb 1000 Tools Scraper")
-    parser.add_argument("--mongodb-uri", help="MongoDB connection URI")
+    parser.add_argument("--mongodb-uri", help="MongoDB connection URI", default="mongodb://admin:X7p9Q2r5T8z3V6b1N4m7K0j3L5s8D2f6@vmi1189275.contaboserver.net:30035/AIAggregator?authSource=admin&directConnection=true")
     parser.add_argument("--headless", action="store_true", default=False, help="Run in headless mode")
     parser.add_argument("--limit", type=int, default=1000, help="Number of tools to process")
     

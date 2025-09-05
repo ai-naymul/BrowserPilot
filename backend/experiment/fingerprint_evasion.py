@@ -1,644 +1,949 @@
 import random
 import json
 from typing import Dict, List
+import time
+from urllib.parse import urlparse
+
+
+
+class DynamicHeaderManager:
+    def __init__(self):
+        self.referer_chains = self._build_referer_chains()
+        self.session_referer = None
+        
+    def _build_referer_chains(self):
+        """Build realistic referer chains that lead to SimilarWeb"""
+        return {
+            'google_search': [
+                'https://www.google.com/',
+                'https://www.google.com/search?q=similarweb+traffic+analysis',
+                'https://www.google.com/search?q=website+analytics+similarweb',
+                'https://www.google.com/search?q=web+analytics+similarweb'
+            ],
+            'direct_search': [
+                'https://www.google.com/search?q=site+analytics',
+                'https://www.google.com/search?q=website+traffic+checker',
+                'https://www.bing.com/search?q=similarweb'
+            ],
+            'competitor_analysis': [
+                'https://blog.hubspot.com/marketing/competitor-analysis-tools',
+                'https://ahrefs.com/blog/competitor-analysis/',
+                'https://neilpatel.com/blog/competitor-analysis/'
+            ],
+            'marketing_tools': [
+                'https://moz.com/blog/competitor-analysis',
+                'https://backlinko.com/competitor-analysis',
+                'https://semrush.com/blog/competitor-analysis/'
+            ]
+        }
+    
+    def generate_dynamic_headers(self, profile: Dict, target_url: str, is_first_visit: bool = False) -> Dict:
+        """Generate contextually appropriate headers"""
+        parsed_url = urlparse(target_url)
+        domain = parsed_url.netloc
+        
+        # Core headers that must be consistent with fingerprint
+        headers = {
+            'User-Agent': profile['user_agent'],
+            'Accept': self._get_dynamic_accept_header(),
+            'Accept-Language': self._get_accept_language(profile),
+            'Accept-Encoding': 'gzip, deflate, br, zstd',
+            'Host': domain,
+            'Upgrade-Insecure-Requests': '1',
+        }
+        
+        # Add Referer based on session context
+        if not is_first_visit:
+            headers['Referer'] = self._get_contextual_referer(target_url)
+        
+        # Browser-specific headers
+        if 'Chrome' in profile['user_agent'] or 'Chromium' in profile['user_agent']:
+            headers.update(self._get_chrome_headers(profile))
+        elif 'Firefox' in profile['user_agent']:
+            headers.update(self._get_firefox_headers(profile))
+        
+        # Add modern browser features
+        if random.random() < 0.8:  # 80% of requests include priority
+            headers['Priority'] = self._get_priority_header()
+            
+        # Add cache control for repeat visits
+        if not is_first_visit and random.random() < 0.3:
+            headers['Cache-Control'] = random.choice(['max-age=0', 'no-cache'])
+            
+        # Add DNT header sometimes (privacy-conscious users)
+        if random.random() < 0.15:  # 15% of users have DNT enabled
+            headers['DNT'] = '1'
+            
+        # Add Sec-GPC for privacy browsers (Brave, etc.)
+        if 'Brave' in profile['user_agent'] or random.random() < 0.05:
+            headers['Sec-GPC'] = '1'
+            
+        return headers
+    
+    def _get_dynamic_accept_header(self) -> str:
+        """Generate realistic Accept header with slight variations"""
+        base_accepts = [
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        ]
+        return random.choice(base_accepts)
+    
+    def _get_accept_language(self, profile: Dict) -> str:
+        """Generate Accept-Language based on profile with realistic variations"""
+        lang = profile.get('language', 'en-US')
+        
+        patterns = {
+            'en-US': ['en-US,en;q=0.9', 'en-US,en;q=0.8,es;q=0.6', 'en-US,en;q=0.9,fr;q=0.8'],
+            'en-GB': ['en-GB,en;q=0.9', 'en-GB,en;q=0.8,fr;q=0.6'],
+            'en-CA': ['en-CA,en;q=0.9,fr;q=0.8', 'en-CA,en;q=0.9']
+        }
+        
+        return random.choice(patterns.get(lang, ['en-US,en;q=0.9']))
+    
+    def _get_chrome_headers(self, profile: Dict) -> Dict:
+        """Chrome-specific headers"""
+        version = self._extract_chrome_version(profile['user_agent'])
+        platform = profile.get('platform', 'Win32')
+        
+        # Map platform to Sec-CH-UA-Platform
+        platform_map = {
+            'Win32': 'Windows',
+            'MacIntel': 'macOS', 
+            'Linux x86_64': 'Linux'
+        }
+        sec_platform = platform_map.get(platform, 'Windows')
+        
+        headers = {
+            'Sec-CH-UA': f'"Not)A;Brand";v="99", "Google Chrome";v="{version}", "Chromium";v="{version}"',
+            'Sec-CH-UA-Mobile': '?0',
+            'Sec-CH-UA-Platform': f'"{sec_platform}"',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': self._get_fetch_site(),
+            'Sec-Fetch-User': '?1'
+        }
+        
+        # Add additional CH-UA headers sometimes
+        if random.random() < 0.4:
+            headers['Sec-CH-UA-Arch'] = '"x86"'
+            headers['Sec-CH-UA-Bitness'] = '"64"'
+            
+        if random.random() < 0.2:
+            headers['Sec-CH-UA-Full-Version'] = f'"{version}.0.0.0"'
+            headers['Sec-CH-UA-Platform-Version'] = self._get_platform_version(sec_platform)
+            
+        return headers
+    
+    def _get_firefox_headers(self, profile: Dict) -> Dict:
+        """Firefox-specific headers"""
+        return {
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': self._get_fetch_site(),
+            'Sec-Fetch-User': '?1'
+        }
+    
+    def _get_contextual_referer(self, target_url: str) -> str:
+        """Generate contextually appropriate referer"""
+        if not self.session_referer or random.random() < 0.3:
+            # Start new referer chain
+            chain_type = random.choice(list(self.referer_chains.keys()))
+            self.session_referer = random.choice(self.referer_chains[chain_type])
+        
+        # Sometimes use SimilarWeb internal navigation
+        if 'similarweb.com' in target_url and random.random() < 0.6:
+            internal_referers = [
+                'https://www.similarweb.com/',
+                'https://www.similarweb.com/corp/web/market-research/',
+                'https://www.similarweb.com/corp/web/competitive-analysis/',
+                # 'https://account.similarweb.com/',
+                'https://www.similarweb.com/packages/marketing/'
+                'https://www.similarweb.com/corp/search/keyword-research/',
+                'https://www.similarweb.com/corp/web/strategy/',
+                'https://www.similarweb.com/corp/search/backlink-analysis/'
+                'https://pro.similarweb.com/'
+            ]
+            return random.choice(internal_referers)
+            
+        return self.session_referer
+    
+    def _get_priority_header(self) -> str:
+        """Generate Priority header (HTTP/2 feature)"""
+        priorities = [
+            'u=0, i',  # High priority, incremental
+            'u=1, i',  # Medium priority
+            'u=2, i',  # Lower priority
+            'u=0'      # High priority only
+        ]
+        return random.choice(priorities)
+    
+    def _get_fetch_site(self) -> str:
+        """Determine Sec-Fetch-Site value"""
+        return random.choices(
+            ['none', 'same-origin', 'cross-site'], 
+            weights=[40, 30, 30]  # 'none' for direct navigation
+        )[0]
+    
+    def _extract_chrome_version(self, user_agent: str) -> str:
+        """Extract Chrome version from user agent"""
+        import re
+        match = re.search(r'Chrome/(\d+)', user_agent)
+        return match.group(1) if match else '120'
+    
+    def _get_platform_version(self, platform: str) -> str:
+        """Get realistic platform version"""
+        versions = {
+            'Windows': ['"10.0.0"', '"11.0.0"'],
+            'macOS': ['"13.0.0"', '"14.0.0"'], 
+            'Linux': ['"6.0.0"', '"5.15.0"']
+        }
+        return random.choice(versions.get(platform, ['"10.0.0"']))
+
+
+
+
+
+
 
 class AdvancedFingerprintEvasion:
     def __init__(self):
-        self.fingerprint_profiles = self._load_comprehensive_fingerprint_profiles()
-        self.current_profile = None
+        # Much smaller, realistic profile set
+        self.stable_profiles = self._load_stable_profiles()
+        self.used_profiles = set()
         
-    def _load_comprehensive_fingerprint_profiles(self) -> List[Dict]:
-        """Load 15+ realistic fingerprint profiles for maximum diversity"""
+    def _load_stable_profiles(self):
+        """Load smaller set of very realistic profiles"""
         return [
-            # Windows Chrome variants
             {
-                "name": "Windows_Chrome_120_High_End",
+                "name": "Corporate_Windows_Chrome",
                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "viewport": {"width": 1920, "height": 1080},
-                "screen": {"width": 1920, "height": 1080, "colorDepth": 24},
                 "timezone": "America/New_York",
                 "language": "en-US",
                 "platform": "Win32",
-                "hardware_concurrency": 16,
-                "device_memory": 32,
-                "webgl_vendor": "Google Inc. (NVIDIA)",
-                "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
-                "canvas_noise": 0.05,
-                "audio_noise": 0.02
+                "hardware_concurrency": 8,
+                "device_memory": 16
             },
             {
-                "name": "Windows_Chrome_119_Gaming",
+                "name": "Home_Windows_Chrome",
                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                "viewport": {"width": 2560, "height": 1440},
-                "screen": {"width": 2560, "height": 1440, "colorDepth": 24},
-                "timezone": "America/Los_Angeles",
-                "language": "en-US",
-                "platform": "Win32",
-                "hardware_concurrency": 12,
-                "device_memory": 16,
-                "webgl_vendor": "Google Inc. (AMD)",
-                "webgl_renderer": "ANGLE (AMD, AMD Radeon RX 7800 XT Direct3D11 vs_5_0 ps_5_0, D3D11)",
-                "canvas_noise": 0.08,
-                "audio_noise": 0.04
-            },
-            {
-                "name": "Windows_Chrome_118_Business",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
                 "viewport": {"width": 1366, "height": 768},
-                "screen": {"width": 1366, "height": 768, "colorDepth": 24},
                 "timezone": "America/Chicago",
                 "language": "en-US",
                 "platform": "Win32",
-                "hardware_concurrency": 8,
-                "device_memory": 8,
-                "webgl_vendor": "Google Inc. (Intel)",
-                "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics 630 Direct3D11 vs_5_0 ps_5_0, D3D11)",
-                "canvas_noise": 0.12,
-                "audio_noise": 0.06
+                "hardware_concurrency": 4,
+                "device_memory": 8
             },
-            
-            # Linux Chrome variants
             {
-                "name": "Linux_Chrome_120_Developer",
+                "name": "MacBook_Safari",
+                "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "viewport": {"width": 1440, "height": 900},
+                "timezone": "America/Los_Angeles",
+                "language": "en-US",
+                "platform": "MacIntel",
+                "hardware_concurrency": 8,
+                "device_memory": 16
+            },
+            {
+                "name": "Linux_Firefox",
                 "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 "viewport": {"width": 1920, "height": 1080},
-                "screen": {"width": 1920, "height": 1080, "colorDepth": 24},
                 "timezone": "America/New_York",
-                "language": "en-US",
-                "platform": "Linux x86_64",
-                "hardware_concurrency": 16,
-                "device_memory": 32,
-                "webgl_vendor": "Mesa",
-                "webgl_renderer": "Mesa DRI Intel(R) Arc(tm) A770 Graphics",
-                "canvas_noise": 0.10,
-                "audio_noise": 0.05
-            },
-            {
-                "name": "Linux_Chrome_119_Ubuntu",
-                "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                "viewport": {"width": 1680, "height": 1050},
-                "screen": {"width": 1680, "height": 1050, "colorDepth": 24},
-                "timezone": "Europe/London",
-                "language": "en-GB",
-                "platform": "Linux x86_64",
-                "hardware_concurrency": 8,
-                "device_memory": 16,
-                "webgl_vendor": "Mesa",
-                "webgl_renderer": "Mesa DRI AMD Radeon RX 6700 XT",
-                "canvas_noise": 0.15,
-                "audio_noise": 0.08
-            },
-            {
-                "name": "Linux_Firefox_121",
-                "user_agent": "Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
-                "viewport": {"width": 1440, "height": 900},
-                "screen": {"width": 1440, "height": 900, "colorDepth": 24},
-                "timezone": "Europe/Berlin",
                 "language": "en-US",
                 "platform": "Linux x86_64",
                 "hardware_concurrency": 12,
-                "device_memory": 8,
-                "webgl_vendor": "Mesa",
-                "webgl_renderer": "Mesa DRI NVIDIA GeForce GTX 1660 Ti",
-                "canvas_noise": 0.18,
-                "audio_noise": 0.09
-            },
-            
-            # MacOS variants
-            {
-                "name": "MacOS_Safari_17_Intel",
-                "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
-                "viewport": {"width": 1440, "height": 900},
-                "screen": {"width": 1440, "height": 900, "colorDepth": 24},
-                "timezone": "America/Los_Angeles",
-                "language": "en-US",
-                "platform": "MacIntel",
-                "hardware_concurrency": 8,
-                "device_memory": 16,
-                "webgl_vendor": "Apple Inc.",
-                "webgl_renderer": "Apple GPU",
-                "canvas_noise": 0.03,
-                "audio_noise": 0.01
-            },
-            {
-                "name": "MacOS_Chrome_120_M2",
-                "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "viewport": {"width": 1512, "height": 982},
-                "screen": {"width": 1512, "height": 982, "colorDepth": 24},
-                "timezone": "America/Los_Angeles",
-                "language": "en-US",
-                "platform": "MacIntel",
-                "hardware_concurrency": 8,
-                "device_memory": 24,
-                "webgl_vendor": "Apple Inc.",
-                "webgl_renderer": "Apple M2 GPU",
-                "canvas_noise": 0.04,
-                "audio_noise": 0.02
-            },
-            {
-                "name": "MacOS_Firefox_120",
-                "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0",
-                "viewport": {"width": 1280, "height": 800},
-                "screen": {"width": 1280, "height": 800, "colorDepth": 24},
-                "timezone": "America/Denver",
-                "language": "en-US",
-                "platform": "MacIntel",
-                "hardware_concurrency": 4,
-                "device_memory": 8,
-                "webgl_vendor": "Apple Inc.",
-                "webgl_renderer": "Apple GPU",
-                "canvas_noise": 0.06,
-                "audio_noise": 0.03
-            },
-            
-            # Mobile-like profiles
-            {
-                "name": "Windows_Edge_120_Tablet",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
-                "viewport": {"width": 1024, "height": 768},
-                "screen": {"width": 1024, "height": 768, "colorDepth": 24},
-                "timezone": "America/New_York",
-                "language": "en-US",
-                "platform": "Win32",
-                "hardware_concurrency": 4,
-                "device_memory": 4,
-                "webgl_vendor": "Google Inc. (Intel)",
-                "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics Direct3D11 vs_5_0 ps_5_0, D3D11)",
-                "canvas_noise": 0.20,
-                "audio_noise": 0.10
-            },
-            
-            # International variants
-            {
-                "name": "Windows_Chrome_120_Europe",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "viewport": {"width": 1600, "height": 900},
-                "screen": {"width": 1600, "height": 900, "colorDepth": 24},
-                "timezone": "Europe/Paris",
-                "language": "fr-FR",
-                "platform": "Win32",
-                "hardware_concurrency": 6,
-                "device_memory": 12,
-                "webgl_vendor": "Google Inc. (NVIDIA)",
-                "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0, D3D11)",
-                "canvas_noise": 0.14,
-                "audio_noise": 0.07
-            },
-            {
-                "name": "Linux_Chrome_119_Asia",
-                "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                "viewport": {"width": 1366, "height": 768},
-                "screen": {"width": 1366, "height": 768, "colorDepth": 24},
-                "timezone": "Asia/Tokyo",
-                "language": "ja-JP",
-                "platform": "Linux x86_64",
-                "hardware_concurrency": 4,
-                "device_memory": 8,
-                "webgl_vendor": "Mesa",
-                "webgl_renderer": "Mesa DRI Intel(R) UHD Graphics 620",
-                "canvas_noise": 0.16,
-                "audio_noise": 0.08
-            },
-            
-            # Low-end systems
-            {
-                "name": "Windows_Chrome_118_Budget",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
-                "viewport": {"width": 1280, "height": 720},
-                "screen": {"width": 1280, "height": 720, "colorDepth": 24},
-                "timezone": "America/Phoenix",
-                "language": "en-US",
-                "platform": "Win32",
-                "hardware_concurrency": 2,
-                "device_memory": 4,
-                "webgl_vendor": "Google Inc. (Intel)",
-                "webgl_renderer": "ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_4_0 ps_4_0, D3D11)",
-                "canvas_noise": 0.25,
-                "audio_noise": 0.12
-            },
-            
-            # High-refresh displays
-            {
-                "name": "Windows_Chrome_120_144Hz",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "viewport": {"width": 2560, "height": 1440},
-                "screen": {"width": 2560, "height": 1440, "colorDepth": 24},
-                "timezone": "America/New_York",
-                "language": "en-US",
-                "platform": "Win32",
-                "hardware_concurrency": 24,
-                "device_memory": 64,
-                "webgl_vendor": "Google Inc. (NVIDIA)",
-                "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4090 Direct3D11 vs_5_0 ps_5_0, D3D11)",
-                "canvas_noise": 0.02,
-                "audio_noise": 0.01
-            },
-            
-            # Corporate environments
-            {
-                "name": "Windows_Chrome_119_Corporate",
-                "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                "viewport": {"width": 1920, "height": 1200},
-                "screen": {"width": 1920, "height": 1200, "colorDepth": 24},
-                "timezone": "America/New_York",
-                "language": "en-US",
-                "platform": "Win32",
-                "hardware_concurrency": 4,
-                "device_memory": 8,
-                "webgl_vendor": "Google Inc. (Intel)",
-                "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics 770 Direct3D11 vs_5_0 ps_5_0, D3D11)",
-                "canvas_noise": 0.10,
-                "audio_noise": 0.05
+                "device_memory": 32
             }
         ]
     
-    def get_random_profile(self) -> Dict:
-        """Get a random fingerprint profile from expanded set"""
-        self.current_profile = random.choice(self.fingerprint_profiles)
-        return self.current_profile.copy()
+    def get_consistent_profile(self) -> Dict:
+        """Get consistent profile that won't change during session"""
+        # Use same profile for longer periods to avoid detection
+        profile_index = len(self.used_profiles) % len(self.stable_profiles)
+        profile = self.stable_profiles[profile_index].copy()
+        
+        # Add minor, consistent variations
+        profile["canvas_noise"] = 0.02 + (profile_index * 0.01)
+        profile["audio_noise"] = 0.01 + (profile_index * 0.005)
+        
+        return profile
     
-    def get_profile_by_type(self, profile_type: str = "balanced") -> Dict:
-        """Get profile by specific characteristics"""
-        if profile_type == "high_end":
-            high_end_profiles = [p for p in self.fingerprint_profiles if p["hardware_concurrency"] >= 12]
-            return random.choice(high_end_profiles if high_end_profiles else self.fingerprint_profiles)
-        elif profile_type == "mobile_like":
-            mobile_profiles = [p for p in self.fingerprint_profiles if p["viewport"]["width"] <= 1024]
-            return random.choice(mobile_profiles if mobile_profiles else self.fingerprint_profiles)
-        elif profile_type == "corporate":
-            corp_profiles = [p for p in self.fingerprint_profiles if "Corporate" in p["name"] or "Business" in p["name"]]
-            return random.choice(corp_profiles if corp_profiles else self.fingerprint_profiles)
-        else:
-            return self.get_random_profile()
     def generate_anti_fingerprintjs_script(self, profile: Dict) -> str:
-        """Generate comprehensive script to defeat fingerprintjs and SimilarWeb detection - FIXED"""
+        """Much simpler script that's harder to detect"""
         return f"""
-        // Advanced Fingerprint Evasion - Defeats fingerprintjs specifically - FIXED VERSION
         (function() {{
-            'use strict';
+            // Minimal, consistent fingerprint evasion
+            const config = {json.dumps(profile)};
             
-            // ✅ FIXED: Ensure Math object exists and store original reference safely
-            if (typeof Math === 'undefined') {{
-                console.error('Math object not available in this context');
-                return;
-            }}
+            // Only override essential properties
+            Object.defineProperties(navigator, {{
+                webdriver: {{ get: () => undefined, configurable: true }},
+                userAgent: {{ get: () => config.user_agent, configurable: true }},
+                language: {{ get: () => config.language, configurable: true }},
+                hardwareConcurrency: {{ get: () => config.hardware_concurrency, configurable: true }}
+            }});
             
-            console.log('🥷 Loading advanced fingerprint evasion for profile:', '{profile["name"]}');
-            
-            // ✅ FIXED: Safely store original Math.random
-            const originalRandom = Math.random;
-            let seed = {random.randint(1, 1000000)};
-            
-            // Override Math.random with seeded version
-            Math.random = function() {{
-                seed = (seed * 9301 + 49297) % 233280;
-                return seed / 233280;
+            // Minimal canvas protection - just slight noise
+            const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+            HTMLCanvasElement.prototype.toDataURL = function() {{
+                const result = originalToDataURL.apply(this, arguments);
+                // Add tiny, consistent noise
+                return result.replace(/data:image\/png;base64,/, 
+                    `data:image/png;base64,${{Math.random().toString(36).substr(2, 2)}}`);
             }};
             
-            // ✅ FIXED: Wrapped all navigator overrides in try-catch
-            try {{
-                // Override Navigator Properties (defeats basic fingerprinting)
-                Object.defineProperties(navigator, {{
-                    userAgent: {{
-                        get: () => '{profile["user_agent"]}',
-                        configurable: true
-                    }},
-                    language: {{
-                        get: () => '{profile["language"]}',
-                        configurable: true
-                    }},
-                    languages: {{
-                        get: () => ['{profile["language"]}', 'en'],
-                        configurable: true
-                    }},
-                    platform: {{
-                        get: () => '{profile["platform"]}',
-                        configurable: true
-                    }},
-                    hardwareConcurrency: {{
-                        get: () => {profile["hardware_concurrency"]},
-                        configurable: true
-                    }},
-                    deviceMemory: {{
-                        get: () => {profile["device_memory"]},
-                        configurable: true
-                    }},
-                    webdriver: {{
-                        get: () => undefined,
-                        configurable: true
-                    }},
-                    plugins: {{
-                        get: () => {{
-                            return {{
-                                length: 3,
-                                0: {{ name: 'Chrome PDF Plugin', filename: 'internal-pdf-viewer' }},
-                                1: {{ name: 'Chrome PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai' }},
-                                2: {{ name: 'Native Client', filename: 'internal-nacl-plugin' }}
-                            }};
-                        }},
-                        configurable: true
-                    }}
-                }});
-            }} catch (navError) {{
-                console.warn('Navigator override failed:', navError);
-            }}
-            
-            // ✅ FIXED: Wrapped screen overrides in try-catch
-            try {{
-                // Override Screen Properties (consistent with viewport)
-                Object.defineProperties(screen, {{
-                    width: {{
-                        get: () => {profile["screen"]["width"]},
-                        configurable: true
-                    }},
-                    height: {{
-                        get: () => {profile["screen"]["height"]},
-                        configurable: true
-                    }},
-                    availWidth: {{
-                        get: () => {profile["screen"]["width"]},
-                        configurable: true
-                    }},
-                    availHeight: {{
-                        get: () => {profile["screen"]["height"] - 40},
-                        configurable: true
-                    }},
-                    colorDepth: {{
-                        get: () => {profile["screen"]["colorDepth"]},
-                        configurable: true
-                    }},
-                    pixelDepth: {{
-                        get: () => {profile["screen"]["colorDepth"]},
-                        configurable: true
-                    }}
-                }});
-            }} catch (screenError) {{
-                console.warn('Screen override failed:', screenError);
-            }}
-            
-            // ✅ FIXED: Enhanced Canvas protection with better error handling
-            try {{
-                const originalGetContext = HTMLCanvasElement.prototype.getContext;
-                const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
-                
-                HTMLCanvasElement.prototype.getContext = function(type, options) {{
-                    const context = originalGetContext.call(this, type, options);
-                    
-                    if (type === '2d' && context) {{
-                        const originalFillText = context.fillText;
-                        const originalStrokeText = context.strokeText;
-                        const noise = {profile["canvas_noise"]};
-                        
-                        context.fillText = function(text, x, y, maxWidth) {{
-                            try {{
-                                const noisyX = x + (Math.random() - 0.5) * noise;
-                                const noisyY = y + (Math.random() - 0.5) * noise;
-                                return originalFillText.call(this, text, noisyX, noisyY, maxWidth);
-                            }} catch (e) {{
-                                return originalFillText.call(this, text, x, y, maxWidth);
-                            }}
-                        }};
-                        
-                        context.strokeText = function(text, x, y, maxWidth) {{
-                            try {{
-                                const noisyX = x + (Math.random() - 0.5) * noise;
-                                const noisyY = y + (Math.random() - 0.5) * noise;
-                                return originalStrokeText.call(this, text, noisyX, noisyY, maxWidth);
-                            }} catch (e) {{
-                                return originalStrokeText.call(this, text, x, y, maxWidth);
-                            }}
-                        }};
-                    }}
-                    
-                    return context;
-                }};
-                
-                // Override Canvas toDataURL with noise injection
-                HTMLCanvasElement.prototype.toDataURL = function(type, quality) {{
-                    try {{
-                        const context = this.getContext('2d');
-                        if (context) {{
-                            const imageData = context.getImageData(0, 0, this.width, this.height);
-                            const data = imageData.data;
-                            
-                            // Add subtle noise to prevent fingerprinting
-                            for (let i = 0; i < data.length; i += 4) {{
-                                if (Math.random() < 0.01) {{ // 1% of pixels get noise
-                                    data[i] = Math.min(255, Math.max(0, data[i] + (Math.random() - 0.5) * 2));
-                                    data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (Math.random() - 0.5) * 2));
-                                    data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (Math.random() - 0.5) * 2));
-                                }}
-                            }}
-                            
-                            context.putImageData(imageData, 0, 0);
-                        }}
-                        return originalToDataURL.call(this, type, quality);
-                    }} catch (e) {{
-                        return originalToDataURL.call(this, type, quality);
-                    }}
-                }};
-            }} catch (canvasError) {{
-                console.warn('Canvas protection failed:', canvasError);
-            }}
-            
-            // ✅ FIXED: Enhanced WebGL protection with better error handling
-            try {{
-                const getParameter = WebGLRenderingContext.prototype.getParameter;
-                WebGLRenderingContext.prototype.getParameter = function(parameter) {{
-                    try {{
-                        switch (parameter) {{
-                            case this.VENDOR:
-                                return '{profile["webgl_vendor"]}';
-                            case this.RENDERER:
-                                return '{profile["webgl_renderer"]}';
-                            case this.VERSION:
-                                return 'WebGL 1.0 (OpenGL ES 2.0 Chromium)';
-                            case this.SHADING_LANGUAGE_VERSION:
-                                return 'WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)';
-                            default:
-                                return getParameter.call(this, parameter);
-                        }}
-                    }} catch (e) {{
-                        return getParameter.call(this, parameter);
-                    }}
-                }};
-                
-                // WebGL2 Context Protection
-                if (window.WebGL2RenderingContext) {{
-                    const getParameter2 = WebGL2RenderingContext.prototype.getParameter;
-                    WebGL2RenderingContext.prototype.getParameter = function(parameter) {{
-                        try {{
-                            switch (parameter) {{
-                                case this.VENDOR:
-                                    return '{profile["webgl_vendor"]}';
-                                case this.RENDERER:
-                                    return '{profile["webgl_renderer"]}';
-                                default:
-                                    return getParameter2.call(this, parameter);
-                            }}
-                        }} catch (e) {{
-                            return getParameter2.call(this, parameter);
-                        }}
-                    }};
-                }}
-            }} catch (webglError) {{
-                console.warn('WebGL protection failed:', webglError);
-            }}
-            
-            // ✅ FIXED: Enhanced Audio Context protection
-            try {{
-                if (window.AudioContext || window.webkitAudioContext) {{
-                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                    const originalCreateAnalyser = AudioContextClass.prototype.createAnalyser;
-                    
-                    AudioContextClass.prototype.createAnalyser = function() {{
-                        const analyser = originalCreateAnalyser.call(this);
-                        const originalGetFloatFrequencyData = analyser.getFloatFrequencyData;
-                        
-                        analyser.getFloatFrequencyData = function(array) {{
-                            try {{
-                                originalGetFloatFrequencyData.call(this, array);
-                                // Add subtle noise to audio fingerprint
-                                for (let i = 0; i < array.length; i++) {{
-                                    array[i] += (Math.random() - 0.5) * {profile["audio_noise"]};
-                                }}
-                            }} catch (e) {{
-                                originalGetFloatFrequencyData.call(this, array);
-                            }}
-                        }};
-                        
-                        return analyser;
-                    }};
-                }}
-            }} catch (audioError) {{
-                console.warn('Audio protection failed:', audioError);
-            }}
-            
-            // ✅ FIXED: Enhanced timezone spoofing
-            try {{
-                const originalGetTimezoneOffset = Date.prototype.getTimezoneOffset;
-                Date.prototype.getTimezoneOffset = function() {{
-                    try {{
-                        const timezones = {{
-                            'America/New_York': 300,
-                            'Europe/London': 0,
-                            'America/Los_Angeles': 480,
-                            'Europe/Berlin': -60
-                        }};
-                        return timezones['{profile["timezone"]}'] || 0;
-                    }} catch (e) {{
-                        return originalGetTimezoneOffset.call(this);
-                    }}
-                }};
-                
-                // Override Intl.DateTimeFormat for timezone consistency
-                const originalDateTimeFormat = Intl.DateTimeFormat;
-                Intl.DateTimeFormat = function(...args) {{
-                    try {{
-                        if (args.length === 0 || !args[0]) {{
-                            args[0] = '{profile["language"]}';
-                        }}
-                        if (args.length === 1) {{
-                            args[1] = {{ timeZone: '{profile["timezone"]}' }};
-                        }} else if (args[1] && !args[1].timeZone) {{
-                            args[1].timeZone = '{profile["timezone"]}';
-                        }}
-                        return new originalDateTimeFormat(...args);
-                    }} catch (e) {{
-                        return new originalDateTimeFormat(...args);
-                    }}
-                }};
-            }} catch (timezoneError) {{
-                console.warn('Timezone spoofing failed:', timezoneError);
-            }}
-            
-            // ✅ FIXED: Safe automation indicator removal
-            try {{
-                // Remove all automation indicators
-                const automationIndicators = [
-                    'cdc_adoQpoasnfa76pfcZLmcfl_Array',
-                    'cdc_adoQpoasnfa76pfcZLmcfl_Promise',
-                    'cdc_adoQpoasnfa76pfcZLmcfl_Symbol',
-                    'cdc_adoQpoasnfa76pfcZLmcfl_Object'
-                ];
-                
-                automationIndicators.forEach(indicator => {{
-                    try {{
-                        delete window[indicator];
-                    }} catch (e) {{
-                        // Ignore individual deletion errors
-                    }}
-                }});
-                
-                // Chrome runtime spoofing
-                if (window.chrome && window.chrome.runtime) {{
-                    try {{
-                        delete window.chrome.runtime.onConnect;
-                        delete window.chrome.runtime.onMessage;
-                    }} catch (e) {{
-                        // Ignore chrome runtime errors
-                    }}
-                }}
-            }} catch (cleanupError) {{
-                console.warn('Cleanup failed:', cleanupError);
-            }}
-            
-            // ✅ FIXED: Enhanced API spoofing with error handling
-            try {{
-                // Permissions API Override
-                if (navigator.permissions && navigator.permissions.query) {{
-                    const originalQuery = navigator.permissions.query;
-                    navigator.permissions.query = function(permissionDesc) {{
-                        try {{
-                            return Promise.resolve({{
-                                state: 'granted',
-                                name: permissionDesc.name
-                            }});
-                        }} catch (e) {{
-                            return originalQuery.call(this, permissionDesc);
-                        }}
-                    }};
-                }}
-                
-                // Battery API Spoofing
-                if (navigator.getBattery) {{
-                    const originalGetBattery = navigator.getBattery;
-                    navigator.getBattery = function() {{
-                        try {{
-                            return Promise.resolve({{
-                                charging: true,
-                                chargingTime: Infinity,
-                                dischargingTime: Infinity,
-                                level: 1.0
-                            }});
-                        }} catch (e) {{
-                            return originalGetBattery.call(this);
-                        }}
-                    }};
-                }}
-                
-                // GamePad API Spoofing
-                if (navigator.getGamepads) {{
-                    const originalGetGamepads = navigator.getGamepads;
-                    navigator.getGamepads = function() {{
-                        try {{
-                            return [];
-                        }} catch (e) {{
-                            return originalGetGamepads.call(this);
-                        }}
-                    }};
-                }}
-            }} catch (apiError) {{
-                console.warn('API spoofing failed:', apiError);
-            }}
-            
-            console.log('✅ Advanced fingerprint evasion loaded successfully');
-            console.log('🎯 Profile:', '{profile["name"]}');
-            console.log('🖥️ Viewport:', {profile["viewport"]["width"]}+'x'+{profile["viewport"]["height"]});
-            console.log('🌍 Timezone:', '{profile["timezone"]}');
-            
+            // Remove obvious automation indicators
+            delete window.webdriver;
+            delete window.__webdriver_script_fn;
+            delete window.__webdriver_evaluate;
         }})();
         """
+
+
+
+
+
+
+
+# class AdvancedFingerprintEvasion:
+#     def __init__(self):
+#         self.fingerprint_profiles = self._load_comprehensive_fingerprint_profiles()
+#         self.current_profile = None
+        
+#     def _load_comprehensive_fingerprint_profiles(self) -> List[Dict]:
+#         """Load 15+ realistic fingerprint profiles for maximum diversity"""
+#         return [
+#             # Windows Chrome variants
+#             {
+#                 "name": "Windows_Chrome_120_High_End",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1920, "height": 1080},
+#                 "screen": {"width": 1920, "height": 1080, "colorDepth": 24},
+#                 "timezone": "America/New_York",
+#                 "language": "en-US",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 16,
+#                 "device_memory": 32,
+#                 "webgl_vendor": "Google Inc. (NVIDIA)",
+#                 "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+#                 "canvas_noise": 0.05,
+#                 "audio_noise": 0.02
+#             },
+#             {
+#                 "name": "Windows_Chrome_119_Gaming",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 2560, "height": 1440},
+#                 "screen": {"width": 2560, "height": 1440, "colorDepth": 24},
+#                 "timezone": "America/Los_Angeles",
+#                 "language": "en-US",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 12,
+#                 "device_memory": 16,
+#                 "webgl_vendor": "Google Inc. (AMD)",
+#                 "webgl_renderer": "ANGLE (AMD, AMD Radeon RX 7800 XT Direct3D11 vs_5_0 ps_5_0, D3D11)",
+#                 "canvas_noise": 0.08,
+#                 "audio_noise": 0.04
+#             },
+#             {
+#                 "name": "Windows_Chrome_118_Business",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1366, "height": 768},
+#                 "screen": {"width": 1366, "height": 768, "colorDepth": 24},
+#                 "timezone": "America/Chicago",
+#                 "language": "en-US",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 8,
+#                 "device_memory": 8,
+#                 "webgl_vendor": "Google Inc. (Intel)",
+#                 "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics 630 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+#                 "canvas_noise": 0.12,
+#                 "audio_noise": 0.06
+#             },
+            
+#             # Linux Chrome variants
+#             {
+#                 "name": "Linux_Chrome_120_Developer",
+#                 "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1920, "height": 1080},
+#                 "screen": {"width": 1920, "height": 1080, "colorDepth": 24},
+#                 "timezone": "America/New_York",
+#                 "language": "en-US",
+#                 "platform": "Linux x86_64",
+#                 "hardware_concurrency": 16,
+#                 "device_memory": 32,
+#                 "webgl_vendor": "Mesa",
+#                 "webgl_renderer": "Mesa DRI Intel(R) Arc(tm) A770 Graphics",
+#                 "canvas_noise": 0.10,
+#                 "audio_noise": 0.05
+#             },
+#             {
+#                 "name": "Linux_Chrome_119_Ubuntu",
+#                 "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1680, "height": 1050},
+#                 "screen": {"width": 1680, "height": 1050, "colorDepth": 24},
+#                 "timezone": "Europe/London",
+#                 "language": "en-GB",
+#                 "platform": "Linux x86_64",
+#                 "hardware_concurrency": 8,
+#                 "device_memory": 16,
+#                 "webgl_vendor": "Mesa",
+#                 "webgl_renderer": "Mesa DRI AMD Radeon RX 6700 XT",
+#                 "canvas_noise": 0.15,
+#                 "audio_noise": 0.08
+#             },
+#             {
+#                 "name": "Linux_Firefox_121",
+#                 "user_agent": "Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0",
+#                 "viewport": {"width": 1440, "height": 900},
+#                 "screen": {"width": 1440, "height": 900, "colorDepth": 24},
+#                 "timezone": "Europe/Berlin",
+#                 "language": "en-US",
+#                 "platform": "Linux x86_64",
+#                 "hardware_concurrency": 12,
+#                 "device_memory": 8,
+#                 "webgl_vendor": "Mesa",
+#                 "webgl_renderer": "Mesa DRI NVIDIA GeForce GTX 1660 Ti",
+#                 "canvas_noise": 0.18,
+#                 "audio_noise": 0.09
+#             },
+            
+#             # MacOS variants
+#             {
+#                 "name": "MacOS_Safari_17_Intel",
+#                 "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+#                 "viewport": {"width": 1440, "height": 900},
+#                 "screen": {"width": 1440, "height": 900, "colorDepth": 24},
+#                 "timezone": "America/Los_Angeles",
+#                 "language": "en-US",
+#                 "platform": "MacIntel",
+#                 "hardware_concurrency": 8,
+#                 "device_memory": 16,
+#                 "webgl_vendor": "Apple Inc.",
+#                 "webgl_renderer": "Apple GPU",
+#                 "canvas_noise": 0.03,
+#                 "audio_noise": 0.01
+#             },
+#             {
+#                 "name": "MacOS_Chrome_120_M2",
+#                 "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1512, "height": 982},
+#                 "screen": {"width": 1512, "height": 982, "colorDepth": 24},
+#                 "timezone": "America/Los_Angeles",
+#                 "language": "en-US",
+#                 "platform": "MacIntel",
+#                 "hardware_concurrency": 8,
+#                 "device_memory": 24,
+#                 "webgl_vendor": "Apple Inc.",
+#                 "webgl_renderer": "Apple M2 GPU",
+#                 "canvas_noise": 0.04,
+#                 "audio_noise": 0.02
+#             },
+#             {
+#                 "name": "MacOS_Firefox_120",
+#                 "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0",
+#                 "viewport": {"width": 1280, "height": 800},
+#                 "screen": {"width": 1280, "height": 800, "colorDepth": 24},
+#                 "timezone": "America/Denver",
+#                 "language": "en-US",
+#                 "platform": "MacIntel",
+#                 "hardware_concurrency": 4,
+#                 "device_memory": 8,
+#                 "webgl_vendor": "Apple Inc.",
+#                 "webgl_renderer": "Apple GPU",
+#                 "canvas_noise": 0.06,
+#                 "audio_noise": 0.03
+#             },
+            
+#             # Mobile-like profiles
+#             {
+#                 "name": "Windows_Edge_120_Tablet",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+#                 "viewport": {"width": 1024, "height": 768},
+#                 "screen": {"width": 1024, "height": 768, "colorDepth": 24},
+#                 "timezone": "America/New_York",
+#                 "language": "en-US",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 4,
+#                 "device_memory": 4,
+#                 "webgl_vendor": "Google Inc. (Intel)",
+#                 "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics Direct3D11 vs_5_0 ps_5_0, D3D11)",
+#                 "canvas_noise": 0.20,
+#                 "audio_noise": 0.10
+#             },
+            
+#             # International variants
+#             {
+#                 "name": "Windows_Chrome_120_Europe",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1600, "height": 900},
+#                 "screen": {"width": 1600, "height": 900, "colorDepth": 24},
+#                 "timezone": "Europe/Paris",
+#                 "language": "fr-FR",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 6,
+#                 "device_memory": 12,
+#                 "webgl_vendor": "Google Inc. (NVIDIA)",
+#                 "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+#                 "canvas_noise": 0.14,
+#                 "audio_noise": 0.07
+#             },
+#             {
+#                 "name": "Linux_Chrome_119_Asia",
+#                 "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1366, "height": 768},
+#                 "screen": {"width": 1366, "height": 768, "colorDepth": 24},
+#                 "timezone": "Asia/Tokyo",
+#                 "language": "ja-JP",
+#                 "platform": "Linux x86_64",
+#                 "hardware_concurrency": 4,
+#                 "device_memory": 8,
+#                 "webgl_vendor": "Mesa",
+#                 "webgl_renderer": "Mesa DRI Intel(R) UHD Graphics 620",
+#                 "canvas_noise": 0.16,
+#                 "audio_noise": 0.08
+#             },
+            
+#             # Low-end systems
+#             {
+#                 "name": "Windows_Chrome_118_Budget",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1280, "height": 720},
+#                 "screen": {"width": 1280, "height": 720, "colorDepth": 24},
+#                 "timezone": "America/Phoenix",
+#                 "language": "en-US",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 2,
+#                 "device_memory": 4,
+#                 "webgl_vendor": "Google Inc. (Intel)",
+#                 "webgl_renderer": "ANGLE (Intel, Intel(R) HD Graphics Direct3D11 vs_4_0 ps_4_0, D3D11)",
+#                 "canvas_noise": 0.25,
+#                 "audio_noise": 0.12
+#             },
+            
+#             # High-refresh displays
+#             {
+#                 "name": "Windows_Chrome_120_144Hz",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 2560, "height": 1440},
+#                 "screen": {"width": 2560, "height": 1440, "colorDepth": 24},
+#                 "timezone": "America/New_York",
+#                 "language": "en-US",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 24,
+#                 "device_memory": 64,
+#                 "webgl_vendor": "Google Inc. (NVIDIA)",
+#                 "webgl_renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4090 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+#                 "canvas_noise": 0.02,
+#                 "audio_noise": 0.01
+#             },
+            
+#             # Corporate environments
+#             {
+#                 "name": "Windows_Chrome_119_Corporate",
+#                 "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+#                 "viewport": {"width": 1920, "height": 1200},
+#                 "screen": {"width": 1920, "height": 1200, "colorDepth": 24},
+#                 "timezone": "America/New_York",
+#                 "language": "en-US",
+#                 "platform": "Win32",
+#                 "hardware_concurrency": 4,
+#                 "device_memory": 8,
+#                 "webgl_vendor": "Google Inc. (Intel)",
+#                 "webgl_renderer": "ANGLE (Intel, Intel(R) UHD Graphics 770 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+#                 "canvas_noise": 0.10,
+#                 "audio_noise": 0.05
+#             }
+#         ]
+    
+#     def get_random_profile(self) -> Dict:
+#         """Get a random fingerprint profile from expanded set"""
+#         self.current_profile = random.choice(self.fingerprint_profiles)
+#         return self.current_profile.copy()
+    
+#     def get_profile_by_type(self, profile_type: str = "balanced") -> Dict:
+#         """Get profile by specific characteristics"""
+#         if profile_type == "high_end":
+#             high_end_profiles = [p for p in self.fingerprint_profiles if p["hardware_concurrency"] >= 12]
+#             return random.choice(high_end_profiles if high_end_profiles else self.fingerprint_profiles)
+#         elif profile_type == "mobile_like":
+#             mobile_profiles = [p for p in self.fingerprint_profiles if p["viewport"]["width"] <= 1024]
+#             return random.choice(mobile_profiles if mobile_profiles else self.fingerprint_profiles)
+#         elif profile_type == "corporate":
+#             corp_profiles = [p for p in self.fingerprint_profiles if "Corporate" in p["name"] or "Business" in p["name"]]
+#             return random.choice(corp_profiles if corp_profiles else self.fingerprint_profiles)
+#         else:
+#             return self.get_random_profile()
+#     def generate_anti_fingerprintjs_script(self, profile: Dict) -> str:
+#         """Generate comprehensive script to defeat fingerprintjs and SimilarWeb detection - FIXED"""
+#         return f"""
+#         // Advanced Fingerprint Evasion - Defeats fingerprintjs specifically - FIXED VERSION
+#         (function() {{
+#             'use strict';
+            
+#             // ✅ FIXED: Ensure Math object exists and store original reference safely
+#             if (typeof Math === 'undefined') {{
+#                 console.error('Math object not available in this context');
+#                 return;
+#             }}
+            
+#             console.log('🥷 Loading advanced fingerprint evasion for profile:', '{profile["name"]}');
+            
+#             // ✅ FIXED: Safely store original Math.random
+#             const originalRandom = Math.random;
+#             let seed = {random.randint(1, 1000000)};
+            
+#             // Override Math.random with seeded version
+#             Math.random = function() {{
+#                 seed = (seed * 9301 + 49297) % 233280;
+#                 return seed / 233280;
+#             }};
+            
+#             // ✅ FIXED: Wrapped all navigator overrides in try-catch
+#             try {{
+#                 // Override Navigator Properties (defeats basic fingerprinting)
+#                 Object.defineProperties(navigator, {{
+#                     userAgent: {{
+#                         get: () => '{profile["user_agent"]}',
+#                         configurable: true
+#                     }},
+#                     language: {{
+#                         get: () => '{profile["language"]}',
+#                         configurable: true
+#                     }},
+#                     languages: {{
+#                         get: () => ['{profile["language"]}', 'en'],
+#                         configurable: true
+#                     }},
+#                     platform: {{
+#                         get: () => '{profile["platform"]}',
+#                         configurable: true
+#                     }},
+#                     hardwareConcurrency: {{
+#                         get: () => {profile["hardware_concurrency"]},
+#                         configurable: true
+#                     }},
+#                     deviceMemory: {{
+#                         get: () => {profile["device_memory"]},
+#                         configurable: true
+#                     }},
+#                     webdriver: {{
+#                         get: () => undefined,
+#                         configurable: true
+#                     }},
+#                     plugins: {{
+#                         get: () => {{
+#                             return {{
+#                                 length: 3,
+#                                 0: {{ name: 'Chrome PDF Plugin', filename: 'internal-pdf-viewer' }},
+#                                 1: {{ name: 'Chrome PDF Viewer', filename: 'mhjfbmdgcfjbbpaeojofohoefgiehjai' }},
+#                                 2: {{ name: 'Native Client', filename: 'internal-nacl-plugin' }}
+#                             }};
+#                         }},
+#                         configurable: true
+#                     }}
+#                 }});
+#             }} catch (navError) {{
+#                 console.warn('Navigator override failed:', navError);
+#             }}
+            
+#             // ✅ FIXED: Wrapped screen overrides in try-catch
+#             try {{
+#                 // Override Screen Properties (consistent with viewport)
+#                 Object.defineProperties(screen, {{
+#                     width: {{
+#                         get: () => {profile["screen"]["width"]},
+#                         configurable: true
+#                     }},
+#                     height: {{
+#                         get: () => {profile["screen"]["height"]},
+#                         configurable: true
+#                     }},
+#                     availWidth: {{
+#                         get: () => {profile["screen"]["width"]},
+#                         configurable: true
+#                     }},
+#                     availHeight: {{
+#                         get: () => {profile["screen"]["height"] - 40},
+#                         configurable: true
+#                     }},
+#                     colorDepth: {{
+#                         get: () => {profile["screen"]["colorDepth"]},
+#                         configurable: true
+#                     }},
+#                     pixelDepth: {{
+#                         get: () => {profile["screen"]["colorDepth"]},
+#                         configurable: true
+#                     }}
+#                 }});
+#             }} catch (screenError) {{
+#                 console.warn('Screen override failed:', screenError);
+#             }}
+            
+#             // ✅ FIXED: Enhanced Canvas protection with better error handling
+#             try {{
+#                 const originalGetContext = HTMLCanvasElement.prototype.getContext;
+#                 const originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
+                
+#                 HTMLCanvasElement.prototype.getContext = function(type, options) {{
+#                     const context = originalGetContext.call(this, type, options);
+                    
+#                     if (type === '2d' && context) {{
+#                         const originalFillText = context.fillText;
+#                         const originalStrokeText = context.strokeText;
+#                         const noise = {profile["canvas_noise"]};
+                        
+#                         context.fillText = function(text, x, y, maxWidth) {{
+#                             try {{
+#                                 const noisyX = x + (Math.random() - 0.5) * noise;
+#                                 const noisyY = y + (Math.random() - 0.5) * noise;
+#                                 return originalFillText.call(this, text, noisyX, noisyY, maxWidth);
+#                             }} catch (e) {{
+#                                 return originalFillText.call(this, text, x, y, maxWidth);
+#                             }}
+#                         }};
+                        
+#                         context.strokeText = function(text, x, y, maxWidth) {{
+#                             try {{
+#                                 const noisyX = x + (Math.random() - 0.5) * noise;
+#                                 const noisyY = y + (Math.random() - 0.5) * noise;
+#                                 return originalStrokeText.call(this, text, noisyX, noisyY, maxWidth);
+#                             }} catch (e) {{
+#                                 return originalStrokeText.call(this, text, x, y, maxWidth);
+#                             }}
+#                         }};
+#                     }}
+                    
+#                     return context;
+#                 }};
+                
+#                 // Override Canvas toDataURL with noise injection
+#                 HTMLCanvasElement.prototype.toDataURL = function(type, quality) {{
+#                     try {{
+#                         const context = this.getContext('2d');
+#                         if (context) {{
+#                             const imageData = context.getImageData(0, 0, this.width, this.height);
+#                             const data = imageData.data;
+                            
+#                             // Add subtle noise to prevent fingerprinting
+#                             for (let i = 0; i < data.length; i += 4) {{
+#                                 if (Math.random() < 0.01) {{ // 1% of pixels get noise
+#                                     data[i] = Math.min(255, Math.max(0, data[i] + (Math.random() - 0.5) * 2));
+#                                     data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + (Math.random() - 0.5) * 2));
+#                                     data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + (Math.random() - 0.5) * 2));
+#                                 }}
+#                             }}
+                            
+#                             context.putImageData(imageData, 0, 0);
+#                         }}
+#                         return originalToDataURL.call(this, type, quality);
+#                     }} catch (e) {{
+#                         return originalToDataURL.call(this, type, quality);
+#                     }}
+#                 }};
+#             }} catch (canvasError) {{
+#                 console.warn('Canvas protection failed:', canvasError);
+#             }}
+            
+#             // ✅ FIXED: Enhanced WebGL protection with better error handling
+#             try {{
+#                 const getParameter = WebGLRenderingContext.prototype.getParameter;
+#                 WebGLRenderingContext.prototype.getParameter = function(parameter) {{
+#                     try {{
+#                         switch (parameter) {{
+#                             case this.VENDOR:
+#                                 return '{profile["webgl_vendor"]}';
+#                             case this.RENDERER:
+#                                 return '{profile["webgl_renderer"]}';
+#                             case this.VERSION:
+#                                 return 'WebGL 1.0 (OpenGL ES 2.0 Chromium)';
+#                             case this.SHADING_LANGUAGE_VERSION:
+#                                 return 'WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)';
+#                             default:
+#                                 return getParameter.call(this, parameter);
+#                         }}
+#                     }} catch (e) {{
+#                         return getParameter.call(this, parameter);
+#                     }}
+#                 }};
+                
+#                 // WebGL2 Context Protection
+#                 if (window.WebGL2RenderingContext) {{
+#                     const getParameter2 = WebGL2RenderingContext.prototype.getParameter;
+#                     WebGL2RenderingContext.prototype.getParameter = function(parameter) {{
+#                         try {{
+#                             switch (parameter) {{
+#                                 case this.VENDOR:
+#                                     return '{profile["webgl_vendor"]}';
+#                                 case this.RENDERER:
+#                                     return '{profile["webgl_renderer"]}';
+#                                 default:
+#                                     return getParameter2.call(this, parameter);
+#                             }}
+#                         }} catch (e) {{
+#                             return getParameter2.call(this, parameter);
+#                         }}
+#                     }};
+#                 }}
+#             }} catch (webglError) {{
+#                 console.warn('WebGL protection failed:', webglError);
+#             }}
+            
+#             // ✅ FIXED: Enhanced Audio Context protection
+#             try {{
+#                 if (window.AudioContext || window.webkitAudioContext) {{
+#                     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+#                     const originalCreateAnalyser = AudioContextClass.prototype.createAnalyser;
+                    
+#                     AudioContextClass.prototype.createAnalyser = function() {{
+#                         const analyser = originalCreateAnalyser.call(this);
+#                         const originalGetFloatFrequencyData = analyser.getFloatFrequencyData;
+                        
+#                         analyser.getFloatFrequencyData = function(array) {{
+#                             try {{
+#                                 originalGetFloatFrequencyData.call(this, array);
+#                                 // Add subtle noise to audio fingerprint
+#                                 for (let i = 0; i < array.length; i++) {{
+#                                     array[i] += (Math.random() - 0.5) * {profile["audio_noise"]};
+#                                 }}
+#                             }} catch (e) {{
+#                                 originalGetFloatFrequencyData.call(this, array);
+#                             }}
+#                         }};
+                        
+#                         return analyser;
+#                     }};
+#                 }}
+#             }} catch (audioError) {{
+#                 console.warn('Audio protection failed:', audioError);
+#             }}
+            
+#             // ✅ FIXED: Enhanced timezone spoofing
+#             try {{
+#                 const originalGetTimezoneOffset = Date.prototype.getTimezoneOffset;
+#                 Date.prototype.getTimezoneOffset = function() {{
+#                     try {{
+#                         const timezones = {{
+#                             'America/New_York': 300,
+#                             'Europe/London': 0,
+#                             'America/Los_Angeles': 480,
+#                             'Europe/Berlin': -60
+#                         }};
+#                         return timezones['{profile["timezone"]}'] || 0;
+#                     }} catch (e) {{
+#                         return originalGetTimezoneOffset.call(this);
+#                     }}
+#                 }};
+                
+#                 // Override Intl.DateTimeFormat for timezone consistency
+#                 const originalDateTimeFormat = Intl.DateTimeFormat;
+#                 Intl.DateTimeFormat = function(...args) {{
+#                     try {{
+#                         if (args.length === 0 || !args[0]) {{
+#                             args[0] = '{profile["language"]}';
+#                         }}
+#                         if (args.length === 1) {{
+#                             args[1] = {{ timeZone: '{profile["timezone"]}' }};
+#                         }} else if (args[1] && !args[1].timeZone) {{
+#                             args[1].timeZone = '{profile["timezone"]}';
+#                         }}
+#                         return new originalDateTimeFormat(...args);
+#                     }} catch (e) {{
+#                         return new originalDateTimeFormat(...args);
+#                     }}
+#                 }};
+#             }} catch (timezoneError) {{
+#                 console.warn('Timezone spoofing failed:', timezoneError);
+#             }}
+            
+#             // ✅ FIXED: Safe automation indicator removal
+#             try {{
+#                 // Remove all automation indicators
+#                 const automationIndicators = [
+#                     'cdc_adoQpoasnfa76pfcZLmcfl_Array',
+#                     'cdc_adoQpoasnfa76pfcZLmcfl_Promise',
+#                     'cdc_adoQpoasnfa76pfcZLmcfl_Symbol',
+#                     'cdc_adoQpoasnfa76pfcZLmcfl_Object'
+#                 ];
+                
+#                 automationIndicators.forEach(indicator => {{
+#                     try {{
+#                         delete window[indicator];
+#                     }} catch (e) {{
+#                         // Ignore individual deletion errors
+#                     }}
+#                 }});
+                
+#                 // Chrome runtime spoofing
+#                 if (window.chrome && window.chrome.runtime) {{
+#                     try {{
+#                         delete window.chrome.runtime.onConnect;
+#                         delete window.chrome.runtime.onMessage;
+#                     }} catch (e) {{
+#                         // Ignore chrome runtime errors
+#                     }}
+#                 }}
+#             }} catch (cleanupError) {{
+#                 console.warn('Cleanup failed:', cleanupError);
+#             }}
+            
+#             // ✅ FIXED: Enhanced API spoofing with error handling
+#             try {{
+#                 // Permissions API Override
+#                 if (navigator.permissions && navigator.permissions.query) {{
+#                     const originalQuery = navigator.permissions.query;
+#                     navigator.permissions.query = function(permissionDesc) {{
+#                         try {{
+#                             return Promise.resolve({{
+#                                 state: 'granted',
+#                                 name: permissionDesc.name
+#                             }});
+#                         }} catch (e) {{
+#                             return originalQuery.call(this, permissionDesc);
+#                         }}
+#                     }};
+#                 }}
+                
+#                 // Battery API Spoofing
+#                 if (navigator.getBattery) {{
+#                     const originalGetBattery = navigator.getBattery;
+#                     navigator.getBattery = function() {{
+#                         try {{
+#                             return Promise.resolve({{
+#                                 charging: true,
+#                                 chargingTime: Infinity,
+#                                 dischargingTime: Infinity,
+#                                 level: 1.0
+#                             }});
+#                         }} catch (e) {{
+#                             return originalGetBattery.call(this);
+#                         }}
+#                     }};
+#                 }}
+                
+#                 // GamePad API Spoofing
+#                 if (navigator.getGamepads) {{
+#                     const originalGetGamepads = navigator.getGamepads;
+#                     navigator.getGamepads = function() {{
+#                         try {{
+#                             return [];
+#                         }} catch (e) {{
+#                             return originalGetGamepads.call(this);
+#                         }}
+#                     }};
+#                 }}
+#             }} catch (apiError) {{
+#                 console.warn('API spoofing failed:', apiError);
+#             }}
+            
+#             console.log('✅ Advanced fingerprint evasion loaded successfully');
+#             console.log('🎯 Profile:', '{profile["name"]}');
+#             console.log('🖥️ Viewport:', {profile["viewport"]["width"]}+'x'+{profile["viewport"]["height"]});
+#             console.log('🌍 Timezone:', '{profile["timezone"]}');
+            
+#         }})();
+#         """
 
     # def generate_anti_fingerprintjs_script(self, profile: Dict) -> str:
     #     """Generate the most advanced fingerprint evasion script"""
