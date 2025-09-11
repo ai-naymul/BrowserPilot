@@ -1,4 +1,4 @@
-# 🤖 AI Agentic Browser
+# BrowserPilot
 
 > Ever wished you could tell your browser "Hey, go grab all the product prices from that e-commerce site" and it would just... do it? That's exactly what this does, but smarter.
 
@@ -6,7 +6,7 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-## 🎯 What's This All About?
+## What's This All About?
 
 Tired of writing complex scrapers that break every time a website changes its layout? Yeah, me too. 
 
@@ -22,33 +22,33 @@ Trust me, it's pretty cool watching an AI navigate websites like a human
 https://github.com/user-attachments/assets/39d2ed68-e121-49b9-817e-2eb5edc25627
 
 
-## ✨ Why You'll Love This
+## Why You'll Love This
 
-### 🧠 It Actually "Sees" Websites
+### It Actually "Sees" Websites
 - Uses Google's Gemini AI to look at pages like you do
 - Automatically figures out if it's looking at Amazon, LinkedIn, or your random blog
 - Clicks the right buttons even when websites change their design
 - Works on literally any website (yes, even the weird ones)
 
-### 🔄 Handles the Annoying Stuff
+### Handles the Annoying Stuff
 - Gets blocked by Cloudflare? No problem, switches proxies automatically
 - Encounters a CAPTCHA? Solves it with AI vision
 - Website thinks it's a bot? Laughs in artificial intelligence
 - Proxy goes down? Switches to a backup faster than you can blink
 
-### 📊 Gives You Data How You Want It
+### Gives You Data How You Want It
 - Say "save as PDF" and boom, you get a PDF
 - Ask for CSV and it structures everything perfectly
 - Want JSON? It knows what you mean
 - Organizes everything with timestamps and metadata (because details matter)
 
-### 🖥️ Watch It Work Live
+### Watch It Work Live
 - Stream the browser view in real-time (it's oddly satisfying)
 - Click and type remotely if you need to step in
 - Multiple people can watch the same session
 - Perfect for debugging or just showing off
 
-## 🚀 Getting Started (It's Actually Pretty Easy)
+## Getting Started (It's Actually Pretty Easy)
 
 ### What You'll Need
 - Python 3.8 or newer (check with `python --version`)
@@ -84,7 +84,7 @@ https://github.com/user-attachments/assets/39d2ed68-e121-49b9-817e-2eb5edc25627
 5. **See the magic**
    Open `http://localhost:8000` and start telling it what to do
 
-## 💡 Real Examples (Because Everyone Loves Examples)
+## Real Examples (Because Everyone Loves Examples)
 
 ### Just Getting Started
 ```javascript
@@ -110,53 +110,53 @@ Don't worry, it handles all the login prompts and infinite scroll nonsense.
 ```
 Even works on sites you've never seen before. That's the beauty of AI vision.
 
-## 🏗️ Core Components
+## Core Components
 
-### 🌐 Smart Browser Controller
+### Smart Browser Controller
 - Automatic anti-bot detection using AI vision
 - Proxy rotation on detection/blocking
 - CAPTCHA solving capabilities
 - Browser restart with new proxies
 
-### 👁️ Vision Model Integration
+### Vision Model Integration
 - Dynamic website analysis
 - Anti-bot system detection
 - Element interaction decisions
 - CAPTCHA recognition and solving
 
-### 📤 Universal Extractor
+### Universal Extractor
 - AI-powered content extraction
 - Multiple output format support
 - Structured data organization
 - Metadata preservation
 
-### 🔧 Proxy Management
+### Proxy Management
 - Health tracking and statistics
 - Performance-based selection
 - Site-specific blocking lists
 - Automatic failure recovery
 
-## 🔥 The Cool Technical Stuff
+## The Cool Technical Stuff
 
-### 📋 Smart Format Detection
+### Smart Format Detection
 Just talk to it naturally:
 - "save as PDF" → Gets you a beautiful PDF
 - "export to CSV" → Perfectly structured spreadsheet
 - "give me JSON" → Clean, organized data structure
 
-### 🛡️ Anti-Bot Ninja Mode
+### Anti-Bot Ninja Mode
 - Spots Cloudflare challenges before they even load
 - Solves CAPTCHAs like a human (but faster)
 - Detects rate limits and backs off gracefully
 - Switches identities when websites get suspicious
 
-### 📈 Dashboard That Actually Helps
+### Dashboard That Actually Helps
 - See which proxies are working (and which ones suck)
 - Watch your browser sessions live
 - Track how much you're spending on AI tokens
 - Performance stats that make sense
 
-## ⚙️ Configuration
+## Configuration
 
 ### Proxy Configuration
 ```json
