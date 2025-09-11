@@ -14,7 +14,7 @@ This AI-powered browser actually *sees* web pages like you do. It doesn't care i
 
 Think of it as having a really smart intern who never gets tired, never makes mistakes, and can handle any website you throw at them - even the ones with annoying CAPTCHAs.
 
-## 🎬 See It In Action
+## See It In Action
 
 Trust me, it's pretty cool watching an AI navigate websites like a human
 
