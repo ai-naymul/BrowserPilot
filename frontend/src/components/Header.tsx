@@ -16,9 +16,17 @@ export const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4 group">
             {/* Logo Placeholder - You can replace this with your SVG */}
-            <div className="w-10 h-10 bg-gradient-to-br from-stone-600 to-stone-700 dark:from-stone-300 dark:to-stone-400 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-              <div className="w-6 h-6 border-2 border-white dark:border-stone-800 rounded-sm transform group-hover:rotate-12 transition-transform duration-300"></div>
-            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 1024 1024"
+              className="w-10 h-10 rounded-xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105"
+            >
+              <path d="M0 0 C337.92 0 675.84 0 1024 0 C1024 337.92 1024 675.84 1024 1024 C686.08 1024 348.16 1024 0 1024 C0 686.08 0 348.16 0 0 Z" fill="#FEFEFE"/>
+              <path d="M0 0 C16.75287235 2.39326748 30.16084399 9.09518011 43 20 ... Z" fill="#0F2F52" transform="translate(383,295)" />
+              <path d="M0 0 C1.18980469 -0.01224609 2.37960937 -0.02449219 ... Z" fill="#102F53" transform="translate(498.875,574.8125)" />
+              <path d="M0 0 C0.94994742 -0.00170885 1.89989484 -0.0034177 ... Z" fill="#113054" transform="translate(504.1683807373047,413.7594909667969)" />
+              <path d="M0 0 C1.22506288 0.00276538 1.22506288 0.00276538 ... Z" fill="#0F2F52" transform="translate(536.9796237945557,501.75390434265137)" />
+            </svg>
             <div className="transform group-hover:translate-x-1 transition-transform duration-300">
               <h1 className="text-xl font-medium text-stone-800 dark:text-stone-200 tracking-wide">BrowserPilot</h1>
               <p className="text-xs text-stone-500 dark:text-stone-400 -mt-1 font-light">Open-source alternative to Perplexity Comet</p>
