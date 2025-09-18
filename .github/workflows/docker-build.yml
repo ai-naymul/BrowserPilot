@@ -29,6 +29,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      attestations: write
+      id-token: write
       
     steps:
     - name: Checkout repository
@@ -61,7 +63,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        platforms: linux/amd64,linux/arm64
+        platforms: linux/amd64
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
@@ -69,20 +71,9 @@ jobs:
         cache-to: type=gha,mode=max
         
     - name: Generate artifact attestation
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
       uses: actions/attest-build-provenance@v1
       with:
-        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
         subject-digest: ${{ steps.build.outputs.digest }}
         push-to-registry: true
-        
-    - name: Update Docker Hub Description
-      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-      uses: peter-evans/dockerhub-description@v4
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-        repository: ${{ github.repository_owner }}/browserpilot
-        short-description: "AI-powered browser automation tool with computer vision"
-        readme-filepath: ./README.docker.md
-      continue-on-error: true
