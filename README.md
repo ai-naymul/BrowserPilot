@@ -50,6 +50,24 @@ https://github.com/user-attachments/assets/39d2ed68-e121-49b9-817e-2eb5edc25627
 
 ## Getting Started (It's Actually Pretty Easy)
 
+### 🐳 Quick Start with Docker (Recommended)
+
+The easiest way to run BrowserPilot is with Docker:
+
+```bash
+# Clone and start with Docker Compose
+git clone https://github.com/veverkap/BrowserPilot.git
+cd BrowserPilot
+echo 'GOOGLE_API_KEY=your_actual_api_key_here' > .env
+docker-compose up -d
+```
+
+Open `http://localhost:8000` and you're ready to go! 🚀
+
+[📖 Full Docker Documentation](README.docker.md)
+
+### 💻 Manual Installation
+
 ### What You'll Need
 - Python 3.8 or newer (check with `python --version`)
 - A Google AI API key (free to get, just sign up at ai.google.dev)
@@ -59,8 +77,8 @@ https://github.com/user-attachments/assets/39d2ed68-e121-49b9-817e-2eb5edc25627
 
 1. **Grab the code**
    ```bash
-   git clone https://github.com/ai-naymul/AI-Agent-Scraper.git
-   cd ai-agentic-browser
+   git clone https://github.com/veverkap/BrowserPilot.git
+   cd BrowserPilot
    ```
 
 2. **Install the good stuff**
