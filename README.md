@@ -56,7 +56,7 @@ The easiest way to run BrowserPilot is with Docker:
 
 ```bash
 # Clone and start with Docker Compose
-git clone https://github.com/veverkap/BrowserPilot.git
+git clone https://github.com/ai-naymul/BrowserPilot.git
 cd BrowserPilot
 echo 'GOOGLE_API_KEY=your_actual_api_key_here' > .env
 docker-compose up -d
@@ -77,7 +77,7 @@ Open `http://localhost:8000` and you're ready to go! 🚀
 
 1. **Grab the code**
    ```bash
-   git clone https://github.com/veverkap/BrowserPilot.git
+   git clone https://github.com/ai-naymul/BrowserPilot.git
    cd BrowserPilot
    ```
 

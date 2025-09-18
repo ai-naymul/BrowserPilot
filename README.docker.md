@@ -10,7 +10,7 @@ The easiest way to run BrowserPilot is with Docker Compose:
 
 ```bash
 # Clone the repository
-git clone https://github.com/veverkap/BrowserPilot.git
+git clone https://github.com/ai-naymul/BrowserPilot.git
 cd BrowserPilot
 
 # Create environment file
