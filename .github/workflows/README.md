@@ -26,24 +26,24 @@ This workflow automatically builds and publishes the BrowserPilot Docker image w
 
 ### Published Images
 The Docker images are published to:
-- `ghcr.io/veverkap/browserpilot:latest`
-- `ghcr.io/veverkap/browserpilot:main`
-- `ghcr.io/veverkap/browserpilot:main-<commit-sha>`
+- `ghcr.io/ai-naymul/browserpilot:latest`
+- `ghcr.io/ai-naymul/browserpilot:main`
+- `ghcr.io/ai-naymul/browserpilot:main-<commit-sha>`
 
 ### Usage
 Users can pull and run the published images:
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/veverkap/browserpilot:latest
+docker pull ghcr.io/ai-naymul/browserpilot:latest
 
 # Run with Docker
-docker run -p 8000:8000 -e GOOGLE_API_KEY=your_key ghcr.io/veverkap/browserpilot:latest
+docker run -p 8000:8000 -e GOOGLE_API_KEY=your_key ghcr.io/ai-naymul/browserpilot:latest
 
 # Or use in docker-compose.yml
 services:
   browserpilot:
-    image: ghcr.io/veverkap/browserpilot:latest
+    image: ghcr.io/ai-naymul/browserpilot:latest
     # ... other config
 ```
 
