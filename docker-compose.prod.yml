@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  browserpilot:
+    restart: always
+    # Resource limits for production
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+    # Production logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
+    # Don't mount local .env in production
+    volumes:
+      - ./outputs:/app/outputs
+    # Production environment variables
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - SCRAPER_PROXIES=${SCRAPER_PROXIES:-[]}
+      # Production settings
+      - PYTHONUNBUFFERED=1
+      - PYTHONOPTIMIZE=1
