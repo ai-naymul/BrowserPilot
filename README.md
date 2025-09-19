@@ -187,6 +187,13 @@ GOOGLE_API_KEY=your_gemini_api_key_here
 SCRAPER_PROXIES=your_proxy_configuration
 ```
 
+## Contributors
+
+<a href="https://github.com/your-username/your-repo/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=ai-naymul/BrowserPilot" />
+</a>
+
+
 ## 🤝 Want to Help Make This Better?
 
 Found a bug? Have a crazy idea? Want to add support for your favorite website? I'd love the help!
