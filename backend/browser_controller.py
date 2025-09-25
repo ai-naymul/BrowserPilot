@@ -4,15 +4,17 @@ import os
 import logging
 import json
 import base64
-from playwright.async_api import async_playwright, Page, CDPSession
 from typing import Optional, Dict, List, Any, Tuple
 import hashlib
 from dataclasses import dataclass, asdict
 from pydantic import BaseModel
+from pathlib import Path
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+from playwright.async_api import async_playwright, Page, CDPSession
 
 @dataclass
 class ElementInfo:
@@ -60,14 +62,111 @@ class BrowserController:
         self._cached_url = None
         self._last_action_timestamp = None
         self.input_enabled = False  # Track if Input domain is available
-        
+        self._original_display = os.environ.get("DISPLAY")
+        self._display_was_set = False
+        self._xvfb_process: subprocess.Popen | None = None
+        self._xvfb_display: str | None = None
+
         # Load the robust DOM extraction JavaScript
         self.dom_js = self._get_dom_extraction_js()
 
+    def _find_free_display(self, start: int = 99, end: int = 110) -> int:
+        """Locate a free X display number for Xvfb."""
+        for display in range(start, end):
+            lock_file = Path(f"/tmp/.X{display}-lock")
+            if not lock_file.exists():
+                return display
+        # Fall back to the starting display even if locked (Xvfb will fail clearly)
+        return start
+
+    def _terminate_xvfb(self):
+        """Stop the Xvfb process if it was started."""
+        if not self._xvfb_process:
+            return
+
+        self._xvfb_process.terminate()
+        try:
+            self._xvfb_process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            self._xvfb_process.kill()
+        finally:
+            self._xvfb_process = None
+            self._xvfb_display = None
+
+    async def _ensure_display(self):
+        """Start a virtual X server when running in headful mode without DISPLAY."""
+        if self.headless or os.environ.get("DISPLAY"):
+            return
+
+        display_number = self._find_free_display()
+        display = f":{display_number}"
+        xvfb_cmd = [
+            "Xvfb",
+            display,
+            "-screen",
+            "0",
+            "1280x800x24",
+            "-nolisten",
+            "tcp",
+        ]
+
+        try:
+            self._xvfb_process = subprocess.Popen(
+                xvfb_cmd,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            self._xvfb_display = display
+            logger.info("🖥️ Started Xvfb on display %s for headful browser session", display)
+        except FileNotFoundError:
+            logger.warning("⚠️ Xvfb not available; falling back to headless mode")
+            self.headless = True
+            return
+
+        # Wait briefly for Xvfb to be ready
+        ready = False
+        for _ in range(30):
+            if self._xvfb_process.poll() is not None:
+                logger.error(
+                    "❌ Xvfb exited prematurely with code %s", self._xvfb_process.returncode
+                )
+                self._terminate_xvfb()
+                self.headless = True
+                return
+            if Path(f"/tmp/.X{display_number}-lock").exists():
+                ready = True
+                break
+            await asyncio.sleep(0.1)
+
+        if not ready:
+            logger.warning("⚠️ Timed out waiting for Xvfb; falling back to headless mode")
+            self._terminate_xvfb()
+            self.headless = True
+            return
+
+        os.environ["DISPLAY"] = display
+        self._display_was_set = True
+
+    def _restore_display(self):
+        """Restore the DISPLAY environment variable and stop Xvfb if needed."""
+        self._terminate_xvfb()
+
+        if not self._display_was_set:
+            return
+
+        if self._original_display is None:
+            os.environ.pop("DISPLAY", None)
+        else:
+            os.environ["DISPLAY"] = self._original_display
+
+        self._display_was_set = False
+
     async def __aenter__(self):
         """Initialize browser with CDP streaming support"""
+        await self._ensure_display()
+
         self.play = await async_playwright().start()
-        
+
         launch_options = {
             "headless": self.headless,
             "args": [
@@ -111,6 +210,7 @@ class BrowserController:
             await self.browser.close()
         if self.play:
             await self.play.stop()
+        self._restore_display()
 
     async def _setup_cdp_streaming(self):
         """Setup CDP session for real-time streaming with proper error handling"""
