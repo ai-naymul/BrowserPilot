@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Monitor, Play, Square, Camera, Settings, Circle, Maximize2 } from 'lucide-react';
 import { WebSocketManager } from '../services/WebSocketManager';
 
 interface StreamingViewerProps {
   wsManager: WebSocketManager;
   jobId: string | null;
+  autoConnect?: boolean;
 }
 
-export const StreamingViewer: React.FC<StreamingViewerProps> = ({ wsManager, jobId }) => {
+export const StreamingViewer: React.FC<StreamingViewerProps> = ({ wsManager, jobId, autoConnect = false }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [currentFrame, setCurrentFrame] = useState<string | null>(null);
   const [streamStats, setStreamStats] = useState({ frameCount: 0, fps: 0 });
   const [showStream, setShowStream] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const lastFrameTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
     wsManager.on('stream_connected', () => {
@@ -21,13 +23,21 @@ export const StreamingViewer: React.FC<StreamingViewerProps> = ({ wsManager, job
 
     wsManager.on('stream_disconnected', () => {
       setIsConnected(false);
+      setStreamStats({ frameCount: 0, fps: 0 });
+      lastFrameTimeRef.current = null;
     });
 
     wsManager.on('stream_frame', (data: any) => {
       setCurrentFrame(data.data);
+
+      const now = performance.now();
+      const lastFrame = lastFrameTimeRef.current;
+      const fps = lastFrame ? Math.round(1000 / Math.max(now - lastFrame, 1)) : 0;
+      lastFrameTimeRef.current = now;
+
       setStreamStats(prev => ({
         frameCount: prev.frameCount + 1,
-        fps: prev.fps
+        fps: fps || prev.fps
       }));
     });
 
@@ -37,6 +47,20 @@ export const StreamingViewer: React.FC<StreamingViewerProps> = ({ wsManager, job
       }
     });
   }, [wsManager]);
+
+  useEffect(() => {
+    if (autoConnect && jobId && !wsManager.isStreamConnected()) {
+      setShowStream(true);
+      wsManager.connectStream(jobId);
+    }
+
+    if (!jobId) {
+      setCurrentFrame(null);
+      setStreamStats({ frameCount: 0, fps: 0 });
+      lastFrameTimeRef.current = null;
+      setIsConnected(false);
+    }
+  }, [autoConnect, jobId, wsManager]);
 
   const handleConnect = () => {
     if (jobId) {
