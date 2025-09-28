@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Download, Monitor, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react';
 import { WebSocketManager } from '../services/WebSocketManager';
+const API_BASE_URL = 'http://localhost:8000';
 
 interface JobFormProps {
   wsManager: WebSocketManager;
@@ -49,7 +50,7 @@ export const JobForm: React.FC<JobFormProps> = ({ wsManager, onJobCreated }) => 
     const finalFormat = detectedFormat || format;
 
     try {
-      const response = await fetch('/job', {
+      const response = await fetch(`${API_BASE_URL}/job`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -78,7 +79,7 @@ export const JobForm: React.FC<JobFormProps> = ({ wsManager, onJobCreated }) => 
     if (!currentJobId) return;
 
     try {
-      const response = await fetch(`/download/${currentJobId}`);
+      const response = await fetch(`${API_BASE_URL}/download/${currentJobId}`);
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);

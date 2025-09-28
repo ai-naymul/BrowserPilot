@@ -7,8 +7,18 @@ from backend.smart_browser_controller import SmartBrowserController  # Updated i
 from backend.proxy_manager import SmartProxyManager  # Updated import
 from backend.agent import run_agent
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # TODO add specific origins in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 tasks = {} # job_id → async.Task
 ws_subscribers = {} # job_id → { websocket, … }
