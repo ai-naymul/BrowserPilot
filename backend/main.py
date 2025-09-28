@@ -115,10 +115,17 @@ async def stream_ws(websocket: WebSocket, job_id: str):
     """WebSocket endpoint for real-time browser streaming"""
     await websocket.accept()
     
+    # Wait for streaming session to be available (with timeout)
+    max_wait = 30  # seconds
+    wait_time = 0
+    while job_id not in streaming_sessions and wait_time < max_wait:
+        await asyncio.sleep(0.5)
+        wait_time += 0.5
+    
     if job_id not in streaming_sessions:
         await websocket.send_text(json.dumps({
             "type": "error",
-            "message": "No streaming session found for this job"
+            "message": "Streaming session not available - job may not have streaming enabled"
         }))
         await websocket.close()
         return

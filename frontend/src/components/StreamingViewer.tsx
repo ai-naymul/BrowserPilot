@@ -52,8 +52,14 @@ export const StreamingViewer: React.FC<StreamingViewerProps> = ({ wsManager, job
     if (autoConnect && jobId && !wsManager.isStreamConnected()) {
       setShowStream(true);
       wsManager.connectStream(jobId);
+    } else {
+      console.log('Auto-connect conditions not met:', {
+        autoConnect: !!autoConnect,
+        jobId: !!jobId,
+        notConnected: !wsManager.isStreamConnected()
+      });
     }
-
+  
     if (!jobId) {
       setCurrentFrame(null);
       setStreamStats({ frameCount: 0, fps: 0 });

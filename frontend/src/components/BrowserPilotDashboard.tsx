@@ -104,16 +104,11 @@ export const BrowserPilotDashboard: React.FC = () => {
   };
 
   const handleJobCreated = (jobData: { jobId: string; streaming: boolean; format: string }) => {
+    console.log('Job created:', jobData);
     setCurrentJobId(jobData.jobId);
     setIsLoading(true);
     setStreamingEnabled(jobData.streaming);
     wsManager.connect(jobData.jobId);
-
-    if (jobData.streaming) {
-      wsManager.connectStream(jobData.jobId);
-    } else {
-      wsManager.disconnectStream();
-    }
   };
 
   const clearDecisions = () => setDecisions([]);
