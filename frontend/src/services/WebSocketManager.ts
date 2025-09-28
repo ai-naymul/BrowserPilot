@@ -13,7 +13,10 @@ export class WebSocketManager {
       this.websocket.close();
     }
 
-    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`;
+    // Detect if we're in development mode (frontend on different port than backend)
+    const isDev = window.location.port === '5173';
+    const backendHost = isDev ? 'localhost:8000' : window.location.host;
+    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${backendHost}`;
     console.log(`📡 Connecting to WebSocket: ${wsBase}/ws/${jobId}`);
     this.websocket = new WebSocket(`${wsBase}/ws/${jobId}`);
     
@@ -89,7 +92,10 @@ export class WebSocketManager {
       this.streamWebSocket.close();
     }
 
-    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`;
+    // Detect if we're in development mode (frontend on different port than backend)
+    const isDev = window.location.port === '5173';
+    const backendHost = isDev ? 'localhost:8000' : window.location.host;
+    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${backendHost}`;
     console.log(`🎥 Connecting to Stream WebSocket: ${wsBase}/stream/${jobId}`);
     this.streamWebSocket = new WebSocket(`${wsBase}/stream/${jobId}`);
     
