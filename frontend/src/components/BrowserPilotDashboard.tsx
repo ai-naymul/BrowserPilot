@@ -31,6 +31,7 @@ export const BrowserPilotDashboard: React.FC = () => {
   const [screenshots, setScreenshots] = useState<string[]>([]);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingEnabled, setStreamingEnabled] = useState(false);
 
   useEffect(() => {
     // Set up WebSocket event listeners
@@ -105,7 +106,14 @@ export const BrowserPilotDashboard: React.FC = () => {
   const handleJobCreated = (jobData: { jobId: string; streaming: boolean; format: string }) => {
     setCurrentJobId(jobData.jobId);
     setIsLoading(true);
+    setStreamingEnabled(jobData.streaming);
     wsManager.connect(jobData.jobId);
+
+    if (jobData.streaming) {
+      wsManager.connectStream(jobData.jobId);
+    } else {
+      wsManager.disconnectStream();
+    }
   };
 
   const clearDecisions = () => setDecisions([]);
@@ -157,7 +165,11 @@ export const BrowserPilotDashboard: React.FC = () => {
 
         {/* Browser Streaming */}
         <div className="animate-in fade-in slide-in-from-left-4 duration-700 delay-400">
-          <StreamingViewer wsManager={wsManager} jobId={currentJobId} />
+          <StreamingViewer
+            wsManager={wsManager}
+            jobId={currentJobId}
+            autoConnect={streamingEnabled}
+          />
         </div>
 
         {/* Decision Log */}

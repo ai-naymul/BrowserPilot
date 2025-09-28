@@ -13,8 +13,9 @@ export class WebSocketManager {
       this.websocket.close();
     }
 
-    console.log(`📡 Connecting to WebSocket: ws://localhost:8000/ws/${jobId}`);
-    this.websocket = new WebSocket(`ws://localhost:8000/ws/${jobId}`);
+    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`;
+    console.log(`📡 Connecting to WebSocket: ${wsBase}/ws/${jobId}`);
+    this.websocket = new WebSocket(`${wsBase}/ws/${jobId}`);
     
     this.websocket.onopen = () => {
       console.log('📡 WebSocket connected successfully');
@@ -88,8 +89,9 @@ export class WebSocketManager {
       this.streamWebSocket.close();
     }
 
-    console.log(`🎥 Connecting to Stream WebSocket: ws://localhost:8000/stream/${jobId}`);
-    this.streamWebSocket = new WebSocket(`ws://localhost:8000/stream/${jobId}`);
+    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}`;
+    console.log(`🎥 Connecting to Stream WebSocket: ${wsBase}/stream/${jobId}`);
+    this.streamWebSocket = new WebSocket(`${wsBase}/stream/${jobId}`);
     
     this.streamWebSocket.onopen = () => {
       console.log('🎥 Stream WebSocket connected successfully');
