@@ -10,9 +10,9 @@
 
 Set up proper project infrastructure for sustainable open-source development.
 
-- [ ] Add pytest configuration and test infrastructure
-- [ ] Create `tests/` directory with proper structure
-- [ ] Write unit tests for `proxy_manager.py`
+- [x] Add pytest configuration and test infrastructure
+- [x] Create `tests/` directory with proper structure
+- [x] Write unit tests for `proxy_manager.py`
 - [ ] Write unit tests for `anti_bot_detection.py`
 - [ ] Write unit tests for `universal_extractor.py`
 - [ ] Write unit tests for `vision_model.py`
