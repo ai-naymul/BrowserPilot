@@ -6,23 +6,22 @@
 
 ## Release v1.0.0 — The Foundation
 
-> Status: **In Progress**
+> Status: **Done**
 
 Set up proper project infrastructure for sustainable open-source development.
 
 - [x] Add pytest configuration and test infrastructure
 - [x] Create `tests/` directory with proper structure
-- [x] Write unit tests for `proxy_manager.py`
-- [ ] Write unit tests for `anti_bot_detection.py`
-- [ ] Write unit tests for `universal_extractor.py`
-- [ ] Write unit tests for `vision_model.py`
-- [ ] Add GitHub Actions CI workflow for tests
-- [ ] Add issue templates (bug report, feature request)
-- [ ] Add pull request template
-- [ ] Add `CONTRIBUTING.md`
-- [ ] Add `LICENSE` file (MIT)
-- [ ] Semantic versioning starting at v1.0.0
-- [ ] Update README with test badges
+- [x] Write unit tests for `proxy_manager.py` (24 tests)
+- [x] Write unit tests for `anti_bot_detection.py` (17 tests)
+- [x] Write unit tests for `universal_extractor.py` (33 tests)
+- [x] Write unit tests for `vision_model.py` (30 tests)
+- [x] Add GitHub Actions CI workflow for tests
+- [x] Add issue templates (bug report, feature request)
+- [x] Add pull request template
+- [x] Add `CONTRIBUTING.md`
+- [x] Add `LICENSE` file (MIT)
+- [x] Semantic versioning starting at v1.0.0
 
 ---
 
