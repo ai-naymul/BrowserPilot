@@ -6,11 +6,16 @@ import asyncio
 import functools
 from PIL import Image
 import io
+import logging
+from backend.config import GEMINI_MODEL_NAME, GOOGLE_API_KEY
+logger = logging.getLogger(__name__)
 
 class AntiBotVisionModel:
     def __init__(self):
-        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-        self.model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+        if not GOOGLE_API_KEY:
+            logger.warning("GOOGLE_API_KEY is not set — anti-bot vision will fail at call time")
+        genai.configure(api_key=GOOGLE_API_KEY)
+        self.model = genai.GenerativeModel(GEMINI_MODEL_NAME)
     
     async def analyze_anti_bot_page(self, screenshot_b64: str, detection_prompt: str, page_url: str) -> dict:
         """Analyze page screenshot to detect anti-bot systems"""
@@ -27,12 +32,22 @@ class AntiBotVisionModel:
             content = [detection_prompt, image]
             
             # Send to vision model
-            response = await asyncio.to_thread(
-                functools.partial(self.model.generate_content, content)
-            )
-            
+            last_error = None
+            for _attempt in range(3):
+                try:
+                    response = await asyncio.to_thread(
+                        functools.partial(self.model.generate_content, content)
+                    )
+                    break
+                except Exception as _e:
+                    last_error = _e
+                    logger.warning(f"Gemini API attempt {_attempt + 1}/3 failed: {_e}")
+                    await asyncio.sleep(2 ** _attempt)
+            else:
+                raise last_error
+
             raw_text = response.text
-            print(f"🔍 Anti-bot detection response: {raw_text[:200]}...")
+            logger.debug(f"Anti-bot detection response: {raw_text[:200]}...")
             
             # Parse JSON response
             try:
@@ -51,7 +66,7 @@ class AntiBotVisionModel:
                 return self._parse_fallback_response(raw_text, page_url)
                 
         except Exception as e:
-            print(f"❌ Error in anti-bot vision analysis: {e}")
+            logger.error(f"Error in anti-bot vision analysis: {e}")
             return {
                 "is_anti_bot": False,
                 "detection_type": "none",
@@ -156,7 +171,7 @@ class AntiBotVisionModel:
             }
             
         except Exception as e:
-            print(f"❌ Error solving CAPTCHA: {e}")
+            logger.error(f"Error solving CAPTCHA: {e}")
             return {
                 "can_solve": False,
                 "solution_type": "error",

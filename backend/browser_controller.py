@@ -15,6 +15,14 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 from playwright.async_api import async_playwright, Page, CDPSession
+from backend.config import (
+    BROWSER_VIEWPORT_WIDTH, BROWSER_VIEWPORT_HEIGHT,
+    NAVIGATION_SETTLE_S, CLICK_SETTLE_S, SCROLL_SETTLE_S,
+    INTERACTION_DELAY_S, STREAM_POLL_INTERVAL_S,
+    WS_BASE_URL, XVFB_DISPLAY_START, XVFB_DISPLAY_END,
+    get_random_ua,
+)
+from backend.stealth_engine import get_stealth_script, get_ua_headers
 
 @dataclass
 class ElementInfo:
@@ -70,7 +78,7 @@ class BrowserController:
         # Load the robust DOM extraction JavaScript
         self.dom_js = self._get_dom_extraction_js()
 
-    def _find_free_display(self, start: int = 99, end: int = 110) -> int:
+    def _find_free_display(self, start: int = XVFB_DISPLAY_START, end: int = XVFB_DISPLAY_END) -> int:
         """Locate a free X display number for Xvfb."""
         for display in range(start, end):
             lock_file = Path(f"/tmp/.X{display}-lock")
@@ -78,6 +86,22 @@ class BrowserController:
                 return display
         # Fall back to the starting display even if locked (Xvfb will fail clearly)
         return start
+
+    def _get_launch_args(self) -> list:
+        """Chromium launch arguments shared by initial launch and proxy-rotation restarts."""
+        return [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--disable-blink-features=AutomationControlled",
+            "--disable-extensions",
+            "--disable-web-security",
+            f"--window-size={BROWSER_VIEWPORT_WIDTH},{BROWSER_VIEWPORT_HEIGHT}",
+            "--no-first-run",
+            "--disable-default-apps",
+            "--remote-debugging-port=0",
+        ]
 
     def _terminate_xvfb(self):
         """Stop the Xvfb process if it was started."""
@@ -169,36 +193,25 @@ class BrowserController:
 
         launch_options = {
             "headless": self.headless,
-            "args": [
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-web-security",
-                "--disable-features=VizDisplayCompositor",
-                "--window-size=1280,800",
-                "--window-position=0,0",
-                "--disable-blink-features=AutomationControlled",
-                "--disable-extensions",
-                "--no-first-run",
-                "--disable-default-apps",
-                # Enable remote debugging for CDP
-                "--remote-debugging-port=0"  # Use random port
-            ]
+            "args": self._get_launch_args(),
         }
-        
         if self.proxy:
             launch_options["proxy"] = self.proxy
-            
+
         self.browser = await self.play.chromium.launch(**launch_options)
-        self.page = await self.browser.new_page(viewport={"width": 1280, "height": 800})
-        
+        self._user_agent = get_random_ua()
+        context = await self.browser.new_context(
+            viewport={"width": BROWSER_VIEWPORT_WIDTH, "height": BROWSER_VIEWPORT_HEIGHT},
+            user_agent=self._user_agent,
+            proxy=self.proxy if self.proxy else None,
+        )
+        self.page = await context.new_page()
+        await self.page.add_init_script(get_stealth_script(self._user_agent))
+        await self.page.set_extra_http_headers(get_ua_headers(self._user_agent))
+
         # Set up CDP session for streaming
         if self.enable_streaming:
             await self._setup_cdp_streaming()
-            
-        await self.page.set_extra_http_headers({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        })
         
         return self
 
@@ -290,16 +303,16 @@ class BrowserController:
                     frame_data = {
                         'type': 'frame',
                         'data': screenshot_b64,
-                        'timestamp': asyncio.get_event_loop().time(),
+                        'timestamp': asyncio.get_running_loop().time(),
                         'method': 'polling'
                     }
                     
                     await self._broadcast_to_clients(frame_data)
-                    await asyncio.sleep(0.1)  # 10 FPS
-                    
+                    await asyncio.sleep(STREAM_POLL_INTERVAL_S)  # 10 FPS
+
                 except Exception as e:
                     logger.error(f"Screenshot polling error: {e}")
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(SCROLL_SETTLE_S)
         
         # Start screenshot polling in background
         asyncio.create_task(screenshot_loop())
@@ -426,7 +439,7 @@ class BrowserController:
                 "enabled": True,
                 "active": self.streaming_active,
                 "clients": len(self.stream_clients),
-                "websocket_url": "ws://localhost:8000/stream",
+                "websocket_url": f"{WS_BASE_URL}/stream",
                 "input_enabled": self.input_enabled,
                 "method": "screencast" if self.input_enabled else "polling"
             }
@@ -618,7 +631,7 @@ class BrowserController:
         try:
             logger.info(f"Navigating to: {url}")
             await self.page.goto(url, wait_until=wait_until, timeout=timeout)
-            await asyncio.sleep(2)
+            await asyncio.sleep(NAVIGATION_SETTLE_S)
             logger.info(f"Successfully navigated to: {url}")
         except Exception as e:
             logger.error(f"Failed to navigate to {url}: {e}")
@@ -628,7 +641,7 @@ class BrowserController:
         """Get current page state with elements"""
         try:
             await self.page.wait_for_load_state("domcontentloaded", timeout=10000)
-            await asyncio.sleep(1)
+            await asyncio.sleep(SCROLL_SETTLE_S)
             
             url = self.page.url
             title = await self.page.title()
@@ -697,8 +710,8 @@ class BrowserController:
             logger.info(f"Clicking element {index}: {element.text[:50]}... at ({x}, {y})")
             
             await self.page.mouse.click(x, y)
-            await asyncio.sleep(1)
-            
+            await asyncio.sleep(CLICK_SETTLE_S)
+
             logger.info(f"Successfully clicked element {index}")
             return True
             
@@ -727,7 +740,7 @@ class BrowserController:
             logger.info(f"Typing '{text}' into element {index}")
             
             await self.page.mouse.click(x, y)
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(INTERACTION_DELAY_S)
             await self.page.keyboard.press('Control+a')
             await self.page.keyboard.type(text)
             
@@ -744,7 +757,7 @@ class BrowserController:
             await self.page.mouse.wheel(0, amount)
         elif direction == "up":
             await self.page.mouse.wheel(0, -amount)
-        await asyncio.sleep(1)
+        await asyncio.sleep(SCROLL_SETTLE_S)
 
     async def press_key(self, key: str) -> bool:
         """Press a keyboard key"""

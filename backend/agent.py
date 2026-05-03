@@ -4,6 +4,10 @@ from typing import Literal
 from backend.smart_browser_controller import SmartBrowserController
 from backend.vision_model import decide
 from backend.universal_extractor import UniversalExtractor
+from backend.config import (
+    NAVIGATION_SETTLE_S, CLICK_SETTLE_S, SCROLL_SETTLE_S,
+    INTERACTION_DELAY_S,
+)
 
 def detect_format_from_prompt(prompt: str, default_fmt: str) -> str:
     """Detect format from prompt text and override default if found"""
@@ -213,7 +217,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                         await browser.click_element_by_index(index, page_state)
                         consecutive_scrolls = 0
                         extraction_attempts = 0  # Reset on navigation
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(CLICK_SETTLE_S)
                     else:
                         print(f"❌ Invalid click index: {index}")
                         
@@ -225,7 +229,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                         print(f"⌨️ Typing '{text}' into: {elem.text[:30]}...")
                         await browser.input_text_by_index(index, text, page_state)
                         consecutive_scrolls = 0
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(INTERACTION_DELAY_S * 2)
                     else:
                         print(f"❌ Invalid type parameters: index={index}, text='{text}'")
                         
@@ -246,7 +250,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                     print(f"🔑 Pressing key: {key}")
                     await browser.press_key(key)
                     consecutive_scrolls = 0
-                    await asyncio.sleep(2)
+                    await asyncio.sleep(NAVIGATION_SETTLE_S)
                     
                 elif action == "navigate":
                     url = decision.get("url", "")
@@ -257,7 +261,7 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                             await browser.goto(url)
                             consecutive_scrolls = 0
                             extraction_attempts = 0
-                            await asyncio.sleep(2)
+                            await asyncio.sleep(NAVIGATION_SETTLE_S)
                         except Exception as nav_error:
                             print(f"❌ Smart navigation failed: {nav_error}")
                             # Broadcast navigation failure with proxy stats
@@ -318,10 +322,10 @@ async def run_agent(job_id: str, prompt: str, fmt: Literal["txt","md","json","ht
                     
             except Exception as e:
                 print(f"❌ Action execution failed: {e}")
-                await asyncio.sleep(1)
-            
+                await asyncio.sleep(INTERACTION_DELAY_S * 2)
+
             # Small delay between actions
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(INTERACTION_DELAY_S)
         
         # Final extraction if not done yet
         if extraction_attempts == 0:

@@ -12,8 +12,13 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from pathlib import Path
 import re
+import logging
+from backend.config import GEMINI_MODEL_NAME, GOOGLE_API_KEY, EXTRACTION_MAX_CHARS, EXTRACTION_FALLBACK_CHARS, EXTRACTION_STRUCTURE_CHARS
+logger = logging.getLogger(__name__)
 
-MODEL = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+if GOOGLE_API_KEY:
+    genai.configure(api_key=GOOGLE_API_KEY)
+MODEL = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
 UNIVERSAL_EXTRACTION_PROMPT = """
 You are a universal data extraction specialist. Your task is to analyze any webpage and extract the most relevant information based on the user's specific goal.
@@ -112,7 +117,7 @@ class UniversalExtractor:
             return await self._format_output(extracted_data, fmt, goal, job_id)  # Pass job_id
                 
         except Exception as e:
-            print(f"❌ Universal extraction failed: {e}")
+            logger.error(f"Universal extraction failed: {e}")
             return await self._fallback_extraction(browser, fmt, goal)
     
     def _detect_website_type(self, url: str, title: str) -> str:
@@ -206,13 +211,13 @@ class UniversalExtractor:
             
             # Join and limit content
             content = "\n".join(main_content)
-            return content[:12000]  # Limit total content to avoid token limits
-            
+            return content[:EXTRACTION_MAX_CHARS]  # Limit total content to avoid token limits
+
         except Exception as e:
-            print(f"❌ Error getting structured content: {e}")
+            logger.error(f"Error getting structured content: {e}")
             # Fallback to simple text extraction
             try:
-                return await browser.page.inner_text("body")[:8000]
+                return await browser.page.inner_text("body")[:EXTRACTION_FALLBACK_CHARS]
             except:
                 return "Content extraction failed"
     
@@ -248,7 +253,7 @@ class UniversalExtractor:
                     "page_title": title,
                     "website_type": website_type,
                     "extraction_goal": goal,
-                    "extraction_timestamp": asyncio.get_event_loop().time(),
+                    "extraction_timestamp": asyncio.get_running_loop().time(),
                     "extraction_method": "ai_powered"
                 }
                 
@@ -263,20 +268,20 @@ class UniversalExtractor:
                         "page_title": title,
                         "website_type": website_type,
                         "extraction_goal": goal,
-                        "extraction_timestamp": asyncio.get_event_loop().time(),
+                        "extraction_timestamp": asyncio.get_running_loop().time(),
                         "extraction_method": "text_fallback"
                     }
                 }
                 
         except Exception as e:
-            print(f"❌ AI extraction failed: {e}")
+            logger.error(f"AI extraction failed: {e}")
             return self._create_fallback_structure(content, url, title, website_type, goal)
     
     def _create_fallback_structure(self, content: str, url: str, title: str, website_type: str, goal: str) -> Dict[str, Any]:
         """Create structured fallback when AI extraction fails"""
         return {
             "extraction_status": "fallback_mode",
-            "raw_content": content[:2000],  # Truncated content
+            "raw_content": content[:EXTRACTION_STRUCTURE_CHARS],  # Truncated content
             "content_summary": self._create_simple_summary(content),
             "_metadata": {
                 "source_url": url,
@@ -462,7 +467,7 @@ class UniversalExtractor:
             return df.to_csv(index=False)
             
         except Exception as e:
-            print(f"❌ CSV formatting failed: {e}")
+            logger.error(f"CSV formatting failed: {e}")
             # Simple fallback
             csv_lines = ["Field,Value"]
             for key, value in data.items():
@@ -544,14 +549,14 @@ class UniversalExtractor:
             # Build PDF with error handling
             try:
                 doc.build(story)
-                print(f"✅ PDF successfully generated: {filepath}")
+                logger.info(f"PDF successfully generated: {filepath}")
                 return f"PDF_DIRECT_SAVE:{filepath}"  # Special indicator for direct save
             except Exception as build_error:
-                print(f"❌ PDF build error: {build_error}")
+                logger.error(f"PDF build error: {build_error}")
                 raise build_error
             
         except ImportError:
-            print("❌ ReportLab not installed. Installing...")
+            logger.error("ReportLab not installed. Installing...")
             import subprocess
             import sys
             try:
@@ -559,11 +564,11 @@ class UniversalExtractor:
                 # Try again after installation
                 return await self._format_as_pdf(data, goal, job_id)
             except subprocess.CalledProcessError:
-                print("❌ Failed to install ReportLab")
+                logger.error("Failed to install ReportLab")
                 raise ImportError("ReportLab installation failed")
             
         except Exception as e:
-            print(f"❌ PDF generation failed: {e}")
+            logger.error(f"PDF generation failed: {e}")
             # Return error indicator instead of fallback file
             raise RuntimeError(f"PDF generation failed: {str(e)}")
 

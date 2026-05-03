@@ -4,7 +4,7 @@ import websockets
 import socket
 import logging
 from typing import Optional
-
+from backend.config import VNC_DEFAULT_PORT, VNC_WS_PORT_OFFSET
 logger = logging.getLogger(__name__)
 
 class VNCWebSocketProxy:
@@ -39,8 +39,9 @@ class VNCWebSocketProxy:
         try:
             # Connect to VNC server
             vnc_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            vnc_socket.connect((self.vnc_host, self.vnc_port))
             vnc_socket.setblocking(False)
+            loop = asyncio.get_running_loop()
+            await loop.sock_connect(vnc_socket, (self.vnc_host, self.vnc_port))
             
             logger.info(f"Connected to VNC server at {self.vnc_host}:{self.vnc_port}")
             
@@ -66,7 +67,7 @@ class VNCWebSocketProxy:
         try:
             async for message in websocket:
                 if isinstance(message, bytes):
-                    await asyncio.get_event_loop().sock_sendall(vnc_socket, message)
+                    await asyncio.get_running_loop().sock_sendall(vnc_socket, message)
         except websockets.exceptions.ConnectionClosed:
             pass
         except Exception as e:
@@ -76,7 +77,7 @@ class VNCWebSocketProxy:
         """Forward VNC messages to WebSocket"""
         try:
             while True:
-                data = await asyncio.get_event_loop().sock_recv(vnc_socket, 4096)
+                data = await asyncio.get_running_loop().sock_recv(vnc_socket, 4096)
                 if not data:
                     break
                 await websocket.send(data)
@@ -88,9 +89,9 @@ class VNCWebSocketProxy:
 # Global proxy manager
 vnc_proxies = {}
 
-async def start_vnc_proxy(vnc_port: int) -> Optional[int]:
+async def start_vnc_proxy(vnc_port: int = VNC_DEFAULT_PORT) -> Optional[int]:
     """Start a VNC WebSocket proxy for the given VNC port"""
-    websocket_port = vnc_port + 1000  # Offset for WebSocket port
+    websocket_port = vnc_port + VNC_WS_PORT_OFFSET  # Offset for WebSocket port
     
     if websocket_port in vnc_proxies:
         return websocket_port
