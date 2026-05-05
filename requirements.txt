@@ -1,6 +1,6 @@
 fastapi>=0.110.0
 uvicorn[standard]>=0.29.0
-playwright>=1.44.0
+patchright>=1.59.0
 google-generativeai>=0.8.0
 Pillow>=10.3.0
 beautifulsoup4>=4.12.0

@@ -1,7 +1,7 @@
 import asyncio
 import random
 from typing import Optional
-from playwright.async_api import Page
+from patchright.async_api import Page
 from backend.config import (
     HUMAN_TYPING_WPM_MIN,
     HUMAN_TYPING_WPM_MAX,

@@ -13,7 +13,7 @@ from backend.config import (
     PROXY_ROTATION_DELAY_S, CAPTCHA_SETTLE_S, NAVIGATION_SETTLE_S,
     get_random_ua,
 )
-from backend.stealth_engine import get_stealth_script, get_ua_headers
+from backend.stealth_engine import get_ua_headers
 from backend.config import BROWSER_VIEWPORT_WIDTH, BROWSER_VIEWPORT_HEIGHT
 logger = logging.getLogger(__name__)
 
@@ -224,7 +224,6 @@ class SmartBrowserController(BrowserController):
                 proxy=new_proxy if new_proxy else None,
             )
             self.page = await context.new_page()
-            await self.page.add_init_script(get_stealth_script(self._user_agent))
             await self.page.set_extra_http_headers(get_ua_headers(self._user_agent))
 
             # Re-setup CDP streaming if enabled
