@@ -36,12 +36,34 @@ class ProxyInfo:
         return self.success_count / total if total > 0 else 1.0
     
     def to_playwright_dict(self) -> Dict:
-        proxy_dict = {"server": self.server}
+        if self.server.startswith(("socks4://", "socks5://", "http://", "https://")):
+            server = self.server
+        else:
+            server = f"http://{self.server}"
+        result = {"server": server}
         if self.username:
-            proxy_dict["username"] = self.username
+            result["username"] = self.username
         if self.password:
-            proxy_dict["password"] = self.password
-        return proxy_dict
+            result["password"] = self.password
+        return result
+
+_COUNTRY_LOCALE_MAP: dict = {
+    "US": ("en-US", "America/New_York"),
+    "GB": ("en-GB", "Europe/London"),
+    "DE": ("de-DE", "Europe/Berlin"),
+    "FR": ("fr-FR", "Europe/Paris"),
+    "JP": ("ja-JP", "Asia/Tokyo"),
+    "CA": ("en-CA", "America/Toronto"),
+    "AU": ("en-AU", "Australia/Sydney"),
+    "IN": ("en-IN", "Asia/Kolkata"),
+    "BR": ("pt-BR", "America/Sao_Paulo"),
+    "NL": ("nl-NL", "Europe/Amsterdam"),
+}
+
+def get_locale_for_country(country_code: str) -> tuple:
+    """Return (locale, timezone) for a country code. Defaults to US if unknown."""
+    code = (country_code or "US").upper()
+    return _COUNTRY_LOCALE_MAP.get(code, ("en-US", "America/New_York"))
 
 class SmartProxyManager:
     def __init__(self, vision_model=None):
@@ -56,7 +78,12 @@ class SmartProxyManager:
     def _load_proxies(self):
         """Load proxies from environment or config"""
         source = os.getenv("SCRAPER_PROXIES", "[]")
-        proxy_data = json.loads(source)
+        try:
+            proxy_data = json.loads(source)
+        except json.JSONDecodeError:
+            import logging as _log
+            _log.getLogger(__name__).warning("SCRAPER_PROXIES is not valid JSON — starting with no proxies")
+            proxy_data = []
         
         for proxy in proxy_data:
             if isinstance(proxy, str):

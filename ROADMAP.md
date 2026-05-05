@@ -27,43 +27,53 @@ Set up proper project infrastructure for sustainable open-source development.
 
 ## Release v1.1.0 — Ghost Mode: Undetectable Browser
 
-> Status: **Planned**
+> Status: **Done** ✅
 
 Full fingerprint evasion and human-like behavior to bypass all major anti-bot systems.
 
 ### Stealth Engine (`backend/stealth_engine.py`)
-- [ ] Modern User-Agent pool (Chrome 120-130, Firefox 121-128, Edge 120-130)
-- [ ] Navigator property patching (`webdriver`, `plugins`, `languages`, `platform`)
-- [ ] `window.chrome` runtime injection (Cloudflare/DataDome check)
-- [ ] WebGL fingerprint spoofing (vendor + renderer override)
-- [ ] Canvas fingerprint noise injection
-- [ ] AudioContext fingerprint spoofing
-- [ ] WebRTC leak prevention (block local IP exposure)
-- [ ] Sec-CH-UA Client Hints headers
-- [ ] Timezone/locale geo-matching to proxy location
-- [ ] Permission API patching
-- [ ] Screen resolution randomization
-- [ ] `deviceMemory` and `hardwareConcurrency` spoofing
-- [ ] Tests for all stealth scripts
+- [x] Modern User-Agent pool (Chrome 120-130, Firefox 121-128, Edge 120-130)
+- [x] Navigator property patching (`webdriver`, `plugins`, `languages`, `platform`)
+- [x] `window.chrome` runtime injection (Cloudflare/DataDome check)
+- [x] WebGL fingerprint spoofing (vendor + renderer override)
+- [x] Canvas fingerprint noise injection
+- [x] AudioContext fingerprint spoofing
+- [ ] WebRTC leak prevention (block local IP exposure) — v1.2 scope
+- [x] Sec-CH-UA Client Hints headers
+- [x] Timezone/locale geo-matching to proxy location (geo helper in proxy_manager)
+- [x] Permission API patching
+- [ ] Screen resolution randomization — v1.2 scope (viewport configurable via env)
+- [x] `deviceMemory` and `hardwareConcurrency` spoofing
+- [x] Tests for all stealth scripts (23 tests)
 
 ### Human Behavior Simulator (`backend/human_behavior.py`)
-- [ ] Bezier curve mouse movements (cubic interpolation)
-- [ ] Realistic typing with variable WPM and occasional typos
-- [ ] Human-like scrolling (variable speed, reading pauses)
-- [ ] Random micro-pauses between actions
-- [ ] Click with slight offset from center + hold duration
-- [ ] Periodic micro-interactions (mouse drift, small scrolls)
-- [ ] Tests for behavior simulation
+- [x] Bezier curve mouse movements (cubic interpolation)
+- [x] Realistic typing with variable WPM and occasional typos
+- [x] Human-like scrolling (variable speed, reading pauses)
+- [x] Random micro-pauses between actions
+- [x] Click with slight offset from center + hold duration
+- [ ] Periodic micro-interactions (mouse drift, small scrolls) — v1.2 scope
+- [x] Tests for behavior simulation (15 tests)
 
 ### Integration
-- [ ] Inject stealth scripts in `browser_controller.py` via `add_init_script()`
-- [ ] Replace hardcoded Chrome 91 UA with modern UA pool
-- [ ] Use browser context instead of raw page for proper isolation
-- [ ] Replace instant clicks with human mouse movement
-- [ ] Replace instant typing with human typing
-- [ ] Replace instant scrolling with human scrolling
-- [ ] Validate against bot.sannysoft.com (before/after screenshots)
-- [ ] Validate against browserleaks.com
+- [x] Inject stealth scripts in `browser_controller.py` via `add_init_script()`
+- [x] Replace hardcoded Chrome 91 UA with modern UA pool
+- [x] Use browser context instead of raw page for proper isolation
+- [x] Replace instant clicks with human mouse movement
+- [x] Replace instant typing with human typing
+- [x] Replace instant scrolling with human scrolling
+- [ ] Validate against bot.sannysoft.com (before/after screenshots) — manual step
+- [ ] Validate against browserleaks.com — manual step
+
+### Additional fixes shipped with v1.1.0
+- [x] Central `backend/config.py` — all 25+ hardcoded values replaced with env-var-backed config
+- [x] `requirements.txt` — added Pillow, python-dotenv, updated google-generativeai to >=0.8.0
+- [x] Deleted broken dead code `backend/cdp_streamer.py`
+- [x] `proxy_manager.py` — guarded JSON parse, SOCKS4/5 URL support, geo-locale map
+- [x] `anti_bot_detection.py` — model name from config, logging, 3-attempt Gemini retry
+- [x] `vnc_proxy.py` — async socket connect, fixed deprecated event loop
+- [x] `universal_extractor.py` — config-backed limits, logging, fixed event loop
+- [x] 152 tests passing (up from 104)
 
 ---
 

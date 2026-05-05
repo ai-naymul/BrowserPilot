@@ -14,7 +14,20 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from playwright.async_api import async_playwright, Page, CDPSession
+from patchright.async_api import async_playwright, Page, CDPSession
+from backend.config import (
+    BROWSER_VIEWPORT_WIDTH, BROWSER_VIEWPORT_HEIGHT,
+    NAVIGATION_SETTLE_S, CLICK_SETTLE_S, SCROLL_SETTLE_S,
+    INTERACTION_DELAY_S, STREAM_POLL_INTERVAL_S,
+    WS_BASE_URL, XVFB_DISPLAY_START, XVFB_DISPLAY_END,
+    GHOST_MODE_ENABLED, GHOST_MODE_HUMAN_BEHAVIOR, GHOST_MODE_SEED,
+    get_random_ua,
+)
+from backend.stealth_engine import get_ua_headers
+from backend.fingerprint_profile import generate_profile, FingerprintProfile
+from backend.human_behavior import (
+    human_move_and_click, human_type, human_scroll, human_pre_action_pause,
+)
 
 @dataclass
 class ElementInfo:
@@ -48,10 +61,12 @@ class PageState:
         self.input_elements = [e for e in elements if e.is_input]
 
 class BrowserController:
-    def __init__(self, headless: bool, proxy: dict | None, enable_streaming: bool = False):
+    def __init__(self, headless: bool, proxy: dict | None, enable_streaming: bool = False,
+                 proxy_country: str | None = None):
         self.headless = headless
         self.proxy = proxy
         self.enable_streaming = enable_streaming
+        self._proxy_country = proxy_country
         self.play = None
         self.browser = None
         self.page = None
@@ -61,16 +76,17 @@ class BrowserController:
         self._cached_page_state = None
         self._cached_url = None
         self._last_action_timestamp = None
-        self.input_enabled = False  # Track if Input domain is available
+        self.input_enabled = False
         self._original_display = os.environ.get("DISPLAY")
         self._display_was_set = False
         self._xvfb_process: subprocess.Popen | None = None
         self._xvfb_display: str | None = None
+        self._profile: FingerprintProfile | None = None
 
         # Load the robust DOM extraction JavaScript
         self.dom_js = self._get_dom_extraction_js()
 
-    def _find_free_display(self, start: int = 99, end: int = 110) -> int:
+    def _find_free_display(self, start: int = XVFB_DISPLAY_START, end: int = XVFB_DISPLAY_END) -> int:
         """Locate a free X display number for Xvfb."""
         for display in range(start, end):
             lock_file = Path(f"/tmp/.X{display}-lock")
@@ -78,6 +94,24 @@ class BrowserController:
                 return display
         # Fall back to the starting display even if locked (Xvfb will fail clearly)
         return start
+
+    def _get_launch_args(self) -> list:
+        """Chromium launch arguments shared by initial launch and proxy-rotation restarts."""
+        profile = self._profile
+        return [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-blink-features=AutomationControlled",
+            "--force-webrtc-ip-handling-policy=disable_non_proxied_udp",
+            f"--window-size={profile.screen_width if profile else BROWSER_VIEWPORT_WIDTH},{profile.screen_height if profile else BROWSER_VIEWPORT_HEIGHT}",
+            "--no-first-run",
+            "--disable-default-apps",
+            "--disable-infobars",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+        ]
 
     def _terminate_xvfb(self):
         """Stop the Xvfb process if it was started."""
@@ -165,41 +199,41 @@ class BrowserController:
         """Initialize browser with CDP streaming support"""
         await self._ensure_display()
 
+        if GHOST_MODE_ENABLED:
+            seed = GHOST_MODE_SEED if GHOST_MODE_SEED else None
+            self._profile = generate_profile(seed=seed, proxy_country=self._proxy_country)
+            self._user_agent = self._profile.user_agent
+        else:
+            self._profile = generate_profile(user_agent=get_random_ua())
+            self._user_agent = self._profile.user_agent
+
         self.play = await async_playwright().start()
 
         launch_options = {
             "headless": self.headless,
-            "args": [
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-web-security",
-                "--disable-features=VizDisplayCompositor",
-                "--window-size=1280,800",
-                "--window-position=0,0",
-                "--disable-blink-features=AutomationControlled",
-                "--disable-extensions",
-                "--no-first-run",
-                "--disable-default-apps",
-                # Enable remote debugging for CDP
-                "--remote-debugging-port=0"  # Use random port
-            ]
+            "args": self._get_launch_args(),
         }
-        
         if self.proxy:
             launch_options["proxy"] = self.proxy
-            
+
         self.browser = await self.play.chromium.launch(**launch_options)
-        self.page = await self.browser.new_page(viewport={"width": 1280, "height": 800})
-        
+        context = await self.browser.new_context(
+            viewport={"width": self._profile.viewport_width, "height": self._profile.viewport_height},
+            user_agent=self._user_agent,
+            locale=self._profile.locale,
+            timezone_id=self._profile.timezone,
+            screen={"width": self._profile.screen_width, "height": self._profile.screen_height},
+            device_scale_factor=self._profile.device_pixel_ratio,
+            color_scheme="light",
+            proxy=self.proxy if self.proxy else None,
+        )
+        self.page = await context.new_page()
+        await self.page.set_extra_http_headers(get_ua_headers(self._user_agent))
+
         # Set up CDP session for streaming
         if self.enable_streaming:
             await self._setup_cdp_streaming()
-            
-        await self.page.set_extra_http_headers({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        })
-        
+
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
@@ -290,16 +324,16 @@ class BrowserController:
                     frame_data = {
                         'type': 'frame',
                         'data': screenshot_b64,
-                        'timestamp': asyncio.get_event_loop().time(),
+                        'timestamp': asyncio.get_running_loop().time(),
                         'method': 'polling'
                     }
                     
                     await self._broadcast_to_clients(frame_data)
-                    await asyncio.sleep(0.1)  # 10 FPS
-                    
+                    await asyncio.sleep(STREAM_POLL_INTERVAL_S)  # 10 FPS
+
                 except Exception as e:
                     logger.error(f"Screenshot polling error: {e}")
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(SCROLL_SETTLE_S)
         
         # Start screenshot polling in background
         asyncio.create_task(screenshot_loop())
@@ -426,7 +460,7 @@ class BrowserController:
                 "enabled": True,
                 "active": self.streaming_active,
                 "clients": len(self.stream_clients),
-                "websocket_url": "ws://localhost:8000/stream",
+                "websocket_url": f"{WS_BASE_URL}/stream",
                 "input_enabled": self.input_enabled,
                 "method": "screencast" if self.input_enabled else "polling"
             }
@@ -618,7 +652,7 @@ class BrowserController:
         try:
             logger.info(f"Navigating to: {url}")
             await self.page.goto(url, wait_until=wait_until, timeout=timeout)
-            await asyncio.sleep(2)
+            await asyncio.sleep(NAVIGATION_SETTLE_S)
             logger.info(f"Successfully navigated to: {url}")
         except Exception as e:
             logger.error(f"Failed to navigate to {url}: {e}")
@@ -628,7 +662,7 @@ class BrowserController:
         """Get current page state with elements"""
         try:
             await self.page.wait_for_load_state("domcontentloaded", timeout=10000)
-            await asyncio.sleep(1)
+            await asyncio.sleep(SCROLL_SETTLE_S)
             
             url = self.page.url
             title = await self.page.title()
@@ -695,10 +729,14 @@ class BrowserController:
             y = element.center_coordinates['y']
             
             logger.info(f"Clicking element {index}: {element.text[:50]}... at ({x}, {y})")
-            
-            await self.page.mouse.click(x, y)
-            await asyncio.sleep(1)
-            
+
+            if GHOST_MODE_ENABLED and GHOST_MODE_HUMAN_BEHAVIOR:
+                await human_pre_action_pause()
+                await human_move_and_click(self.page, x, y)
+            else:
+                await self.page.mouse.click(x, y)
+            await asyncio.sleep(CLICK_SETTLE_S)
+
             logger.info(f"Successfully clicked element {index}")
             return True
             
@@ -725,11 +763,18 @@ class BrowserController:
             y = element.center_coordinates['y']
             
             logger.info(f"Typing '{text}' into element {index}")
-            
-            await self.page.mouse.click(x, y)
-            await asyncio.sleep(0.5)
-            await self.page.keyboard.press('Control+a')
-            await self.page.keyboard.type(text)
+
+            if GHOST_MODE_ENABLED and GHOST_MODE_HUMAN_BEHAVIOR:
+                await human_pre_action_pause()
+                await human_move_and_click(self.page, x, y)
+                await asyncio.sleep(INTERACTION_DELAY_S)
+                await self.page.keyboard.press('Control+a')
+                await human_type(self.page, text)
+            else:
+                await self.page.mouse.click(x, y)
+                await asyncio.sleep(INTERACTION_DELAY_S)
+                await self.page.keyboard.press('Control+a')
+                await self.page.keyboard.type(text)
             
             logger.info(f"Successfully typed text into element {index}")
             return True
@@ -740,11 +785,14 @@ class BrowserController:
 
     async def scroll_page(self, direction: str = "down", amount: int = 500):
         """Scroll the page"""
-        if direction == "down":
-            await self.page.mouse.wheel(0, amount)
-        elif direction == "up":
-            await self.page.mouse.wheel(0, -amount)
-        await asyncio.sleep(1)
+        if GHOST_MODE_ENABLED and GHOST_MODE_HUMAN_BEHAVIOR:
+            await human_scroll(self.page, direction, amount)
+        else:
+            if direction == "down":
+                await self.page.mouse.wheel(0, amount)
+            elif direction == "up":
+                await self.page.mouse.wheel(0, -amount)
+            await asyncio.sleep(SCROLL_SETTLE_S)
 
     async def press_key(self, key: str) -> bool:
         """Press a keyboard key"""

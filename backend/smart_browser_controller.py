@@ -8,6 +8,13 @@ from backend.proxy_manager import SmartProxyManager
 from backend.anti_bot_detection import AntiBotVisionModel
 import logging
 import base64
+from backend.config import (
+    MAX_PROXY_RETRIES, MAX_CAPTCHA_ATTEMPTS,
+    PROXY_ROTATION_DELAY_S, CAPTCHA_SETTLE_S, NAVIGATION_SETTLE_S,
+    get_random_ua,
+)
+from backend.stealth_engine import get_ua_headers
+from backend.config import BROWSER_VIEWPORT_WIDTH, BROWSER_VIEWPORT_HEIGHT
 logger = logging.getLogger(__name__)
 
 class SmartBrowserController(BrowserController):
@@ -18,9 +25,9 @@ class SmartBrowserController(BrowserController):
         self.vision_model = AntiBotVisionModel()
         self.proxy_manager = SmartProxyManager(self.vision_model)
         self.current_proxy = proxy
-        self.max_proxy_retries = 5
+        self.max_proxy_retries = MAX_PROXY_RETRIES
         self.proxy_retry_count = 0
-        self.max_captcha_solve_attempts = 3
+        self.max_captcha_solve_attempts = MAX_CAPTCHA_ATTEMPTS
         self.captcha_solve_count = 0
     
     async def smart_navigate(self, url: str, wait_until: str = "domcontentloaded", timeout: int = 30000) -> bool:
@@ -37,7 +44,7 @@ class SmartBrowserController(BrowserController):
                 response_time = time.time() - start_time
                 
                 # Wait a moment for page to fully load
-                await asyncio.sleep(2)
+                await asyncio.sleep(NAVIGATION_SETTLE_S)
                 
                 # Use vision model to detect anti-bot systems
                 is_antibot, detection_type, suggested_action = await self.proxy_manager.detect_anti_bot_with_vision(
@@ -74,7 +81,7 @@ class SmartBrowserController(BrowserController):
                                 new_proxy = new_proxy_info.to_playwright_dict()
                                 logger.info(f"🔄 Rotating to new proxy: {new_proxy['server']}")
                                 await self._restart_browser_with_proxy(new_proxy)
-                                await asyncio.sleep(3)  # Wait before retry
+                                await asyncio.sleep(PROXY_ROTATION_DELAY_S)  # Wait before retry
                                 continue
                             else:
                                 logger.error("❌ No available proxies for rotation")
@@ -110,7 +117,7 @@ class SmartBrowserController(BrowserController):
                         new_proxy = new_proxy_info.to_playwright_dict()
                         logger.info(f"🔄 Retrying with new proxy due to connection error")
                         await self._restart_browser_with_proxy(new_proxy)
-                        await asyncio.sleep(3)
+                        await asyncio.sleep(PROXY_ROTATION_DELAY_S)
                         continue
         
         logger.error(f"❌ Failed to navigate to {url} after all retries")
@@ -154,16 +161,16 @@ class SmartBrowserController(BrowserController):
                 for input_elem in text_inputs:
                     if await input_elem.is_visible():
                         await input_elem.fill(solution_value)
-                        await asyncio.sleep(1)
-                        
+                        await asyncio.sleep(CAPTCHA_SETTLE_S)
+
                         # Look for submit button
                         submit_buttons = await self.page.query_selector_all('button, input[type="submit"]')
                         for button in submit_buttons:
                             if await button.is_visible():
                                 await button.click()
-                                await asyncio.sleep(3)
+                                await asyncio.sleep(CAPTCHA_SETTLE_S)
                                 return True
-            
+
             elif solution_type == "selection":
                 # Handle image selection CAPTCHAs
                 logger.warning("🚧 Image selection CAPTCHA solving not fully implemented")
@@ -175,13 +182,13 @@ class SmartBrowserController(BrowserController):
                 for input_elem in text_inputs:
                     if await input_elem.is_visible():
                         await input_elem.fill(str(solution_value))
-                        await asyncio.sleep(1)
-                        
+                        await asyncio.sleep(CAPTCHA_SETTLE_S)
+
                         submit_buttons = await self.page.query_selector_all('button, input[type="submit"]')
                         for button in submit_buttons:
                             if await button.is_visible():
                                 await button.click()
-                                await asyncio.sleep(3)
+                                await asyncio.sleep(CAPTCHA_SETTLE_S)
                                 return True
             
             return False
@@ -203,36 +210,25 @@ class SmartBrowserController(BrowserController):
             # Launch new browser with new proxy
             launch_options = {
                 "headless": self.headless,
-                "args": [
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                    "--disable-gpu",
-                    "--disable-web-security",
-                    "--disable-features=VizDisplayCompositor",
-                    "--window-size=1280,800",
-                    "--window-position=0,0",
-                    "--disable-blink-features=AutomationControlled",
-                    "--disable-extensions",
-                    "--no-first-run",
-                    "--disable-default-apps",
-                    "--remote-debugging-port=0"
-                ]
+                "args": self._get_launch_args(),
             }
-            
+
             if new_proxy:
                 launch_options["proxy"] = new_proxy
-            
+
             self.browser = await self.play.chromium.launch(**launch_options)
-            self.page = await self.browser.new_page(viewport={"width": 1280, "height": 800})
-            
+            self._user_agent = get_random_ua()
+            context = await self.browser.new_context(
+                viewport={"width": BROWSER_VIEWPORT_WIDTH, "height": BROWSER_VIEWPORT_HEIGHT},
+                user_agent=self._user_agent,
+                proxy=new_proxy if new_proxy else None,
+            )
+            self.page = await context.new_page()
+            await self.page.set_extra_http_headers(get_ua_headers(self._user_agent))
+
             # Re-setup CDP streaming if enabled
             if self.enable_streaming:
                 await self._setup_cdp_streaming()
-            
-            # Set headers with randomization
-            await self.page.set_extra_http_headers({
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            })
             
             logger.info("✅ Browser restarted with new proxy")
             

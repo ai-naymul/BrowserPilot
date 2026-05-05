@@ -1,4 +1,4 @@
-import asyncio, json, os, uuid, shutil, base64
+import asyncio, json, os, uuid, shutil, base64, time
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks, UploadFile, Form
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -8,6 +8,7 @@ from backend.proxy_manager import SmartProxyManager  # Updated import
 from backend.agent import run_agent
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from backend.config import WS_BASE_URL, STREAM_SESSION_TIMEOUT_S
 
 app = FastAPI()
 
@@ -79,7 +80,7 @@ async def create_job(req: JobRequest):
     
     if req.enable_streaming:
         response["streaming_enabled"] = True
-        response["stream_url"] = f"ws://localhost:8000/stream/{job_id}"
+        response["stream_url"] = f"{WS_BASE_URL}/stream/{job_id}"
     
     return response
 
@@ -116,7 +117,7 @@ async def stream_ws(websocket: WebSocket, job_id: str):
     await websocket.accept()
     
     # Wait for streaming session to be available (with timeout)
-    max_wait = 30  # seconds
+    max_wait = STREAM_SESSION_TIMEOUT_S
     wait_time = 0
     while job_id not in streaming_sessions and wait_time < max_wait:
         await asyncio.sleep(0.5)
@@ -313,7 +314,7 @@ def get_proxy_stats():
     stats = smart_proxy_manager.get_proxy_stats()
     return {
         "proxy_stats": stats,
-        "timestamp": asyncio.get_event_loop().time()
+        "timestamp": time.time()
     }
 
 @app.post("/proxy/reload")
