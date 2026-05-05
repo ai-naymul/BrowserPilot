@@ -127,6 +127,57 @@ We tested against the **hardest commercial anti-bot systems** — the ones that 
 
 ---
 
+## Bulk Scraping — Production Speed at Scale
+
+Single-page demos are cute. Production scraping means hundreds of pages across protected sites without a single block. BrowserPilot's bulk engine does exactly that.
+
+<p align="center">
+  <img src="docs/stealth-benchmarks/bulk_demo.gif" alt="BrowserPilot bulk scraping 10 protected sites" width="640">
+</p>
+
+### What You Get
+
+| Feature | Details |
+|---------|---------|
+| **Concurrent workers** | Up to 10 parallel browsers, each with its own fingerprint |
+| **Context rotation** | New identity (viewport, UA, locale) every N pages — no browser restart needed |
+| **Resource blocking** | Blocks images, fonts, CSS for 3-5x faster page loads |
+| **Adaptive throttling** | Auto backs off on 429s, speeds up on success |
+| **Cookie persistence** | Cookies survive context rotation — sessions don't break |
+| **Checkpoint/resume** | Crash mid-job? Resume from where you stopped |
+| **DOM extraction** | Fast BeautifulSoup extraction by default (no AI API calls needed) |
+| **Shared block intelligence** | If one worker gets blocked on a domain+proxy, all workers skip it |
+
+### Quick Start
+
+```bash
+# API — scrape 10 URLs with 3 workers
+curl -X POST http://localhost:8000/bulk \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": ["https://example.com/page1", "https://example.com/page2"],
+    "prompt": "Extract product data",
+    "format": "json",
+    "max_workers": 3,
+    "block_resources": true
+  }'
+
+# Check progress
+curl http://localhost:8000/bulk/{job_id}
+
+# Resume a crashed job
+curl -X POST http://localhost:8000/bulk/{job_id}/resume
+```
+
+### Performance
+
+| Test | Pages | Speed | Blocked |
+|------|-------|-------|---------|
+| Hacker News (15 pages) | 15/15 | **37.8 pages/min** | 0 |
+| Mixed anti-bot (DataDome, Akamai, PerimeterX, Cloudflare) | 10/10 | **33.7 pages/min** | 0 |
+
+---
+
 ## Why You'll Love This
 
 ### It Actually "Sees" Websites
