@@ -13,8 +13,6 @@
   <em>Type what you want → AI navigates any website → get structured data back.</em>
 </p>
 
-https://github.com/user-attachments/assets/39d2ed68-e121-49b9-817e-2eb5edc25627
-
 ---
 
 ## Why BrowserPilot?
