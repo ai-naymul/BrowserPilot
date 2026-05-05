@@ -54,28 +54,62 @@ BrowserPilot's stealth engine passes the hardest bot detection benchmarks on the
 
 </details>
 
-### Real-World Site Access
+### Tier S Anti-Bot Bypass
 
-We tested against heavily protected production sites — all loaded without blocks:
+We tested against the **hardest commercial anti-bot systems** — the ones that block 99% of automation tools. BrowserPilot loaded 11 out of 14 sites without blocks:
+
+| Site | Anti-Bot System | Tier | Result |
+|------|----------------|------|--------|
+| **Foot Locker** | DataDome | S | **Loaded** — full homepage with products |
+| **Leboncoin** | DataDome | S | **Loaded** — listings + cookie consent |
+| **Vinted** | DataDome | S | **Loaded** — country selector served |
+| **Nike** | Akamai | A | **Loaded** — location selector |
+| **New Balance** | Akamai | A | **Loaded** — full homepage |
+| **Zalando** | Akamai | A | **Loaded** — country page |
+| **Wayfair** | PerimeterX | A | **Loaded** — full homepage |
+| **Ticketmaster** | Multiple | A | **Loaded** — full homepage with events |
+| **Stake.com** | Cloudflare Enterprise | A | **Loaded** — full site |
+| **LinkedIn** | Cloudflare + custom | A | **Loaded** — login page served |
+| **Booking.com** | DataDome + custom | S | **Loaded** — search functional |
+| **Canada Goose** | Kasada | S | Partial — nav rendered, 429 on content |
+| **Nowsecure.nl** | Cloudflare Turnstile | A | Challenge — Turnstile presented |
+| **Hermes** | DataDome (strictest) | S | Blocked — IP-level restriction |
+
+<details>
+<summary><b>Tier S Screenshots (click to expand)</b></summary>
+
+| Foot Locker (DataDome) | Leboncoin (DataDome) | Vinted (DataDome) |
+|---|---|---|
+| <img src="docs/stealth-benchmarks/tiertest_footlocker.com.png" width="300"> | <img src="docs/stealth-benchmarks/tiertest_leboncoin.png" width="300"> | <img src="docs/stealth-benchmarks/tiertest_vinted.com.png" width="300"> |
+
+| Nike (Akamai) | Wayfair (PerimeterX) | Ticketmaster |
+|---|---|---|
+| <img src="docs/stealth-benchmarks/tiertest_nike.com.png" width="300"> | <img src="docs/stealth-benchmarks/tiertest_wayfair.com.png" width="300"> | <img src="docs/stealth-benchmarks/tiertest_ticketmaster.com.png" width="300"> |
+
+| New Balance (Akamai) | Stake.com (CF Enterprise) | Booking.com |
+|---|---|---|
+| <img src="docs/stealth-benchmarks/tiertest_newbalance.com.png" width="300"> | <img src="docs/stealth-benchmarks/tiertest_stake.png" width="300"> | <img src="docs/stealth-benchmarks/realworld_booking.png" width="300"> |
+
+</details>
+
+### More Real-World Results
 
 | Site | Protection | Result |
 |------|-----------|--------|
-| **LinkedIn** | Cloudflare + custom | Loaded — login page served |
 | **Indeed** | PerimeterX | Loaded — full homepage |
 | **Zillow** | Cloudflare | Loaded — listings visible |
-| **Booking.com** | DataDome + custom | Loaded — search functional |
 | **G2** | Cloudflare | Loaded — full homepage |
 
 <details>
-<summary><b>Real-World Screenshots (click to expand)</b></summary>
+<summary><b>Additional Screenshots (click to expand)</b></summary>
 
 | LinkedIn | Indeed | Zillow |
 |---|---|---|
 | <img src="docs/stealth-benchmarks/realworld_linkedin.png" width="300"> | <img src="docs/stealth-benchmarks/realworld_indeed.png" width="300"> | <img src="docs/stealth-benchmarks/realworld_zillow.png" width="300"> |
 
-| Booking.com | G2 |
-|---|---|
-| <img src="docs/stealth-benchmarks/realworld_booking.png" width="300"> | <img src="docs/stealth-benchmarks/realworld_g2.png" width="300"> |
+| G2 |
+|---|
+| <img src="docs/stealth-benchmarks/realworld_g2.png" width="300"> |
 
 </details>
 
