@@ -8,10 +8,12 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
 <p align="center">
-  <img src="docs/stealth-benchmarks/bulk_demo.gif" alt="BrowserPilot bulk scraping 10 protected sites at 33 pages/min" width="700">
+  <img src="docs/stealth-benchmarks/browserpilot_demo.gif" alt="BrowserPilot — type a prompt, AI navigates and extracts data" width="700">
   <br>
-  <em>10 anti-bot protected sites. 3 concurrent workers. 33.7 pages/min. Zero blocks.</em>
+  <em>Type what you want → AI navigates any website → get structured data back.</em>
 </p>
+
+https://github.com/user-attachments/assets/39d2ed68-e121-49b9-817e-2eb5edc25627
 
 ---
 
@@ -129,6 +131,10 @@ These are the systems that block 99% of automation tools. BrowserPilot loaded **
 ## Bulk Scraping at Production Scale
 
 Not a demo — a production bulk engine that scrapes hundreds of pages concurrently without getting blocked.
+
+<p align="center">
+  <img src="docs/stealth-benchmarks/bulk_demo.gif" alt="Bulk scraping 10 protected sites" width="640">
+</p>
 
 | Feature | How |
 |---------|-----|
