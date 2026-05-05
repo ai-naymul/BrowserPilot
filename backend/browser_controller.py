@@ -62,11 +62,12 @@ class PageState:
 
 class BrowserController:
     def __init__(self, headless: bool, proxy: dict | None, enable_streaming: bool = False,
-                 proxy_country: str | None = None):
+                 proxy_country: str | None = None, block_resources: bool = False):
         self.headless = headless
         self.proxy = proxy
         self.enable_streaming = enable_streaming
         self._proxy_country = proxy_country
+        self.block_resources = block_resources
         self.play = None
         self.browser = None
         self.page = None
@@ -227,6 +228,15 @@ class BrowserController:
             color_scheme="light",
             proxy=self.proxy if self.proxy else None,
         )
+        if self.block_resources:
+            _BLOCKED_TYPES = {"image", "media", "font", "stylesheet"}
+            async def _block_route(route):
+                if route.request.resource_type in _BLOCKED_TYPES:
+                    await route.abort()
+                else:
+                    await route.continue_()
+            await context.route("**/*", _block_route)
+
         self.page = await context.new_page()
         await self.page.set_extra_http_headers(get_ua_headers(self._user_agent))
 
@@ -235,6 +245,61 @@ class BrowserController:
             await self._setup_cdp_streaming()
 
         return self
+
+    async def get_cookies(self) -> list[dict]:
+        """Export cookies from the current context."""
+        if self.page and self.page.context:
+            return await self.page.context.cookies()
+        return []
+
+    async def rotate_context(self, new_profile=None, cookies: list[dict] | None = None):
+        """Rotate browser context without restarting Chromium. Keeps browser alive, swaps identity."""
+        if not self.browser:
+            return
+
+        if self.streaming_active:
+            await self._stop_cdp_streaming()
+
+        old_context = self.page.context if self.page else None
+
+        if new_profile:
+            self._profile = new_profile
+            self._user_agent = new_profile.user_agent
+
+        context = await self.browser.new_context(
+            viewport={"width": self._profile.viewport_width, "height": self._profile.viewport_height},
+            user_agent=self._user_agent,
+            locale=self._profile.locale,
+            timezone_id=self._profile.timezone,
+            screen={"width": self._profile.screen_width, "height": self._profile.screen_height},
+            device_scale_factor=self._profile.device_pixel_ratio,
+            color_scheme="light",
+            proxy=self.proxy if self.proxy else None,
+        )
+
+        if cookies:
+            await context.add_cookies(cookies)
+
+        if self.block_resources:
+            _BLOCKED_TYPES = {"image", "media", "font", "stylesheet"}
+            async def _block_route(route):
+                if route.request.resource_type in _BLOCKED_TYPES:
+                    await route.abort()
+                else:
+                    await route.continue_()
+            await context.route("**/*", _block_route)
+
+        self.page = await context.new_page()
+        await self.page.set_extra_http_headers(get_ua_headers(self._user_agent))
+
+        if old_context:
+            try:
+                await old_context.close()
+            except Exception:
+                pass
+
+        if self.enable_streaming:
+            await self._setup_cdp_streaming()
 
     async def __aexit__(self, exc_type, exc, tb):
         """Cleanup browser and CDP session"""

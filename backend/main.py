@@ -9,6 +9,7 @@ from backend.agent import run_agent
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from backend.config import WS_BASE_URL, STREAM_SESSION_TIMEOUT_S
+from backend.bulk_engine import BulkEngine, BulkJobConfig
 
 app = FastAPI()
 
@@ -28,6 +29,9 @@ job_info = {} # job_id → { format, content_type, extension, prompt }
 
 # Initialize global smart proxy manager
 smart_proxy_manager = SmartProxyManager()
+
+# Initialize bulk engine
+bulk_engine = BulkEngine(proxy_manager=smart_proxy_manager)
 
 OUTPUT_DIR = Path("outputs")
 OUTPUT_DIR.mkdir(exist_ok=True)
@@ -334,6 +338,80 @@ def reload_proxies():
             "success": False,
             "message": f"Failed to reload proxies: {str(e)}"
         }
+
+# ── Bulk scraping endpoints ──────────────────────────────────────────────────
+
+class BulkJobRequest(BaseModel):
+    urls: list[str]
+    prompt: str
+    format: str = "json"
+    max_workers: int = 3
+    max_retries: int = 2
+    per_domain_delay_s: float = 2.0
+    page_timeout_s: float = 45.0
+    rotation_interval: int = 10
+    use_ai_extraction: bool = False
+    block_resources: bool = True
+
+
+@app.post("/bulk")
+async def create_bulk_job(req: BulkJobRequest):
+    config = BulkJobConfig(
+        urls=req.urls,
+        prompt=req.prompt,
+        output_format=req.format,
+        max_workers=min(req.max_workers, 10),
+        max_retries=req.max_retries,
+        per_domain_delay_s=req.per_domain_delay_s,
+        page_timeout_s=req.page_timeout_s,
+        rotation_interval=req.rotation_interval,
+        use_ai_extraction=req.use_ai_extraction,
+        block_resources=req.block_resources,
+    )
+    state = await bulk_engine.create_job(config)
+    bulk_engine.set_broadcast(broadcast)
+
+    async def _run():
+        await bulk_engine.run_job(state.job_id)
+
+    tasks[state.job_id] = asyncio.create_task(_run())
+    return {
+        "job_id": state.job_id,
+        "total_urls": len(req.urls),
+        "max_workers": config.max_workers,
+        "format": req.format,
+    }
+
+
+@app.get("/bulk/{job_id}")
+def get_bulk_progress(job_id: str):
+    state = bulk_engine.get_job(job_id)
+    if not state:
+        return {"error": "Job not found"}
+    return {
+        **state.progress,
+        "tasks": [
+            {"url": t.url, "status": t.status.value, "error": t.error, "attempts": t.attempts}
+            for t in state.tasks
+        ],
+    }
+
+
+@app.delete("/bulk/{job_id}")
+def cancel_bulk_job(job_id: str):
+    if bulk_engine.cancel_job(job_id):
+        return {"message": "Job cancelled", "job_id": job_id}
+    return {"error": "Job not found"}
+
+
+@app.post("/bulk/{job_id}/resume")
+async def resume_bulk_job(job_id: str):
+    async def _run():
+        await bulk_engine.resume_job(job_id)
+
+    tasks[job_id] = asyncio.create_task(_run())
+    return {"message": "Job resumed", "job_id": job_id}
+
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 
