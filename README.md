@@ -23,6 +23,76 @@ Trust me, it's pretty cool watching an AI navigate websites like a human
 https://github.com/user-attachments/assets/39d2ed68-e121-49b9-817e-2eb5edc25627
 
 
+## Ghost Mode — Production-Grade Stealth
+
+BrowserPilot's stealth engine passes the hardest bot detection benchmarks on the internet. No noise injection, no brittle hacks — real Chromium with patchright, real GPU fingerprints, human-like behavior.
+
+### Benchmark Results
+
+| Benchmark | Score | What It Tests |
+|-----------|-------|---------------|
+| [Sannysoft](https://bot.sannysoft.com/) | **All Green** | WebDriver, Chrome object, plugins, WebGL, permissions |
+| [Pixelscan Bot Check](https://pixelscan.net/bot-check) | **4/4 Clear** | Navigator, WebDriver, CDP, User Agent |
+| [Rebrowser Bot Detector](https://bot-detector.rebrowser.net/) | **9/10 Pass** | CDP leaks, runtime detection, init scripts, viewport |
+| [BrowserScan](https://www.browserscan.net/bot-detection) | **All Normal** | Fingerprint + bot detection combined |
+| [Incolumitas](https://bot.incolumitas.com/) | **All OK** | Puppeteer/Playwright detection, worker consistency |
+| [CreepJS](https://abrahamjuliot.github.io/creepjs/) | **Real Fingerprint** | Deep fingerprint analysis, WebGL, canvas, audio |
+| [IPhey](https://iphey.com/) | **5/6 Green** | Browser, location, IP, hardware, software checks |
+| [DeviceAndBrowserInfo](https://deviceandbrowserinfo.com/are_you_a_bot) | **"You are human!"** | 20+ signals all false — CDP, WebDriver, headless |
+| [BrowserLeaks WebRTC](https://browserleaks.com/webrtc) | **No IP Leak** | WebRTC local IP prevention |
+
+<details>
+<summary><b>Benchmark Screenshots (click to expand)</b></summary>
+
+| Sannysoft — All Green | Pixelscan — 4/4 Clear | DeviceInfo — "You are human!" |
+|---|---|---|
+| <img src="docs/stealth-benchmarks/sannysoft_section1.png" width="300"> | <img src="docs/stealth-benchmarks/pixelscan_section1.png" width="300"> | <img src="docs/stealth-benchmarks/deviceinfo_section1.png" width="300"> |
+
+| Rebrowser — 9/10 Pass | BrowserScan — All Normal | BrowserLeaks — No IP Leak |
+|---|---|---|
+| <img src="docs/stealth-benchmarks/rebrowser_section1.png" width="300"> | <img src="docs/stealth-benchmarks/browserscan_section1.png" width="300"> | <img src="docs/stealth-benchmarks/browserleaks-webrtc_section1.png" width="300"> |
+
+</details>
+
+### Real-World Site Access
+
+We tested against heavily protected production sites — all loaded without blocks:
+
+| Site | Protection | Result |
+|------|-----------|--------|
+| **LinkedIn** | Cloudflare + custom | Loaded — login page served |
+| **Indeed** | PerimeterX | Loaded — full homepage |
+| **Zillow** | Cloudflare | Loaded — listings visible |
+| **Booking.com** | DataDome + custom | Loaded — search functional |
+| **G2** | Cloudflare | Loaded — full homepage |
+
+<details>
+<summary><b>Real-World Screenshots (click to expand)</b></summary>
+
+| LinkedIn | Indeed | Zillow |
+|---|---|---|
+| <img src="docs/stealth-benchmarks/realworld_linkedin.png" width="300"> | <img src="docs/stealth-benchmarks/realworld_indeed.png" width="300"> | <img src="docs/stealth-benchmarks/realworld_zillow.png" width="300"> |
+
+| Booking.com | G2 |
+|---|---|
+| <img src="docs/stealth-benchmarks/realworld_booking.png" width="300"> | <img src="docs/stealth-benchmarks/realworld_g2.png" width="300"> |
+
+</details>
+
+### How It Works
+
+- **Patchright** — Playwright fork that never calls `Runtime.enable` (defeats CDP detection)
+- **Full Chromium via xvfb** — Real `window.chrome`, plugins, codecs, WebGL (not headless shell)
+- **Vulkan GPU rendering** — Real WebGL fingerprint from actual hardware
+- **Fingerprint diversification** — Seed-based profiles vary viewport, UA, DPR, locale per session
+- **Human behavior** — Bezier mouse curves, variable typing speed, natural scroll patterns
+- **Geo-matching** — Proxy country auto-maps to correct timezone + locale + languages
+- **WebRTC prevention** — Local IP never leaked through WebRTC
+
+> **Why no noise injection?** Anti-bots (Cloudflare, DataDome) detect JS canvas/WebGL noise by rendering known values and checking them. Real fingerprints from real hardware, varied through configuration, is the [Multilogin-validated approach](https://multilogin.com/).
+
+---
+
 ## Why You'll Love This
 
 ### It Actually "Sees" Websites
@@ -228,7 +298,8 @@ For big changes, maybe open an issue first so we can chat about it.
 
 ## 🙏 Acknowledgments
 
-- [Playwright](https://playwright.dev/) for browser automation
+- [Patchright](https://github.com/nicecatchpro/patchright) for undetected browser automation
+- [Playwright](https://playwright.dev/) for the browser automation foundation
 - [Google Gemini](https://ai.google.dev/) for vision AI capabilities
 - [FastAPI](https://fastapi.tiangolo.com/) for the backend framework
 - Open source community for inspiration and tools
