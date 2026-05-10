@@ -52,6 +52,28 @@ curl -X POST http://localhost:8000/bulk -H "Content-Type: application/json" -d '
 
 ---
 
+## See It Work
+
+**Reddit's new React frontend** — navigates feeds, clicks posts, scrolls comments. No selectors, no DOM parsing.
+
+<p align="center">
+  <img src="docs/reddit_demo.gif" alt="BrowserPilot navigating Reddit's new frontend" width="700">
+</p>
+
+**StatsMuse** — scraped 191 rows of La Liga stats in seconds. JS-rendered data, no API needed.
+
+<p align="center">
+  <img src="docs/statmuse_scrape.gif" alt="BrowserPilot scraping StatsMuse" width="700">
+</p>
+
+**10 protected sites in 60 seconds** — DataDome, Akamai, Cloudflare, PerimeterX. Zero blocks.
+
+<p align="center">
+  <img src="docs/stealth-benchmarks/bypass_showcase.gif" alt="Bypassing 10 protected sites" width="700">
+</p>
+
+---
+
 ## Stealth That Actually Works
 
 We don't just claim stealth — we prove it. BrowserPilot passes every major bot detection benchmark:
