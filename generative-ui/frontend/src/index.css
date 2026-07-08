@@ -1,0 +1,672 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Jelly UI Design System */
+    --background: 0 0% 100%;
+    --foreground: 215 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 12%;
+
+    /* Primary - Blue accent */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Light gray */
+    --secondary: 210 17% 96%;
+    --secondary-foreground: 215 25% 12%;
+
+    /* Muted - Medium gray */
+    --muted: 210 17% 96%;
+    --muted-foreground: 215 14% 46%;
+
+    /* Accent - Gold selection */
+    --accent: 43 96% 56%;
+    --accent-foreground: 215 25% 12%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders */
+    --border: 210 18% 90%;
+    --input: 210 18% 90%;
+    --ring: 217 91% 60%;
+
+    /* Sidebar - Light gray background */
+    --sidebar-background: 210 17% 96%;
+    --sidebar-foreground: 215 25% 12%;
+    --sidebar-border: 210 18% 90%;
+    
+    /* Context Panel - Lightest gray */
+    --context-background: 210 20% 98%;
+
+    /* Chat - White with border */
+    --chat-background: 0 0% 100%;
+    --chat-border: 210 18% 90%;
+    
+    /* Message bubbles */
+    --message-ai: 210 17% 95%;
+    --message-user: 217 91% 60%;
+    
+    /* Entity tags */
+    --tag-safety: 0 84% 60%;
+    --tag-dietary: 142 71% 45%;
+    --tag-info: 217 91% 60%;
+
+    --radius: 0.5rem;
+
+    /* Transitions */
+    --transition-smooth: all 0.15s ease-out;
+  }
+
+  .dark {
+    /* OpenAI-Style Premium Theme - Cool, calm, neutral */
+    /* Core surfaces - cooler, darker, more neutral */
+    --background: 220 18% 3%;         /* #050608 - Very dark neutral app background */
+    --foreground: 0 0% 96%;           /* #f5f5f7 - Soft white text */
+
+    --card: 220 15% 11%;              /* #181b22 - Subtle card surface */
+    --card-foreground: 0 0% 96%;
+
+    --popover: 220 15% 11%;
+    --popover-foreground: 0 0% 96%;
+
+    /* Primary: Soft Sky Blue (calm, trustworthy) */
+    --primary: 199 95% 74%;           /* #7dd3fc - Soft sky blue */
+    --primary-foreground: 220 18% 3%;  /* Dark text on blue */
+
+    --secondary: 220 13% 15%;         /* #111318 - Main panel background */
+    --secondary-foreground: 0 0% 96%;
+
+    --muted: 220 13% 15%;
+    --muted-foreground: 220 8% 58%;   /* #8f99a8 - Muted grey text */
+
+    /* Accent: Soft Sky Blue (same as primary for consistency) */
+    --accent: 199 95% 74%;            /* #7dd3fc - Soft sky blue */
+    --accent-foreground: 220 18% 3%;
+
+    --destructive: 0 72% 66%;         /* #f87171 - Soft red */
+    --destructive-foreground: 0 0% 96%;
+
+    /* Borders: Subtle cool grey */
+    --border: 220 15% 18%;            /* #2a2f3a - Subtle border */
+    --input: 220 15% 18%;
+    --ring: 199 95% 74%;              /* Sky blue focus ring */
+
+    --sidebar-background: 220 18% 3%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-border: 220 15% 18%;
+
+    --context-background: 220 18% 3%;
+    --chat-background: 220 13% 15%;
+    --chat-border: 220 15% 18%;
+
+    --message-ai: 220 13% 15%;
+    --message-user: 199 95% 74%;
+
+    /* Tag colors: Muted, cohesive, soft */
+    --tag-blue: 217 33% 27%;          /* #1e293b - Muted blue bg */
+    --tag-blue-text: 0 0% 90%;        /* #e5e7eb - Light text */
+    --tag-green: 160 40% 18%;         /* #1a2f26 - Muted green bg */
+    --tag-green-text: 142 76% 73%;    /* #bbf7d0 - Soft green text */
+    --tag-green-border: 142 76% 36%;  /* #16a34a - Green border */
+    --tag-amber: 25 35% 15%;          /* #332715 - Muted amber bg */
+    --tag-amber-text: 48 96% 89%;     /* #fef3c7 - Soft amber text */
+    --tag-pink: 330 30% 16%;          /* #2b1f28 - Muted pink bg */
+    --tag-pink-text: 0 93% 87%;       /* #fecaca - Soft pink text */
+    --tag-purple: 250 33% 27%;        /* #1e1b3b - Muted purple bg */
+    --tag-purple-text: 270 91% 87%;   /* #e9d5ff - Soft purple text */
+
+    /* Additional accent tokens for soft backgrounds */
+    --accent-soft: 199 95% 74% / 0.14;  /* Sky blue soft bg */
+    --accent-border: 199 100% 70%;      /* #38bdf8 - Sky blue border */
+    --accent-text: 199 95% 74%;         /* #7dd3fc - Sky blue text */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Apple-style smooth font rendering */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Apple-style focus rings */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+    transition: all 150ms ease;
+  }
+
+  /* Keyboard focus indicators for interactive elements */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* Focus within containers */
+  [tabindex]:focus-visible {
+    @apply outline-none ring-2 ring-primary/50 ring-offset-1 ring-offset-background;
+  }
+}
+
+/* Apple-style glassmorphism utilities */
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Apple-style card shadows */
+  .shadow-apple {
+    box-shadow:
+      0 1px 3px 0 rgba(0, 0, 0, 0.1),
+      0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-apple-lg {
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  .shadow-apple-xl {
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Soft hover glow with primary accent */
+  .hover-glow {
+    transition: all 150ms ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow:
+      0 0 20px rgba(125, 211, 252, 0.2),
+      0 0 40px rgba(125, 211, 252, 0.1),
+      0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Smooth transitions */
+  .transition-apple {
+    transition: all 150ms ease;
+  }
+
+  /* Primary color RGB for shadows (sky blue) */
+  :root {
+    --primary-rgb: 125, 211, 252;
+  }
+}
+
+/* Scrollbar styling (Apple-like) */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+    background-clip: content-box;
+  }
+}
+
+/* ============================================================================
+   APPLE-STYLE DESIGN TOKENS & UTILITIES
+   ============================================================================ */
+
+@layer utilities {
+  /* Design tokens */
+  :root {
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md: 0 8px 24px rgba(0,0,0,.12);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,.18);
+    --glass: rgba(255,255,255,.08);
+    --glass-dark: rgba(0,0,0,.28);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --ease-spring: cubic-bezier(.68,-.55,.265,1.55);
+  }
+
+  /* Surface styles */
+  .surface {
+    background: var(--glass);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .surface-dark {
+    background: var(--glass-dark);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Panel styles */
+  .panel {
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Map container - fixed height with overflow control */
+  .map-wrap {
+    position: relative;
+    height: clamp(280px, 45vh, 520px);
+    overflow: hidden;
+    border-radius: var(--radius-md);
+  }
+
+  .leaflet-container {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-md);
+  }
+
+  .leaflet-popup {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+  }
+
+  /* Expanded card - progressive disclosure with scroll */
+  .expanded-card {
+    max-height: clamp(320px, 60vh, 680px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Action dock */
+  .action-dock {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .hover-lift {
+      transition-duration: 60ms;
+    }
+
+    .hover-lift:hover {
+      transform: translateY(-1px);
+    }
+
+    .transition-apple {
+      transition-duration: 150ms;
+    }
+
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Tab styles (for ExpandedMetricCard) */
+  .tab-list {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    transition: all 150ms ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .tab-button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: hsl(var(--foreground));
+  }
+
+  .tab-button[data-active="true"] {
+    background: hsl(var(--accent-soft));
+    color: hsl(var(--primary));
+    border-bottom: 2px solid hsl(var(--primary));
+  }
+
+  /* Empty state chip */
+  .empty-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    background: hsl(var(--accent-soft));
+    border: 1px solid hsl(var(--accent-border) / 0.3);
+    color: hsl(var(--primary));
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  .empty-chip:hover {
+    background: hsl(var(--accent-soft) / 1.2);
+    border-color: hsl(var(--accent-border) / 0.5);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Copy button (for ExpandedMetricCard) */
+  .copy-button {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .copy-button-parent:hover .copy-button {
+    opacity: 1;
+  }
+
+  /* Flash highlight animation for related module updates */
+  @keyframes flash {
+    0% {
+      box-shadow: 0 0 0 0 rgba(125, 211, 252, 0);
+      border-color: inherit;
+    }
+    50% {
+      box-shadow: 0 0 20px 5px rgba(125, 211, 252, 0.4);
+      border-color: rgb(125, 211, 252);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(125, 211, 252, 0);
+      border-color: inherit;
+    }
+  }
+
+  .flash-highlight {
+    animation: flash 300ms ease-out;
+  }
+
+  /* Pulse animation for hover preview */
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.85;
+      transform: scale(1.01);
+    }
+  }
+
+  .pulse-subtle {
+    animation: pulse-subtle 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Preview highlight (lighter than flash) */
+  .preview-highlight {
+    border-color: rgba(125, 211, 252, 0.3) !important;
+    box-shadow: 0 0 10px 2px rgba(125, 211, 252, 0.15);
+  }
+
+  /* Multi-select checkmark */
+  .multi-select-indicator {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 30;
+    pointer-events: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Map Containment & Z-Index Fixes
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Map wrapper with strict containment */
+.map-wrap {
+  position: relative;
+  height: clamp(280px, 45vh, 520px);
+  overflow: hidden;
+  border-radius: 12px;
+  isolation: isolate; /* Create stacking context */
+}
+
+/* Leaflet container z-index control */
+.map-wrap .leaflet-container {
+  z-index: 0 !important;
+  position: relative;
+}
+
+.map-wrap .leaflet-pane {
+  z-index: 0 !important;
+}
+
+/* Ensure map tiles and overlays stay contained */
+.map-wrap .leaflet-tile-container,
+.map-wrap .leaflet-overlay-pane,
+.map-wrap .leaflet-marker-pane {
+  z-index: 0 !important;
+}
+
+/* Map popups above markers but below UI chrome */
+.map-wrap .leaflet-popup-pane {
+  z-index: 1 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Responsive Grid & Panel Layouts
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Card grid: 1-col mobile, 2-col tablet, 3/4-col desktop */
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1.5rem !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 1.5rem !important;
+  }
+}
+
+/* Sidebar responsive width */
+.location-panel,
+.context-panel {
+  width: clamp(340px, 28vw, 440px);
+}
+
+@media (max-width: 768px) {
+  .location-panel,
+  .context-panel {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Apple-Style Transitions (Respect Reduced Motion)
+   ═══════════════════════════════════════════════════════════════ */
+
+.transition-apple {
+  transition: all 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transition-apple {
+    transition-duration: 0ms;
+  }
+
+  * {
+    animation-duration: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Empty State Chips (Add Details)
+   ═══════════════════════════════════════════════════════════════ */
+
+.empty-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px dashed hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: hsl(var(--muted) / 0.3);
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.empty-chip:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  background: hsl(var(--accent-soft));
+  border-style: solid;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Tri-Pane AppPanel Layout (OpenAI-style)
+   ═══════════════════════════════════════════════════════════════ */
+
+.app-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: hsl(var(--background));
+}
+
+/* Entity list pane */
+.app-panel .entity-list-pane {
+  width: 320px;
+  flex-shrink: 0;
+  border-right: 1px solid hsl(var(--border));
+  background: hsl(var(--card) / 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Center pane (map/chart) */
+.app-panel .center-pane {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Detail panel pane */
+.app-panel .detail-pane {
+  width: 360px;
+  flex-shrink: 0;
+  border-left: 1px solid hsl(var(--border));
+  background: hsl(var(--card) / 0.5);
+  overflow: hidden;
+}
+
+/* Responsive adjustments for tri-pane */
+@media (max-width: 1024px) {
+  .app-panel .entity-list-pane {
+    width: 280px;
+  }
+
+  .app-panel .detail-pane {
+    width: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-panel {
+    flex-direction: column;
+  }
+
+  .app-panel .entity-list-pane,
+  .app-panel .detail-pane {
+    width: 100%;
+    max-height: 40vh;
+    border-right: none;
+    border-left: none;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .app-panel .center-pane {
+    min-height: 40vh;
+  }
+}
+
+/* Line clamp utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

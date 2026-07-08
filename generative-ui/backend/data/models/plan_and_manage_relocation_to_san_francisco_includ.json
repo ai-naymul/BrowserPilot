@@ -1,0 +1,1699 @@
+{
+  "version": 2,
+  "task_description": "Plan and manage relocation to San Francisco including housing search, budget planning, and move coordination",
+  "entities": [
+    {
+      "id": "moving_plan_sf_1",
+      "type": "Moving_Plan",
+      "icon": "🚚",
+      "color": "#3b82f6",
+      "public_identifier": "Move to San Francisco",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "moving_plan_sf_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "title",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Move to San Francisco",
+          "data_type": "primitive"
+        },
+        {
+          "name": "current_location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "",
+          "data_type": "primitive"
+        },
+        {
+          "name": "destination",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "San Francisco, CA",
+          "data_type": "primitive"
+        },
+        {
+          "name": "move_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          }
+        },
+        {
+          "name": "total_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 15000,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0
+          }
+        },
+        {
+          "name": "move_type",
+          "widget": "radio",
+          "editable": true,
+          "function": "display",
+          "value": "full_service",
+          "data_type": "primitive",
+          "options": [
+            "full_service",
+            "diy",
+            "hybrid"
+          ]
+        },
+        {
+          "name": "status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "filterable",
+          "value": "planning",
+          "data_type": "primitive",
+          "options": [
+            "planning",
+            "housing_search",
+            "packing",
+            "in_transit",
+            "settling_in",
+            "completed"
+          ]
+        },
+        {
+          "name": "days_until_move",
+          "widget": "number",
+          "editable": false,
+          "function": "computed",
+          "value": null,
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "housing_search_sf_1",
+      "type": "Housing_Search",
+      "icon": "🏠",
+      "color": "#8b5cf6",
+      "public_identifier": "SF Apartment Search",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "housing_search_sf_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "search_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Apartment Search",
+          "data_type": "primitive"
+        },
+        {
+          "name": "preferred_neighborhoods",
+          "widget": "multi_select",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Mission District",
+            "Hayes Valley",
+            "Noe Valley",
+            "Inner Sunset"
+          ],
+          "data_type": "array",
+          "options": [
+            "Mission District",
+            "Hayes Valley",
+            "Noe Valley",
+            "Inner Sunset",
+            "Castro",
+            "Marina",
+            "North Beach",
+            "Pacific Heights",
+            "Russian Hill",
+            "SOMA",
+            "Potrero Hill",
+            "Bernal Heights",
+            "Outer Sunset",
+            "Richmond District",
+            "Haight-Ashbury"
+          ]
+        },
+        {
+          "name": "housing_type",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "apartment",
+          "data_type": "primitive",
+          "options": [
+            "apartment",
+            "studio",
+            "house",
+            "condo",
+            "shared_housing"
+          ]
+        },
+        {
+          "name": "bedrooms",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 1,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 5
+          }
+        },
+        {
+          "name": "bathrooms",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 1,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 4
+          }
+        },
+        {
+          "name": "max_monthly_rent",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3500,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1000
+          }
+        },
+        {
+          "name": "must_haves",
+          "widget": "multi_select",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "in_unit_laundry",
+            "parking"
+          ],
+          "data_type": "array",
+          "options": [
+            "in_unit_laundry",
+            "parking",
+            "pet_friendly",
+            "dishwasher",
+            "hardwood_floors",
+            "outdoor_space",
+            "gym",
+            "elevator",
+            "doorman",
+            "bike_storage"
+          ]
+        },
+        {
+          "name": "move_in_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          }
+        },
+        {
+          "name": "saved_listings",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [],
+          "data_type": "array"
+        }
+      ]
+    },
+    {
+      "id": "moving_budget_sf_1",
+      "type": "Moving_Budget",
+      "icon": "💰",
+      "color": "#10b981",
+      "public_identifier": "SF Move Budget",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "moving_budget_sf_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "budget_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Move Budget",
+          "data_type": "primitive"
+        },
+        {
+          "name": "first_month_rent",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 10000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "security_deposit",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "moving_company",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "travel_costs",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 800,
+          "data_type": "primitive"
+        },
+        {
+          "name": "furniture_purchases",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "utilities_setup",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 300,
+          "data_type": "primitive"
+        },
+        {
+          "name": "storage_costs",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "miscellaneous",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_estimated_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 14000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "budget_health",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 93,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "moving_checklist_sf_1",
+      "type": "Moving_Checklist",
+      "icon": "✅",
+      "color": "#f59e0b",
+      "public_identifier": "SF Move Checklist",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "moving_checklist_sf_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "checklist_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Move Checklist",
+          "data_type": "primitive"
+        },
+        {
+          "name": "tasks",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "id": "task_1",
+              "category": "Housing",
+              "task": "Research SF neighborhoods",
+              "done": true,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_2",
+              "category": "Housing",
+              "task": "Set up apartment viewings",
+              "done": true,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_3",
+              "category": "Housing",
+              "task": "Apply for apartments",
+              "done": true,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_4",
+              "category": "Housing",
+              "task": "Sign lease and pay deposits",
+              "done": false,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_5",
+              "category": "Logistics",
+              "task": "Get moving quotes from 3 companies",
+              "done": false,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_6",
+              "category": "Logistics",
+              "task": "Book moving company",
+              "done": false,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_7",
+              "category": "Logistics",
+              "task": "Purchase packing supplies",
+              "done": false,
+              "priority": "medium",
+              "due_date": null
+            },
+            {
+              "id": "task_8",
+              "category": "Administrative",
+              "task": "Update address with USPS",
+              "done": false,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_9",
+              "category": "Administrative",
+              "task": "Transfer or cancel utilities",
+              "done": true,
+              "priority": "medium",
+              "due_date": null
+            },
+            {
+              "id": "task_10",
+              "category": "Administrative",
+              "task": "Update driver's license to CA",
+              "done": false,
+              "priority": "medium",
+              "due_date": null
+            },
+            {
+              "id": "task_11",
+              "category": "Administrative",
+              "task": "Register vehicle in California",
+              "done": false,
+              "priority": "medium",
+              "due_date": null
+            },
+            {
+              "id": "task_12",
+              "category": "Administrative",
+              "task": "Update address with banks and credit cards",
+              "done": false,
+              "priority": "medium",
+              "due_date": null
+            },
+            {
+              "id": "task_13",
+              "category": "Setup",
+              "task": "Set up internet and utilities at new place",
+              "done": false,
+              "priority": "high",
+              "due_date": null
+            },
+            {
+              "id": "task_14",
+              "category": "Setup",
+              "task": "Research SF neighborhoods for amenities",
+              "done": false,
+              "priority": "low",
+              "due_date": null
+            },
+            {
+              "id": "task_15",
+              "category": "Setup",
+              "task": "Find doctors, dentists in SF",
+              "done": false,
+              "priority": "low",
+              "due_date": null
+            },
+            {
+              "id": "task_16",
+              "category": "Packing",
+              "task": "Declutter and donate items",
+              "done": false,
+              "priority": "medium",
+              "due_date": null
+            },
+            {
+              "id": "task_17",
+              "category": "Packing",
+              "task": "Pack non-essentials",
+              "done": false,
+              "priority": "medium",
+              "due_date": null
+            },
+            {
+              "id": "task_18",
+              "category": "Packing",
+              "task": "Pack essentials box for first night",
+              "done": false,
+              "priority": "high",
+              "due_date": null
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "completion_percentage",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "cost_of_living_calculator_sf_1",
+      "type": "Cost_Calculator",
+      "icon": "🧮",
+      "color": "#ec4899",
+      "public_identifier": "SF Cost of Living Calculator",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "cost_of_living_calculator_sf_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "calculator_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Cost of Living Calculator",
+          "data_type": "primitive"
+        },
+        {
+          "name": "monthly_rent",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "utilities",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive"
+        },
+        {
+          "name": "internet_phone",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 100,
+          "data_type": "primitive"
+        },
+        {
+          "name": "groceries",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 600,
+          "data_type": "primitive"
+        },
+        {
+          "name": "dining_out",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 400,
+          "data_type": "primitive"
+        },
+        {
+          "name": "transportation",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 100,
+          "data_type": "primitive"
+        },
+        {
+          "name": "health_insurance",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 450,
+          "data_type": "primitive"
+        },
+        {
+          "name": "entertainment",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 300,
+          "data_type": "primitive"
+        },
+        {
+          "name": "gym_fitness",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 100,
+          "data_type": "primitive"
+        },
+        {
+          "name": "miscellaneous",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 300,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_monthly_expenses",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 6000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_annual_salary",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 90000,
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "neighborhood_mission_district",
+      "type": "Neighborhood",
+      "icon": "🏘️",
+      "color": "#a855f7",
+      "public_identifier": "Mission District",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "neighborhood_mission_district",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Mission District",
+          "data_type": "primitive"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Vibrant, culturally diverse neighborhood known for murals, Latin American cuisine, and nightlife. Hip and artistic with a mix of old and new San Francisco.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_rent_1br",
+          "widget": "currency",
+          "editable": true,
+          "function": "thumbnail",
+          "value": 3199,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "avg_rent_2br",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 4500,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "safety_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 6,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "walkability_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "commute_to_downtown",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 15,
+          "data_type": "primitive",
+          "unit": "minutes"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": {
+            "lat": 37.7599,
+            "lng": -122.4148,
+            "address": "Mission District, San Francisco, CA"
+          },
+          "data_type": "primitive"
+        },
+        {
+          "name": "vibe",
+          "widget": "tags",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Artistic",
+            "Diverse",
+            "Nightlife",
+            "Foodie"
+          ],
+          "data_type": "primitive"
+        },
+        {
+          "name": "pros",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Great restaurants",
+            "Cultural diversity",
+            "Public transit access",
+            "Street art and murals"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "cons",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Can be noisy",
+            "Parking difficult",
+            "Some areas less safe at night"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "interest_level",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": "",
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "neighborhood_pacific_heights",
+      "type": "Neighborhood",
+      "icon": "🏘️",
+      "color": "#a855f7",
+      "public_identifier": "Pacific Heights",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "neighborhood_pacific_heights",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Pacific Heights",
+          "data_type": "primitive"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Upscale residential neighborhood with Victorian mansions, stunning bay views, and tree-lined streets. Quiet, safe, and family-friendly.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_rent_1br",
+          "widget": "currency",
+          "editable": true,
+          "function": "thumbnail",
+          "value": 4200,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "avg_rent_2br",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 6000,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "safety_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "walkability_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "commute_to_downtown",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 20,
+          "data_type": "primitive",
+          "unit": "minutes"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": {
+            "lat": 37.7919,
+            "lng": -122.4363,
+            "address": "Pacific Heights, San Francisco, CA"
+          },
+          "data_type": "primitive"
+        },
+        {
+          "name": "vibe",
+          "widget": "tags",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Upscale",
+            "Quiet",
+            "Family-friendly",
+            "Scenic"
+          ],
+          "data_type": "primitive"
+        },
+        {
+          "name": "pros",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Very safe",
+            "Beautiful architecture",
+            "Great views",
+            "Excellent schools"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "cons",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Very expensive",
+            "Limited nightlife",
+            "Steep hills",
+            "Less diverse dining options"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "interest_level",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "neighborhood_soma",
+      "type": "Neighborhood",
+      "icon": "🏘️",
+      "color": "#a855f7",
+      "public_identifier": "SoMa (South of Market)",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "neighborhood_soma",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "SoMa (South of Market)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Tech hub with modern high-rises, startups, and urban atmosphere. Mix of industrial and luxury living with many new developments.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_rent_1br",
+          "widget": "currency",
+          "editable": true,
+          "function": "thumbnail",
+          "value": 3500,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "avg_rent_2br",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 5200,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "safety_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "walkability_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "commute_to_downtown",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 5,
+          "data_type": "primitive",
+          "unit": "minutes"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": {
+            "lat": 37.7749,
+            "lng": -122.4194,
+            "address": "SoMa, San Francisco, CA"
+          },
+          "data_type": "primitive"
+        },
+        {
+          "name": "vibe",
+          "widget": "tags",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Tech",
+            "Urban",
+            "Modern",
+            "Young professionals"
+          ],
+          "data_type": "primitive"
+        },
+        {
+          "name": "pros",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Central location",
+            "New apartments",
+            "Tech scene",
+            "Easy commute"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "cons",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Safety concerns in some areas",
+            "Can feel industrial",
+            "Homeless population",
+            "Less neighborhood feel"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "interest_level",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "neighborhood_noe_valley",
+      "type": "Neighborhood",
+      "icon": "🏘️",
+      "color": "#a855f7",
+      "public_identifier": "Noe Valley",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "neighborhood_noe_valley",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Noe Valley",
+          "data_type": "primitive"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Sunny, family-oriented neighborhood with a small-town feel. Known as 'Stroller Valley' for its popularity with young families. Charming shops and cafes.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_rent_1br",
+          "widget": "currency",
+          "editable": true,
+          "function": "thumbnail",
+          "value": 3400,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "avg_rent_2br",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 4800,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "safety_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "walkability_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "commute_to_downtown",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 25,
+          "data_type": "primitive",
+          "unit": "minutes"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": {
+            "lat": 37.7509,
+            "lng": -122.4315,
+            "address": "Noe Valley, San Francisco, CA"
+          },
+          "data_type": "primitive"
+        },
+        {
+          "name": "vibe",
+          "widget": "tags",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Family-friendly",
+            "Sunny",
+            "Community-oriented",
+            "Residential"
+          ],
+          "data_type": "primitive"
+        },
+        {
+          "name": "pros",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Great for families",
+            "Sunny microclimate",
+            "Safe and quiet",
+            "Strong community"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "cons",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Limited public transit",
+            "Can feel isolated",
+            "Less nightlife",
+            "Expensive for families"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "interest_level",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "neighborhood_hayes_valley",
+      "type": "Neighborhood",
+      "icon": "🏘️",
+      "color": "#a855f7",
+      "public_identifier": "Hayes Valley",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "neighborhood_hayes_valley",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Hayes Valley",
+          "data_type": "primitive"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Trendy, boutique neighborhood with designer shops, farm-to-table restaurants, and a vibrant arts scene. Small but perfectly formed.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_rent_1br",
+          "widget": "currency",
+          "editable": true,
+          "function": "thumbnail",
+          "value": 3600,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "avg_rent_2br",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 5000,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "safety_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "walkability_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "commute_to_downtown",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 12,
+          "data_type": "primitive",
+          "unit": "minutes"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": {
+            "lat": 37.7756,
+            "lng": -122.4241,
+            "address": "Hayes Valley, San Francisco, CA"
+          },
+          "data_type": "primitive"
+        },
+        {
+          "name": "vibe",
+          "widget": "tags",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Trendy",
+            "Boutique",
+            "Foodie",
+            "Arts"
+          ],
+          "data_type": "primitive"
+        },
+        {
+          "name": "pros",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Amazing restaurants",
+            "Boutique shopping",
+            "Central location",
+            "Walkable"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "cons",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Small area",
+            "Expensive",
+            "Can be crowded",
+            "Limited parking"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "interest_level",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "neighborhood_richmond",
+      "type": "Neighborhood",
+      "icon": "🏘️",
+      "color": "#a855f7",
+      "public_identifier": "Richmond District",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "neighborhood_richmond",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Richmond District",
+          "data_type": "primitive"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Foggy, residential neighborhood near Ocean Beach and Golden Gate Park. Diverse Asian community with authentic restaurants. More affordable and spacious.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_rent_1br",
+          "widget": "currency",
+          "editable": true,
+          "function": "thumbnail",
+          "value": 2800,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "avg_rent_2br",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3800,
+          "data_type": "primitive",
+          "currency": "USD",
+          "period": "monthly"
+        },
+        {
+          "name": "safety_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "walkability_score",
+          "widget": "rating",
+          "editable": true,
+          "function": "filterable",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "commute_to_downtown",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 35,
+          "data_type": "primitive",
+          "unit": "minutes"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": {
+            "lat": 37.7756,
+            "lng": -122.4697,
+            "address": "Richmond District, San Francisco, CA"
+          },
+          "data_type": "primitive"
+        },
+        {
+          "name": "vibe",
+          "widget": "tags",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Residential",
+            "Diverse",
+            "Foggy",
+            "Affordable"
+          ],
+          "data_type": "primitive"
+        },
+        {
+          "name": "pros",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "More affordable",
+            "Near park and beach",
+            "Great Asian food",
+            "Safe and quiet"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "cons",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Often foggy",
+            "Long commute",
+            "Far from downtown",
+            "Limited nightlife"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "interest_level",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "moving_plan_sf_1",
+      "target_entity_id": "housing_search_sf_1",
+      "relationship": "includes",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Moving plan includes housing search"
+      }
+    },
+    {
+      "source_entity_id": "moving_plan_sf_1",
+      "target_entity_id": "moving_budget_sf_1",
+      "relationship": "tracks",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Budget updates based on move plan changes"
+      }
+    },
+    {
+      "source_entity_id": "moving_plan_sf_1",
+      "target_entity_id": "moving_checklist_sf_1",
+      "relationship": "manages",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Checklist tasks tied to move plan timeline"
+      }
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "cost_of_living_calculator_sf_1",
+      "relationship": "informs",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Rent from housing search updates cost calculator"
+      }
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "moving_budget_sf_1",
+      "relationship": "updates",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Selected housing updates budget deposits and rent"
+      }
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "neighborhood_mission_district",
+      "relationship": "evaluating",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "neighborhood_pacific_heights",
+      "relationship": "evaluating",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "neighborhood_soma",
+      "relationship": "evaluating",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "neighborhood_noe_valley",
+      "relationship": "evaluating",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "neighborhood_hayes_valley",
+      "relationship": "evaluating",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "housing_search_sf_1",
+      "target_entity_id": "neighborhood_richmond",
+      "relationship": "evaluating",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "moving_budget_sf_1",
+      "target_entity_id": "neighborhood_mission_district",
+      "relationship": "considers_costs_for",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "moving_budget_sf_1",
+      "target_entity_id": "neighborhood_pacific_heights",
+      "relationship": "considers_costs_for",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "moving_budget_sf_1",
+      "target_entity_id": "neighborhood_soma",
+      "relationship": "considers_costs_for",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "moving_budget_sf_1",
+      "target_entity_id": "neighborhood_noe_valley",
+      "relationship": "considers_costs_for",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "moving_budget_sf_1",
+      "target_entity_id": "neighborhood_hayes_valley",
+      "relationship": "considers_costs_for",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "moving_budget_sf_1",
+      "target_entity_id": "neighborhood_richmond",
+      "relationship": "considers_costs_for",
+      "mechanism": "reference",
+      "metadata": {}
+    }
+  ],
+  "created_at": "2025-10-25T13:47:51.957876",
+  "updated_at": "2025-10-25T13:52:42.616Z"
+}

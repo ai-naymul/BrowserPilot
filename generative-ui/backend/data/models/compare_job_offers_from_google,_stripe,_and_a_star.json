@@ -1,0 +1,1144 @@
+{
+  "version": 1,
+  "task_description": "Compare job offers from Google, Stripe, and a startup with detailed 5-year compensation projections and key factors",
+  "entities": [
+    {
+      "id": "offer_google_1",
+      "type": "Job_Offer",
+      "icon": "🔵",
+      "color": "#4285f4",
+      "public_identifier": "Google",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "offer_google_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "company",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Google",
+          "data_type": "primitive",
+          "help_text": "Company name"
+        },
+        {
+          "name": "position",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Senior Software Engineer",
+          "data_type": "primitive",
+          "help_text": "Job title"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "Mountain View, CA",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.422,
+            "lng": -122.0841
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "base_salary",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 220000,
+          "data_type": "primitive",
+          "help_text": "Annual base salary"
+        },
+        {
+          "name": "signing_bonus",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 50000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year1_equity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 400000,
+          "data_type": "primitive",
+          "help_text": "Total equity grant value (4-year vesting)"
+        },
+        {
+          "name": "annual_bonus_target",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 15,
+          "data_type": "primitive",
+          "help_text": "Target bonus as % of base"
+        },
+        {
+          "name": "year1_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 403000,
+          "data_type": "primitive",
+          "help_text": "Base + Signing + Year 1 equity vesting + Bonus"
+        },
+        {
+          "name": "year2_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 353000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year3_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 363000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year4_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 373000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year5_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 383000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1875000,
+          "data_type": "primitive",
+          "help_text": "Total compensation over 5 years"
+        },
+        {
+          "name": "pto_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 20,
+          "data_type": "primitive",
+          "help_text": "Annual PTO days"
+        },
+        {
+          "name": "remote_policy",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Hybrid (3 days in office)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "health_benefits_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "health_benefits_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Exceptional healthcare coverage with multiple plan options, $0 premium for employee, low deductibles, comprehensive dental and vision, on-site health centers, and generous parental leave",
+          "data_type": "primitive"
+        },
+        {
+          "name": "career_growth_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "career_growth_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Strong internal mobility across products, well-defined promotion paths, extensive learning resources, mentorship programs, but can be competitive and slower at senior levels",
+          "data_type": "primitive"
+        },
+        {
+          "name": "work_life_balance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "work_life_balance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Generally reasonable hours with team-dependent variance, good PTO policy, strong perks and amenities, but high-performance culture can create pressure during product launches",
+          "data_type": "primitive"
+        },
+        {
+          "name": "team_size",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Large (50+ engineers)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Established company with strong brand recognition. Excellent benefits and infrastructure. Slower decision-making but more resources.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "offer_stripe_1",
+      "type": "Job_Offer",
+      "icon": "🟣",
+      "color": "#635bff",
+      "public_identifier": "Stripe",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "offer_stripe_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "company",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Stripe",
+          "data_type": "primitive"
+        },
+        {
+          "name": "position",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Senior Software Engineer",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "San Francisco, CA",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7749,
+            "lng": -122.4194
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "base_salary",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 210000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "signing_bonus",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 40000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year1_equity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 600000,
+          "data_type": "primitive",
+          "help_text": "Total equity grant value (4-year vesting)"
+        },
+        {
+          "name": "annual_bonus_target",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year1_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 421000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year2_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 381000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year3_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 392000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year4_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 403000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year5_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 414000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2011000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "pto_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 25,
+          "data_type": "primitive"
+        },
+        {
+          "name": "remote_policy",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Flexible hybrid",
+          "data_type": "primitive"
+        },
+        {
+          "name": "health_benefits_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "health_benefits_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Excellent healthcare with premium coverage options, $0 employee premiums, comprehensive mental health support, generous parental leave (16 weeks), and wellness stipends",
+          "data_type": "primitive"
+        },
+        {
+          "name": "career_growth_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "career_growth_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Fast-paced growth environment with high impact opportunities, direct access to leadership, clear ownership of projects, strong engineering culture, and rapid skill development through complex challenges",
+          "data_type": "primitive"
+        },
+        {
+          "name": "work_life_balance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "work_life_balance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "High-intensity work environment with ambitious goals, generous PTO but can be challenging to take due to workload, flexible schedule but expectation of high output and availability",
+          "data_type": "primitive"
+        },
+        {
+          "name": "team_size",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Medium (15-20 engineers)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "High-growth fintech with strong product-market fit. Excellent equity upside potential. Fast-paced environment with high expectations.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "offer_startup_1",
+      "type": "Job_Offer",
+      "icon": "🟢",
+      "color": "#10b981",
+      "public_identifier": "TechFlow AI (Startup)",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "offer_startup_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "company",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "TechFlow AI (Startup)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "position",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Lead Engineer",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "San Francisco, CA",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7749,
+            "lng": -122.4194
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "base_salary",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 180000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "signing_bonus",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 20000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year1_equity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1200000,
+          "data_type": "primitive",
+          "help_text": "Equity value at current valuation (4-year vesting, 1-year cliff)"
+        },
+        {
+          "name": "equity_percentage",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 0.8,
+          "data_type": "primitive",
+          "help_text": "Percentage ownership of company"
+        },
+        {
+          "name": "annual_bonus_target",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 0,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year1_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 200000,
+          "data_type": "primitive",
+          "help_text": "Conservative estimate (cash only for year 1)"
+        },
+        {
+          "name": "year2_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 480000,
+          "data_type": "primitive",
+          "help_text": "Assumes equity vesting begins"
+        },
+        {
+          "name": "year3_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 495000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year4_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 510000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "year5_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 525000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2210000,
+          "data_type": "primitive",
+          "help_text": "Optimistic scenario if equity appreciates 20% annually"
+        },
+        {
+          "name": "five_year_total_conservative",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1500000,
+          "data_type": "primitive",
+          "help_text": "Conservative scenario with flat equity value"
+        },
+        {
+          "name": "pto_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 25,
+          "data_type": "primitive"
+        },
+        {
+          "name": "remote_policy",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Fully flexible",
+          "data_type": "primitive"
+        },
+        {
+          "name": "health_benefits_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "health_benefits_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Standard healthcare coverage through marketplace plans with company contribution, basic dental and vision, but limited compared to large tech companies. No on-site services or extensive wellness programs yet.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "career_growth_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "career_growth_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Exceptional learning opportunity as early technical leader, direct impact on product and company direction, wear multiple hats, build team from ground up, potential for CTO track if company succeeds",
+          "data_type": "primitive"
+        },
+        {
+          "name": "work_life_balance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 5.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "work_life_balance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Startup intensity with long hours expected, especially around fundraising and product launches. Flexible schedule but always-on culture. High autonomy but also high pressure to deliver.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "team_size",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Small (5 engineers)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "funding_stage",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Series A ($15M raised)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "risk_level",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          },
+          "help_text": "Higher number = higher risk"
+        },
+        {
+          "name": "risk_level_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Early-stage startup with execution risk, equity could be worth significantly more or nothing depending on company success, competitive AI market, but strong founding team and initial traction",
+          "data_type": "primitive"
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "High risk, high reward opportunity. Significant equity upside if successful. Leadership role with broad responsibilities. AI/ML focus in hot market.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "comparison_calculator_1",
+      "type": "Compensation_Calculator",
+      "icon": "🧮",
+      "color": "#f59e0b",
+      "public_identifier": "5-Year Compensation Calculator",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "comparison_calculator_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "5-Year Compensation Calculator",
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_salary_increase",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 5,
+          "data_type": "primitive",
+          "help_text": "Expected annual salary increase %"
+        },
+        {
+          "name": "equity_appreciation_optimistic",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 20,
+          "data_type": "primitive",
+          "help_text": "Optimistic annual equity appreciation %"
+        },
+        {
+          "name": "equity_appreciation_conservative",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 0,
+          "data_type": "primitive",
+          "help_text": "Conservative annual equity appreciation %"
+        },
+        {
+          "name": "cost_of_living_adjustment",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 3,
+          "data_type": "primitive",
+          "help_text": "Annual cost of living increase %"
+        },
+        {
+          "name": "tax_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 35,
+          "data_type": "primitive",
+          "help_text": "Effective tax rate % (federal + state + local)"
+        },
+        {
+          "name": "discount_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 5,
+          "data_type": "primitive",
+          "help_text": "Discount rate for NPV calculations"
+        },
+        {
+          "name": "google_npv",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1625000,
+          "data_type": "primitive",
+          "help_text": "Net present value of Google offer"
+        },
+        {
+          "name": "stripe_npv",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1742000,
+          "data_type": "primitive",
+          "help_text": "Net present value of Stripe offer"
+        },
+        {
+          "name": "startup_npv_optimistic",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1915000,
+          "data_type": "primitive",
+          "help_text": "Net present value of startup offer (optimistic)"
+        },
+        {
+          "name": "startup_npv_conservative",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1300000,
+          "data_type": "primitive",
+          "help_text": "Net present value of startup offer (conservative)"
+        }
+      ]
+    },
+    {
+      "id": "decision_framework_1",
+      "type": "Decision_Framework",
+      "icon": "⚖️",
+      "color": "#8b5cf6",
+      "public_identifier": "Job Offer Decision Framework",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "decision_framework_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Job Offer Decision Framework",
+          "data_type": "primitive"
+        },
+        {
+          "name": "compensation_weight",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 30,
+          "data_type": "primitive",
+          "help_text": "Importance of total compensation"
+        },
+        {
+          "name": "career_growth_weight",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 25,
+          "data_type": "primitive",
+          "help_text": "Importance of career growth potential"
+        },
+        {
+          "name": "work_life_balance_weight",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 20,
+          "data_type": "primitive",
+          "help_text": "Importance of work-life balance"
+        },
+        {
+          "name": "benefits_weight",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 15,
+          "data_type": "primitive",
+          "help_text": "Importance of benefits package"
+        },
+        {
+          "name": "risk_tolerance_weight",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "help_text": "Importance of stability vs. risk"
+        },
+        {
+          "name": "google_weighted_score",
+          "widget": "rating",
+          "editable": false,
+          "function": "computed",
+          "value": 8.1,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "stripe_weighted_score",
+          "widget": "rating",
+          "editable": false,
+          "function": "computed",
+          "value": 8.4,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "startup_weighted_score",
+          "widget": "rating",
+          "editable": false,
+          "function": "computed",
+          "value": 7.8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "recommendation",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Based on weighted scores, Stripe offers the best balance of compensation, growth, and benefits. However, if career acceleration and ownership are top priorities, consider the startup. If stability and benefits matter most, Google is the safest choice.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "next_steps_checklist_1",
+      "type": "Decision_Checklist",
+      "icon": "✅",
+      "color": "#06b6d4",
+      "public_identifier": "Offer Evaluation Checklist",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "next_steps_checklist_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Offer Evaluation Checklist",
+          "data_type": "primitive"
+        },
+        {
+          "name": "tasks",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "task": "Request offer letter extensions if needed",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Schedule calls with hiring managers to discuss role details",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Talk to current employees at each company (use LinkedIn)",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Research team composition and recent projects",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Calculate take-home pay after taxes for each offer",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Review equity vesting schedules and cliff periods",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Understand startup's cap table and dilution risk",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Compare commute times and remote work flexibility",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Review health insurance plans in detail",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Negotiate compensation if appropriate",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Discuss decision with mentor or trusted advisor",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Set decision deadline and communicate to all parties",
+              "done": false,
+              "priority": "high"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "decision_deadline",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": "2025-10-31",
+          "data_type": "primitive",
+          "help_text": "When do you need to decide?"
+        },
+        {
+          "name": "current_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Evaluating offers",
+          "data_type": "primitive",
+          "options": [
+            "Evaluating offers",
+            "Negotiating",
+            "Final decision pending",
+            "Accepted offer"
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "offer_google_1",
+      "target_entity_id": "comparison_calculator_1",
+      "relationship": "feeds_into",
+      "mechanism": "compute",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "offer_stripe_1",
+      "target_entity_id": "comparison_calculator_1",
+      "relationship": "feeds_into",
+      "mechanism": "compute",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "offer_startup_1",
+      "target_entity_id": "comparison_calculator_1",
+      "relationship": "feeds_into",
+      "mechanism": "compute",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "comparison_calculator_1",
+      "target_entity_id": "decision_framework_1",
+      "relationship": "informs",
+      "mechanism": "compute",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "offer_google_1",
+      "target_entity_id": "decision_framework_1",
+      "relationship": "evaluated_by",
+      "mechanism": "compute",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "offer_stripe_1",
+      "target_entity_id": "decision_framework_1",
+      "relationship": "evaluated_by",
+      "mechanism": "compute",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "offer_startup_1",
+      "target_entity_id": "decision_framework_1",
+      "relationship": "evaluated_by",
+      "mechanism": "compute",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "decision_framework_1",
+      "target_entity_id": "next_steps_checklist_1",
+      "relationship": "guides",
+      "mechanism": "reference",
+      "metadata": {}
+    }
+  ],
+  "created_at": "2025-10-28T14:18:17.449636",
+  "updated_at": "2025-10-28T14:19:40.659Z"
+}

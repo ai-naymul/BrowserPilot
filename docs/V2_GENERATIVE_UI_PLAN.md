@@ -4,6 +4,19 @@
 
 This is the differentiator no funded competitor occupies. Data players (Firecrawl, browser-use, crawl4ai) return a file. UI players (CopilotKit, thesys, Vercel AI SDK) render UI from data you already have. BrowserPilot does the full loop — **URL + a sentence → living app** — self-hosted and free.
 
+## Beachhead (start narrow, widen later)
+
+First use-case to nail: **price / product comparison** — *"point it at product/pricing pages → a live comparison dashboard (price table + trend chart)."* Chosen because the target sites (Nike, Wayfair, Amazon, Footlocker) are exactly the existing stealth demos (anti-bot = our strength), the output is naturally visual + instantly shareable, and it maps to the search intent "competitor price monitoring open source." Generalize to other domains only *after* this one is reliable and shareable — nobody shares a broken dashboard.
+
+## Growth model (product-led — the founder will NOT run campaigns)
+
+Hard constraint: no time for daily Reddit/Twitter; those platforms are hostile to self-promo anyway. So growth must be **compounding, not campaign-driven**. Every tactic must pass: *"does this need the founder to keep showing up?"* If yes, it's out. Three compounding engines + one pulse:
+
+1. **The product markets itself (the flywheel):** the dashboard output is **shareable with a subtle "built with BrowserPilot" link.** User scrapes → dashboard → shares → viewer clicks → new user. The only mechanism where users bring users with zero founder effort. Requires the narrow beachhead to be genuinely reliable.
+2. **Be found by searchers (SEO):** repo + a small docs page rank for "cloudflare bypass python open source", "free browserbase alternative", "does X pass sannysoft". The reproducible benchmark (`make benchmark`, done) is searchable *and* citeable by third-party "best scraping tools" posts.
+3. **Be listed & embedded:** one-time PRs to awesome-lists (steel-dev/awesome-web-agents, awesome-web-scraping), correct GitHub topics, and ship as an **MCP server / tool** so others embed it in tutorials (permanent backlinks).
+4. **One pulse:** a single Show HN when the shareable demo works. Not a campaign.
+
 ---
 
 ## Why this wins (competitive truth)
@@ -50,19 +63,24 @@ The current repo does not run if you follow the README. No growth tactic convert
 - Add `POST /render`: structured scraped rows → `ComponentSpec[]` + `LayoutSpec`. This is the clean seam.
 - Wire `DynamicComponentRenderer` as BrowserPilot's output view (alongside/replacing raw-file download).
 - **Strip travel-domain hardcoding** — `extractEntityIdFromKey` (tokyo/paris/barcelona patterns), `groupIntoSections` (weather/costs/safety/logistics), MetricCard "7-day cost" heuristics. Generalize to arbitrary scraped data.
-- **Exit gate:** prompt → dashboard works on 3 hero sites (e.g. Amazon pricing, a stats site, a real-estate listing).
+- **Exit gate:** prompt → dashboard works reliably on the **price-comparison beachhead** across ~5 real protected retail sites (Nike, Wayfair, Amazon, Footlocker, one more). Reliable on the narrow case beats flaky on "any site."
 
-### Phase 3 — App-ify (easier + reliable "like a mobile app").
-- **Hosted "try it live" demo** (no clone, no key) — gated with owner key + auth + rate limits. Highest-leverage GTM move.
+### Phase 3 — App-ify + the flywheel (easier, reliable, shareable).
+- **Shareable artifact (the growth flywheel):** export/share a generated dashboard via a link, each carrying a subtle **"built with BrowserPilot"** backlink. This is the single most important growth feature — it's what makes users bring users without the founder campaigning.
+- **Hosted "try it live" demo** (no clone, no key) — gated with owner key + auth + rate limits. Highest-leverage *conversion* lever; pairs with the shareable link.
 - Add auth + rate limiting to LLM endpoints (currently an open money-spending proxy).
 - Mobile-first responsive layout (currently desktop tri-pane with mobile fallbacks).
 - Soften the light theme (pure-white bg + saturated blue/gold → off-white + desaturated tokens); calmer motion.
 - Reliability: set `max_tokens`, add JSON-repair/fallback so the main flow never 500s on a truncated LLM response.
 - Remove 253 `console.log`s; fix duplicated/invalid CSS.
 
-### Phase 4 — Launch.
-- Record the 30–60s self-building-dashboard clip (the hero asset).
-- Sequence: awesome-lists (durable) → r/webscraping + r/dataengineering (participate first) → Show HN (Tue–Thu 8–10am ET, reply every comment 2h) → ProductHunt.
+### Phase 4 — Seed the compounding engines (no ongoing campaign).
+Per the growth model above — one-time/automated actions only:
+- **Cut the 30–60s price-comparison demo clip** (the hero asset; README + the one Show HN).
+- **SEO content:** a "reproduce the stealth benchmark" page + a comparison page targeting real search intent ("free browserbase alternative", "cloudflare bypass open source"). One-time, compounds.
+- **Listings (one-time PRs):** awesome-web-agents, awesome-web-scraping; set GitHub topics.
+- **MCP server / tool wrapper** so BrowserPilot gets embedded in others' tutorials (permanent backlinks).
+- **One Show HN** when the shareable demo works (Tue–Thu 8–10am ET, reply to comments for 2h). Single event, not a campaign.
 - README hero = the clip + the hosted demo link + one-command setup that actually works.
 
 ---

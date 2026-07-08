@@ -1,0 +1,1518 @@
+{
+  "version": 2,
+  "task_description": "Compare travel destinations (Tokyo, Barcelona, Bali) for budget-friendly tours with cost breakdowns, attractions, and travel insights",
+  "entities": [
+    {
+      "id": "destination_tokyo",
+      "type": "Destination_Tokyo",
+      "icon": "🗼",
+      "color": "#3b82f6",
+      "public_identifier": "Tokyo",
+      "attributes": [
+        {
+          "name": "name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo, Japan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 35.6762,
+            "lng": 139.6503
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "accommodation_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 80,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 25,
+          "data_type": "primitive"
+        },
+        {
+          "name": "transport_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive"
+        },
+        {
+          "name": "attractions_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 15,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_daily_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 80,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo ranks as one of the world's safest cities with extremely low crime rates, 24/7 police presence, efficient emergency services, and safe public transportation. Solo travelers and families feel secure at all hours. Lost items are commonly returned.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo offers an exceptional blend of ancient traditions and cutting-edge modernity. From historic temples like Senso-ji to traditional tea ceremonies, sumo wrestling, and seasonal festivals, the city preserves its heritage while embracing innovation in technology, fashion, and art.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo has more Michelin-starred restaurants than any other city globally. From world-class sushi at Tsukiji to affordable ramen shops, izakayas, and street food, the culinary scene is unmatched. Fresh ingredients, meticulous preparation, and diverse options from traditional to fusion cuisine.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo's nightlife is diverse with vibrant districts like Shibuya, Roppongi, and Shinjuku offering everything from karaoke bars and izakayas to upscale clubs and themed cafes. The city is safe and accessible 24/7 with late-night trains and taxis. However, it's more subdued compared to Western party cities.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "March-May (Spring) or October-November (Fall)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japanese Yen (JPY)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japanese",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "name": "Senso-ji Temple",
+              "description": "Tokyo's oldest and most significant Buddhist temple in Asakusa, featuring the iconic Kaminarimon Gate",
+              "coordinates": {
+                "lat": 35.7148,
+                "lng": 139.7967
+              }
+            },
+            {
+              "name": "Shibuya Crossing",
+              "description": "World's busiest pedestrian crossing and iconic Tokyo landmark with neon lights and massive crowds",
+              "coordinates": {
+                "lat": 35.6595,
+                "lng": 139.7004
+              }
+            },
+            {
+              "name": "Meiji Shrine",
+              "description": "Serene Shinto shrine surrounded by forest in the heart of Tokyo, dedicated to Emperor Meiji",
+              "coordinates": {
+                "lat": 35.6764,
+                "lng": 139.6993
+              }
+            },
+            {
+              "name": "Tokyo Skytree",
+              "description": "Tallest structure in Japan at 634m, offering panoramic city views and shopping complex",
+              "coordinates": {
+                "lat": 35.7101,
+                "lng": 139.8107
+              }
+            },
+            {
+              "name": "Tsukiji Outer Market",
+              "description": "Famous seafood and produce market with fresh sushi, street food, and culinary experiences",
+              "coordinates": {
+                "lat": 35.6654,
+                "lng": 139.7707
+              }
+            },
+            {
+              "name": "Imperial Palace",
+              "description": "Primary residence of the Emperor of Japan with beautiful East Gardens open to public",
+              "coordinates": {
+                "lat": 35.6852,
+                "lng": 139.7528
+              }
+            },
+            {
+              "name": "Akihabara Electric Town",
+              "description": "Electronics and anime/manga district, paradise for tech enthusiasts and otaku culture",
+              "coordinates": {
+                "lat": 35.7022,
+                "lng": 139.7744
+              }
+            },
+            {
+              "name": "Ueno Park",
+              "description": "Large public park with museums, zoo, cherry blossoms, and cultural attractions",
+              "coordinates": {
+                "lat": 35.7148,
+                "lng": 139.7744
+              }
+            }
+          ],
+          "data_type": "array"
+        }
+      ]
+    },
+    {
+      "id": "destination_barcelona",
+      "type": "Destination_Barcelona",
+      "icon": "🏖️",
+      "color": "#f59e0b",
+      "public_identifier": "Barcelona",
+      "attributes": [
+        {
+          "name": "name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona, Catalonia, Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "accommodation_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 95,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 30,
+          "data_type": "primitive"
+        },
+        {
+          "name": "transport_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 12,
+          "data_type": "primitive"
+        },
+        {
+          "name": "attractions_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 18,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_daily_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 95,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona is generally safe but has higher rates of petty crime, especially pickpocketing in tourist areas like Las Ramblas and the Metro. Travelers should remain vigilant with belongings. Violent crime is rare. Avoid poorly lit areas at night and be cautious in crowded tourist spots.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.2,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona boasts extraordinary Gaudí architecture including Sagrada Familia and Park Güell, vibrant Catalan culture, world-class museums like Picasso Museum, Gothic Quarter medieval streets, and passionate traditions like human towers (castells) and sardana dancing. The city perfectly blends historic and contemporary art.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona offers exceptional Mediterranean cuisine with fresh seafood, tapas culture, paella, and innovative Catalan dishes. La Boqueria market provides amazing fresh produce. The city has numerous Michelin-starred restaurants and affordable local eateries. Wine and vermouth culture is strong.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona has one of Europe's best nightlife scenes with beach clubs, rooftop bars, world-famous nightclubs like Opium and Pacha, and late-night dining. The Gothic Quarter and El Born offer trendy cocktail bars. Parties often continue until sunrise. The city embraces a vibrant, energetic social culture.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-June or September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Euro (EUR)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spanish, Catalan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "name": "Sagrada Familia",
+              "description": "Gaudí's masterpiece basilica, under construction since 1882, UNESCO World Heritage site with stunning architecture",
+              "coordinates": {
+                "lat": 41.4036,
+                "lng": 2.1744
+              }
+            },
+            {
+              "name": "Park Güell",
+              "description": "Colorful mosaic park designed by Gaudí with panoramic city views and whimsical architecture",
+              "coordinates": {
+                "lat": 41.4145,
+                "lng": 2.1527
+              }
+            },
+            {
+              "name": "Las Ramblas",
+              "description": "Famous tree-lined pedestrian street with street performers, markets, cafes, and vibrant atmosphere",
+              "coordinates": {
+                "lat": 41.3818,
+                "lng": 2.1745
+              }
+            },
+            {
+              "name": "Gothic Quarter",
+              "description": "Medieval neighborhood with narrow streets, Roman ruins, Cathedral, and historic charm",
+              "coordinates": {
+                "lat": 41.3833,
+                "lng": 2.1769
+              }
+            },
+            {
+              "name": "Casa Batlló",
+              "description": "Gaudí's modernist residential building with organic shapes and colorful facade on Passeig de Gràcia",
+              "coordinates": {
+                "lat": 41.3916,
+                "lng": 2.1649
+              }
+            },
+            {
+              "name": "La Boqueria Market",
+              "description": "Vibrant public market with fresh produce, seafood, tapas, and local delicacies since 1217",
+              "coordinates": {
+                "lat": 41.3816,
+                "lng": 2.1719
+              }
+            },
+            {
+              "name": "Barceloneta Beach",
+              "description": "Popular urban beach with golden sand, Mediterranean waters, restaurants, and beach bars",
+              "coordinates": {
+                "lat": 41.3772,
+                "lng": 2.1896
+              }
+            },
+            {
+              "name": "Camp Nou",
+              "description": "FC Barcelona's legendary football stadium, largest in Europe, with museum and tours",
+              "coordinates": {
+                "lat": 41.3809,
+                "lng": 2.1228
+              }
+            }
+          ],
+          "data_type": "array"
+        }
+      ]
+    },
+    {
+      "id": "destination_bali",
+      "type": "Destination_Bali",
+      "icon": "🌴",
+      "color": "#10b981",
+      "public_identifier": "Bali",
+      "attributes": [
+        {
+          "name": "name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Indonesia",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Bali, Indonesia",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": -8.4095,
+            "lng": 115.1889
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "accommodation_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 35,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 15,
+          "data_type": "primitive"
+        },
+        {
+          "name": "transport_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive"
+        },
+        {
+          "name": "attractions_cost_daily",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 12,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_daily_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 35,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Bali is generally safe for tourists with friendly locals and low violent crime. Main concerns include petty theft, scooter accidents (traffic can be chaotic), and occasional scams targeting tourists. Be cautious with valuables on beaches and use reputable transportation. Natural hazards include volcanic activity and strong ocean currents.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Bali offers rich Hindu-Balinese culture with thousands of temples including Tanah Lot and Uluwatu, daily offerings (canang sari), traditional dance performances like Kecak, intricate art and crafts, spiritual wellness retreats, and rice terrace landscapes. The island maintains strong cultural traditions despite tourism growth.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Bali features delicious Indonesian cuisine including nasi goreng, satay, babi guling (roast pork), and fresh seafood. Ubud offers healthy cafes with organic and vegan options. Warungs (local eateries) provide authentic, affordable meals. The island has diverse international restaurants and beachfront dining experiences.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Bali's nightlife centers around Seminyak and Canggu with beach clubs, sunset bars, and nightclubs. Popular spots include Potato Head Beach Club, Finn's Beach Club, and La Favela. Ubud offers more relaxed evening activities like cultural performances. The scene is laid-back compared to major cities but vibrant in tourist areas.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-October (Dry Season)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Indonesian Rupiah (IDR)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Indonesian, Balinese",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "name": "Tanah Lot Temple",
+              "description": "Iconic sea temple on rocky outcrop with stunning sunset views, one of Bali's most photographed spots",
+              "coordinates": {
+                "lat": -8.6211,
+                "lng": 115.0868
+              }
+            },
+            {
+              "name": "Tegalalang Rice Terraces",
+              "description": "Stunning emerald green rice paddies with traditional Balinese irrigation system, popular for photos",
+              "coordinates": {
+                "lat": -8.4318,
+                "lng": 115.2782
+              }
+            },
+            {
+              "name": "Uluwatu Temple",
+              "description": "Clifftop temple 70m above ocean with Kecak fire dance performances at sunset and monkey forest",
+              "coordinates": {
+                "lat": -8.8291,
+                "lng": 115.085
+              }
+            },
+            {
+              "name": "Sacred Monkey Forest Sanctuary",
+              "description": "Nature reserve in Ubud with over 700 monkeys, ancient temples, and lush jungle pathways",
+              "coordinates": {
+                "lat": -8.5189,
+                "lng": 115.2585
+              }
+            },
+            {
+              "name": "Mount Batur",
+              "description": "Active volcano offering sunrise trekking with panoramic views of Lake Batur and surrounding mountains",
+              "coordinates": {
+                "lat": -8.2422,
+                "lng": 115.3753
+              }
+            },
+            {
+              "name": "Seminyak Beach",
+              "description": "Upscale beach area with luxury resorts, beach clubs, high-end shopping, and vibrant nightlife",
+              "coordinates": {
+                "lat": -8.6915,
+                "lng": 115.1683
+              }
+            },
+            {
+              "name": "Tirta Empul Temple",
+              "description": "Holy spring water temple where Balinese Hindus go for purification rituals and blessings",
+              "coordinates": {
+                "lat": -8.4154,
+                "lng": 115.3154
+              }
+            },
+            {
+              "name": "Nusa Penida",
+              "description": "Island southeast of Bali with dramatic cliffs, Kelingking Beach T-Rex viewpoint, and crystal waters",
+              "coordinates": {
+                "lat": -8.729,
+                "lng": 115.5446
+              }
+            }
+          ],
+          "data_type": "array"
+        }
+      ]
+    },
+    {
+      "id": "trip_budget_calculator",
+      "type": "Trip_Budget_Calculator",
+      "icon": "💰",
+      "color": "#8b5cf6",
+      "public_identifier": "7",
+      "attributes": [
+        {
+          "name": "trip_duration_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 365
+          }
+        },
+        {
+          "name": "selected_destination",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Bali",
+          "data_type": "primitive",
+          "options": [
+            "Tokyo",
+            "Barcelona",
+            "Bali"
+          ]
+        },
+        {
+          "name": "estimated_total_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 490,
+          "data_type": "primitive"
+        },
+        {
+          "name": "flight_cost_estimate",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_with_flights",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1290,
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "seasonal_info_tokyo",
+      "type": "Seasonal_Travel_Info",
+      "icon": "🌸",
+      "color": "#ec4899",
+      "public_identifier": "Tokyo",
+      "attributes": [
+        {
+          "name": "destination_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "March-May (Cherry Blossom), October-November (Fall Foliage)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spring: 10-20°C (50-68°F), mild and pleasant. Fall: 15-22°C (59-72°F), comfortable with clear skies",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 120,
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "June-August (Rainy/Hot), December-February (Winter)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Summer: 25-35°C (77-95°F), humid with frequent rain. Winter: 0-10°C (32-50°F), cold but dry",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 6,
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 70,
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "September, Late November",
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "September: 22-28°C (72-82°F), warm with occasional typhoons. Late November: 10-15°C (50-59°F), cool and comfortable",
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 85,
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_value_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "January-February, June-July",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_value_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Winter months offer significantly lower prices with cold but clear weather perfect for city exploration. Early summer has lower rates before peak vacation season, though it can be humid.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_weather_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "March-May, October-November",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_weather_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spring offers iconic cherry blossoms with mild temperatures and low humidity. Fall provides stunning foliage, clear skies, and comfortable conditions ideal for sightseeing.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_visit_time",
+          "widget": "short_text",
+          "editable": false,
+          "function": "thumbnail",
+          "value": "October-November (Best Balance)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Fall offers the best balance of excellent weather, beautiful scenery, and slightly lower prices than spring. The comfortable temperatures make it ideal for extensive walking and outdoor activities.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "price_savings_percentage",
+          "widget": "percentage",
+          "editable": false,
+          "function": "computed",
+          "value": 42,
+          "data_type": "primitive"
+        },
+        {
+          "name": "avoid_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "August, Golden Week (late April-early May)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avoid_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "August is extremely hot and humid with peak tourist crowds. Golden Week is a major Japanese holiday when prices skyrocket and attractions are overcrowded with domestic tourists.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "seasonal_info_barcelona",
+      "type": "Seasonal_Travel_Info",
+      "icon": "☀️",
+      "color": "#f59e0b",
+      "public_identifier": "Barcelona",
+      "attributes": [
+        {
+          "name": "destination_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "June-August (Summer)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "25-30°C (77-86°F), hot and sunny with perfect beach weather but can be uncomfortably warm for city walking",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "November-February (Winter)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "10-15°C (50-59°F), mild winters with occasional rain, still pleasant compared to Northern Europe",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 65,
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-May, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spring: 15-22°C (59-72°F), mild and blooming. Fall: 18-25°C (64-77°F), warm with less humidity and comfortable for beach and city",
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 95,
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_value_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "November-March (excluding Christmas/New Year)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_value_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Winter months offer the lowest prices with mild Mediterranean weather still suitable for sightseeing. Hotels and attractions are less crowded, and you can experience authentic local life.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_weather_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-June, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_weather_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Late spring and early fall provide ideal temperatures for both beach activities and city exploration. The weather is warm but not oppressively hot, with plenty of sunshine and minimal rain.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_visit_time",
+          "widget": "short_text",
+          "editable": false,
+          "function": "thumbnail",
+          "value": "May or September (Best Balance)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "These shoulder months offer perfect weather, moderate prices, and fewer tourists than summer. September is particularly ideal with warm sea temperatures and post-summer calm.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "price_savings_percentage",
+          "widget": "percentage",
+          "editable": false,
+          "function": "computed",
+          "value": 57,
+          "data_type": "primitive"
+        },
+        {
+          "name": "avoid_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "August",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avoid_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "August is peak summer with maximum prices, extreme heat, and overwhelming tourist crowds. Many local businesses close for vacation, and the city can feel uncomfortably packed.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "seasonal_info_bali",
+      "type": "Seasonal_Travel_Info",
+      "icon": "🌴",
+      "color": "#10b981",
+      "public_identifier": "Bali",
+      "attributes": [
+        {
+          "name": "destination_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "July-August, December-January",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Dry season: 26-30°C (79-86°F), sunny with low humidity and minimal rainfall. Perfect beach and outdoor conditions.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 85,
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "January-March (Wet Season Peak)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "25-29°C (77-84°F), high humidity with frequent afternoon thunderstorms and heavy rainfall. Can disrupt beach and outdoor activities.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 4,
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 35,
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-June, September-November",
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_weather",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Transitional periods: 26-30°C (79-86°F). April-June: drying out with occasional rain. Sept-Nov: dry and pleasant with excellent conditions.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_price_level",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 6,
+          "data_type": "primitive"
+        },
+        {
+          "name": "shoulder_season_accommodation_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "display",
+          "value": 50,
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_value_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-June, September",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_value_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "These months offer excellent weather with significantly lower prices than peak season. You'll enjoy dry conditions, fewer crowds, and better deals on accommodations and activities.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_weather_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-October (Dry Season)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_weather_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "The dry season provides consistent sunshine, low humidity, and minimal rainfall. Perfect for beach activities, surfing, temple visits, and rice terrace exploration.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_visit_time",
+          "widget": "short_text",
+          "editable": false,
+          "function": "thumbnail",
+          "value": "May-June or September (Best Balance)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "These months provide the sweet spot of excellent dry weather, moderate prices, and manageable crowds. The landscape is lush from earlier rains, and you avoid both wet season disruptions and peak season prices.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "price_savings_percentage",
+          "widget": "percentage",
+          "editable": false,
+          "function": "computed",
+          "value": 41,
+          "data_type": "primitive"
+        },
+        {
+          "name": "avoid_months",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "January-February",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avoid_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Peak wet season with heavy rainfall and high humidity. Beach activities are limited, roads can flood, and outdoor attractions may be inaccessible. Despite lower prices, the weather significantly impacts the experience.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "seasonal_comparison",
+      "type": "Seasonal_Comparison_Summary",
+      "icon": "📊",
+      "color": "#8b5cf6",
+      "public_identifier": "Best Time to Visit: Tokyo vs Barcelona vs Bali",
+      "attributes": [
+        {
+          "name": "comparison_title",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Best Time to Visit: Tokyo vs Barcelona vs Bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_best_value_winner",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona (November-March)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_best_weather_winner",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Bali (May-October)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_best_balance_winner",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Bali (May-June or September)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "summary_analysis",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "For optimal weather and value balance: Visit Bali in May-June or September for consistent sunshine and moderate prices. Visit Tokyo in October-November for beautiful fall foliage and comfortable temperatures. Visit Barcelona in May or September to avoid extreme summer heat while enjoying beach weather. All three destinations offer 40-57% savings during shoulder seasons compared to peak times.",
+          "data_type": "primitive"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "trip_budget_calculator",
+      "target_entity_id": "destination_tokyo",
+      "relationship": "calculates_from",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "trip_budget_calculator",
+      "target_entity_id": "destination_barcelona",
+      "relationship": "calculates_from",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "trip_budget_calculator",
+      "target_entity_id": "destination_bali",
+      "relationship": "calculates_from",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "destination_tokyo",
+      "target_entity_id": "seasonal_info_tokyo",
+      "relationship": "has_seasonal_info",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "destination_barcelona",
+      "target_entity_id": "seasonal_info_barcelona",
+      "relationship": "has_seasonal_info",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "destination_bali",
+      "target_entity_id": "seasonal_info_bali",
+      "relationship": "has_seasonal_info",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "seasonal_comparison",
+      "target_entity_id": "seasonal_info_tokyo",
+      "relationship": "compares",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "seasonal_comparison",
+      "target_entity_id": "seasonal_info_barcelona",
+      "relationship": "compares",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "seasonal_comparison",
+      "target_entity_id": "seasonal_info_bali",
+      "relationship": "compares",
+      "mechanism": "reference",
+      "metadata": {}
+    }
+  ],
+  "created_at": "2025-11-17T08:40:45.795549",
+  "updated_at": "2025-11-17T08:43:58.884Z"
+}

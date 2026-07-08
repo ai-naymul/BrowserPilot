@@ -1,0 +1,663 @@
+{
+  "version": 1,
+  "task_description": "Compare three tech job offers and determine the best overall choice based on compensation, role, location, and career growth potential",
+  "entities": [
+    {
+      "id": "offer_google",
+      "type": "Job_Offer",
+      "icon": "💼",
+      "color": "#4285f4",
+      "public_identifier": "Google",
+      "attributes": [
+        {
+          "name": "company",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Google",
+          "data_type": "primitive"
+        },
+        {
+          "name": "role",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Senior Software Engineer",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "Mountain View, CA",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.3861,
+            "lng": -122.0839
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "work_mode",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Hybrid",
+          "data_type": "primitive",
+          "options": [
+            "Remote",
+            "Hybrid",
+            "On-site"
+          ]
+        },
+        {
+          "name": "base_salary",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 220000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bonus_target_percentage",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 15,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bonus_target_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 33000,
+          "data_type": "primitive",
+          "help_text": "Calculated as 15% of base salary"
+        },
+        {
+          "name": "equity_total",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 300000,
+          "data_type": "primitive",
+          "help_text": "Total equity over 4 years"
+        },
+        {
+          "name": "equity_vesting_years",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 4,
+          "data_type": "primitive"
+        },
+        {
+          "name": "equity_annual",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 75000,
+          "data_type": "primitive",
+          "help_text": "Annual equity value"
+        },
+        {
+          "name": "total_comp_year1",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 328000,
+          "data_type": "primitive",
+          "help_text": "Base + Bonus + Year 1 Equity"
+        },
+        {
+          "name": "total_comp_4years",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1513000,
+          "data_type": "primitive",
+          "help_text": "Total compensation over 4 years"
+        },
+        {
+          "name": "career_growth_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7.5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "career_growth_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Google offers structured career progression with clear leveling system. Large company means more mentorship opportunities but potentially slower advancement. Strong brand name valuable for future opportunities. Limited ability to shape product direction at senior level.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "impact_potential_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 6,
+          "data_type": "primitive"
+        },
+        {
+          "name": "impact_potential_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Work will be on established products with large user base, but individual impact is diluted across large teams. Changes are incremental rather than transformative. High quality engineering standards but slower shipping cycles.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "risk_level_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 2,
+          "data_type": "primitive"
+        },
+        {
+          "name": "risk_level_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Extremely low risk - Google is a stable, profitable company with strong market position. Compensation is guaranteed and predictable. Layoff risk exists but lower than most companies. Equity value is liquid and stable.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Brand name recognition. Excellent benefits and perks. Strong engineering culture. May feel less impactful than smaller companies.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "offer_stripe",
+      "type": "Job_Offer",
+      "icon": "💼",
+      "color": "#635bff",
+      "public_identifier": "Stripe",
+      "attributes": [
+        {
+          "name": "company",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Stripe",
+          "data_type": "primitive"
+        },
+        {
+          "name": "role",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Senior Engineer (Core Payments Team)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "San Francisco, CA",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7749,
+            "lng": -122.4194
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "work_mode",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Hybrid",
+          "data_type": "primitive",
+          "options": [
+            "Remote",
+            "Hybrid",
+            "On-site"
+          ]
+        },
+        {
+          "name": "base_salary",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 210000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bonus_target_percentage",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bonus_target_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 21000,
+          "data_type": "primitive",
+          "help_text": "Calculated as 10% of base salary"
+        },
+        {
+          "name": "equity_total",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 400000,
+          "data_type": "primitive",
+          "help_text": "Total equity over 4 years"
+        },
+        {
+          "name": "equity_vesting_years",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 4,
+          "data_type": "primitive"
+        },
+        {
+          "name": "equity_annual",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 100000,
+          "data_type": "primitive",
+          "help_text": "Annual equity value"
+        },
+        {
+          "name": "total_comp_year1",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 331000,
+          "data_type": "primitive",
+          "help_text": "Base + Bonus + Year 1 Equity"
+        },
+        {
+          "name": "total_comp_4years",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1524000,
+          "data_type": "primitive",
+          "help_text": "Total compensation over 4 years"
+        },
+        {
+          "name": "career_growth_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "career_growth_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Stripe is a high-growth fintech company with strong upward trajectory. Core payments team is critical infrastructure with high visibility. Opportunity to work on complex, mission-critical systems. Growing company means more advancement opportunities. Strong reputation in tech industry.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "impact_potential_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive"
+        },
+        {
+          "name": "impact_potential_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Core payments team directly impacts millions of businesses globally. High-visibility work on critical infrastructure. Stripe's influence in fintech means work has industry-wide impact. Faster shipping cycles than large tech companies while maintaining quality.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "risk_level_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 4,
+          "data_type": "primitive"
+        },
+        {
+          "name": "risk_level_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Medium risk - Stripe is well-established with strong revenue and market position, but faces competition and economic headwinds. Private company means equity is less liquid. Recent valuation adjustments in 2022-2023. Still considered a tier-1 fintech company with IPO potential.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Highest equity package. Core infrastructure work. Strong fintech domain expertise. San Francisco location more expensive than Mountain View.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "offer_startup",
+      "type": "Job_Offer",
+      "icon": "💼",
+      "color": "#10b981",
+      "public_identifier": "Mid-stage Startup",
+      "attributes": [
+        {
+          "name": "company",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Mid-stage Startup",
+          "data_type": "primitive"
+        },
+        {
+          "name": "role",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Founding-ish Engineer",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "Fully Remote (US time zones)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 39.8283,
+            "lng": -98.5795
+          },
+          "data_type": "dict",
+          "help_text": "Geographic center of US"
+        },
+        {
+          "name": "work_mode",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Remote",
+          "data_type": "primitive",
+          "options": [
+            "Remote",
+            "Hybrid",
+            "On-site"
+          ]
+        },
+        {
+          "name": "base_salary",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 180000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bonus_target_percentage",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 0,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bonus_target_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive",
+          "help_text": "No bonus structure"
+        },
+        {
+          "name": "equity_percentage",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 0.5,
+          "data_type": "primitive",
+          "help_text": "0.5% equity stake"
+        },
+        {
+          "name": "equity_vesting_years",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 4,
+          "data_type": "primitive"
+        },
+        {
+          "name": "estimated_company_valuation",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 100000000,
+          "data_type": "primitive",
+          "help_text": "Estimated current valuation - update based on actual"
+        },
+        {
+          "name": "equity_current_value",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 500000,
+          "data_type": "primitive",
+          "help_text": "Current paper value of equity (0.5% of valuation)"
+        },
+        {
+          "name": "total_comp_year1",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 180000,
+          "data_type": "primitive",
+          "help_text": "Base salary only (equity value highly variable)"
+        },
+        {
+          "name": "total_comp_4years",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 720000,
+          "data_type": "primitive",
+          "help_text": "Base salary over 4 years (excluding equity upside)"
+        },
+        {
+          "name": "career_growth_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive"
+        },
+        {
+          "name": "career_growth_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Founding engineer role offers unparalleled growth opportunity. Will shape engineering culture, make architectural decisions, and likely move into leadership as company scales. Broad exposure across full stack and business. Startup experience highly valued. Risk of failure but massive learning regardless.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "impact_potential_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive"
+        },
+        {
+          "name": "impact_potential_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Maximum impact - as a founding engineer, you'll directly shape the product, technology stack, and company culture. Every decision has outsized impact. Ownership of major features and systems. Direct influence on company direction. If successful, equity stake provides meaningful financial upside.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "risk_level_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "risk_level_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "High risk - mid-stage startups have ~30-40% success rate. Equity may be worth nothing if company fails. No bonus means lower guaranteed comp. Longer hours and higher stress typical. Market downturn affects funding. However, 'mid-stage' suggests some product-market fit and runway.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Remote flexibility saves on housing costs. Highest learning potential. Equity could be worth millions or nothing. Lower cash comp means less savings. Need to understand company stage, funding, and runway.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "decision_framework",
+      "type": "Decision_Framework",
+      "icon": "🎯",
+      "color": "#f59e0b",
+      "public_identifier": "Job Offer Decision Matrix",
+      "attributes": [
+        {
+          "name": "framework_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Job Offer Decision Matrix",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommendation",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Stripe - Best overall balance",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommendation_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Stripe offers the best balance across all factors: (1) Highest total compensation over 4 years ($1.524M), (2) High-impact work on core infrastructure with global reach, (3) Strong career growth in a tier-1 fintech company, (4) Moderate risk profile with established company and IPO potential, (5) Core payments expertise is highly transferable and valuable. Choose Google if you prioritize stability and brand name. Choose the startup if you're willing to take financial risk for maximum learning and impact.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "key_factors",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "factor": "Career Growth",
+              "weight": 25,
+              "winner": "Startup"
+            },
+            {
+              "factor": "Impact Potential",
+              "weight": 20,
+              "winner": "Startup"
+            },
+            {
+              "factor": "Risk Level",
+              "weight": 15,
+              "winner": "Google"
+            },
+            {
+              "factor": "Work-Life Balance",
+              "weight": 10,
+              "winner": "Google"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "questions_to_ask",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "What is the startup's current runway and next funding plans?",
+            "What is Stripe's expected IPO timeline?",
+            "What are the team sizes and structures for each role?",
+            "What are the performance review and promotion timelines?",
+            "Can I negotiate equity or base salary at any of these offers?"
+          ],
+          "data_type": "array"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "offer_google",
+      "target_entity_id": "decision_framework",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "offer_stripe",
+      "target_entity_id": "decision_framework",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "offer_startup",
+      "target_entity_id": "decision_framework",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {}
+    }
+  ],
+  "created_at": "2025-11-26T15:49:04.320139",
+  "updated_at": "2025-11-26T15:51:06.268Z"
+}

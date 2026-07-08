@@ -1,0 +1,1256 @@
+{
+  "version": 1,
+  "task_description": "Compare total cost of ownership for Tesla Model 3, BMW 330i, and Audi A4 over 5 years to make an informed purchase decision",
+  "entities": [
+    {
+      "id": "vehicle_tesla_model3",
+      "type": "Vehicle_Comparison",
+      "icon": "🚗",
+      "color": "#e82127",
+      "public_identifier": "Tesla Model 3",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "vehicle_tesla_model3",
+          "data_type": "primitive"
+        },
+        {
+          "name": "vehicle_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Tesla Model 3",
+          "data_type": "primitive"
+        },
+        {
+          "name": "manufacturer",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tesla",
+          "data_type": "primitive"
+        },
+        {
+          "name": "year",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 2025,
+          "data_type": "primitive"
+        },
+        {
+          "name": "trim",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Long Range AWD",
+          "data_type": "primitive",
+          "options": [
+            "Standard Range RWD",
+            "Long Range AWD",
+            "Performance"
+          ]
+        },
+        {
+          "name": "msrp",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 47990,
+          "data_type": "primitive",
+          "help_text": "Manufacturer's suggested retail price"
+        },
+        {
+          "name": "purchase_price",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 47990,
+          "data_type": "primitive",
+          "help_text": "Actual purchase price after negotiations"
+        },
+        {
+          "name": "down_payment",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 9598,
+          "data_type": "primitive",
+          "help_text": "20% down payment recommended"
+        },
+        {
+          "name": "loan_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 38392,
+          "data_type": "primitive"
+        },
+        {
+          "name": "interest_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 6.5,
+          "data_type": "primitive",
+          "help_text": "Annual interest rate for auto loan"
+        },
+        {
+          "name": "monthly_payment",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 753,
+          "data_type": "primitive",
+          "help_text": "60-month loan payment"
+        },
+        {
+          "name": "total_loan_payments",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 45180,
+          "data_type": "primitive"
+        },
+        {
+          "name": "fuel_type",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Electric",
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_miles",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 12000,
+          "data_type": "primitive",
+          "help_text": "Estimated annual mileage"
+        },
+        {
+          "name": "efficiency",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "3.5 mi/kWh",
+          "data_type": "primitive"
+        },
+        {
+          "name": "electricity_cost_per_kwh",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 0.16,
+          "data_type": "primitive",
+          "help_text": "Average US electricity cost"
+        },
+        {
+          "name": "annual_fuel_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 549,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_fuel_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2745,
+          "data_type": "primitive",
+          "help_text": "Total electricity cost for 5 years"
+        },
+        {
+          "name": "annual_insurance",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1800,
+          "data_type": "primitive",
+          "help_text": "Average annual insurance premium"
+        },
+        {
+          "name": "five_year_insurance",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 9000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_maintenance",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 500,
+          "data_type": "primitive",
+          "help_text": "EVs have minimal maintenance needs"
+        },
+        {
+          "name": "five_year_maintenance",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_registration",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 450,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_registration",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2250,
+          "data_type": "primitive"
+        },
+        {
+          "name": "tax_incentives",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 7500,
+          "data_type": "primitive",
+          "help_text": "Federal EV tax credit (if eligible)"
+        },
+        {
+          "name": "depreciation_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 42,
+          "data_type": "primitive",
+          "help_text": "Estimated 5-year depreciation"
+        },
+        {
+          "name": "resale_value",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 27834,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_cost_of_ownership",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 36167,
+          "data_type": "primitive",
+          "help_text": "Total 5-year TCO (purchase + fuel + insurance + maintenance + registration - incentives - resale)"
+        },
+        {
+          "name": "cost_per_mile",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.2,
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Exceptional value proposition with lowest operating costs due to electric powertrain, minimal maintenance requirements, strong performance, and advanced technology. Federal tax credit significantly reduces upfront cost. Excellent safety ratings and over-the-air updates add long-term value.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "vehicle_bmw_330i",
+      "type": "Vehicle_Comparison",
+      "icon": "🚗",
+      "color": "#0066b1",
+      "public_identifier": "BMW 330i",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "vehicle_bmw_330i",
+          "data_type": "primitive"
+        },
+        {
+          "name": "vehicle_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "BMW 330i",
+          "data_type": "primitive"
+        },
+        {
+          "name": "manufacturer",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "BMW",
+          "data_type": "primitive"
+        },
+        {
+          "name": "year",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 2025,
+          "data_type": "primitive"
+        },
+        {
+          "name": "trim",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "330i xDrive",
+          "data_type": "primitive",
+          "options": [
+            "330i RWD",
+            "330i xDrive",
+            "M340i xDrive"
+          ]
+        },
+        {
+          "name": "msrp",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 46300,
+          "data_type": "primitive",
+          "help_text": "Manufacturer's suggested retail price"
+        },
+        {
+          "name": "purchase_price",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 46300,
+          "data_type": "primitive",
+          "help_text": "Actual purchase price after negotiations"
+        },
+        {
+          "name": "down_payment",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 9260,
+          "data_type": "primitive",
+          "help_text": "20% down payment recommended"
+        },
+        {
+          "name": "loan_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 37040,
+          "data_type": "primitive"
+        },
+        {
+          "name": "interest_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 6.5,
+          "data_type": "primitive",
+          "help_text": "Annual interest rate for auto loan"
+        },
+        {
+          "name": "monthly_payment",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 726,
+          "data_type": "primitive",
+          "help_text": "60-month loan payment"
+        },
+        {
+          "name": "total_loan_payments",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 43560,
+          "data_type": "primitive"
+        },
+        {
+          "name": "fuel_type",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Premium Gasoline",
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_miles",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 12000,
+          "data_type": "primitive",
+          "help_text": "Estimated annual mileage"
+        },
+        {
+          "name": "efficiency",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "28 MPG combined",
+          "data_type": "primitive"
+        },
+        {
+          "name": "gas_price_per_gallon",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 4.2,
+          "data_type": "primitive",
+          "help_text": "Premium gas price (2025 average)"
+        },
+        {
+          "name": "annual_fuel_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1800,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_fuel_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 9000,
+          "data_type": "primitive",
+          "help_text": "Total fuel cost for 5 years"
+        },
+        {
+          "name": "annual_insurance",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2100,
+          "data_type": "primitive",
+          "help_text": "Average annual insurance premium"
+        },
+        {
+          "name": "five_year_insurance",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 10500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_maintenance",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1200,
+          "data_type": "primitive",
+          "help_text": "BMW maintenance costs are higher than average"
+        },
+        {
+          "name": "five_year_maintenance",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 6000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_registration",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 420,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_registration",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2100,
+          "data_type": "primitive"
+        },
+        {
+          "name": "tax_incentives",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 0,
+          "data_type": "primitive",
+          "help_text": "No federal incentives for gas vehicles"
+        },
+        {
+          "name": "depreciation_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 48,
+          "data_type": "primitive",
+          "help_text": "Estimated 5-year depreciation"
+        },
+        {
+          "name": "resale_value",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 24076,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_cost_of_ownership",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 53284,
+          "data_type": "primitive",
+          "help_text": "Total 5-year TCO (purchase + fuel + insurance + maintenance + registration - incentives - resale)"
+        },
+        {
+          "name": "cost_per_mile",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Premium driving experience with excellent handling dynamics and luxury features. Higher operating costs due to premium fuel requirements, expensive maintenance, and steeper depreciation. Brand prestige and driving pleasure justify the premium for enthusiasts, but TCO is significantly higher than Tesla.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "vehicle_audi_a4",
+      "type": "Vehicle_Comparison",
+      "icon": "🚗",
+      "color": "#bb0a30",
+      "public_identifier": "Audi A4",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "vehicle_audi_a4",
+          "data_type": "primitive"
+        },
+        {
+          "name": "vehicle_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Audi A4",
+          "data_type": "primitive"
+        },
+        {
+          "name": "manufacturer",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Audi",
+          "data_type": "primitive"
+        },
+        {
+          "name": "year",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 2025,
+          "data_type": "primitive"
+        },
+        {
+          "name": "trim",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Premium Plus Quattro",
+          "data_type": "primitive",
+          "options": [
+            "Premium",
+            "Premium Plus",
+            "Prestige"
+          ]
+        },
+        {
+          "name": "msrp",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 45800,
+          "data_type": "primitive",
+          "help_text": "Manufacturer's suggested retail price"
+        },
+        {
+          "name": "purchase_price",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 45800,
+          "data_type": "primitive",
+          "help_text": "Actual purchase price after negotiations"
+        },
+        {
+          "name": "down_payment",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 9160,
+          "data_type": "primitive",
+          "help_text": "20% down payment recommended"
+        },
+        {
+          "name": "loan_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 36640,
+          "data_type": "primitive"
+        },
+        {
+          "name": "interest_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 6.5,
+          "data_type": "primitive",
+          "help_text": "Annual interest rate for auto loan"
+        },
+        {
+          "name": "monthly_payment",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 718,
+          "data_type": "primitive",
+          "help_text": "60-month loan payment"
+        },
+        {
+          "name": "total_loan_payments",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 43080,
+          "data_type": "primitive"
+        },
+        {
+          "name": "fuel_type",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Premium Gasoline",
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_miles",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 12000,
+          "data_type": "primitive",
+          "help_text": "Estimated annual mileage"
+        },
+        {
+          "name": "efficiency",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "27 MPG combined",
+          "data_type": "primitive"
+        },
+        {
+          "name": "gas_price_per_gallon",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 4.2,
+          "data_type": "primitive",
+          "help_text": "Premium gas price (2025 average)"
+        },
+        {
+          "name": "annual_fuel_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1867,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_fuel_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 9335,
+          "data_type": "primitive",
+          "help_text": "Total fuel cost for 5 years"
+        },
+        {
+          "name": "annual_insurance",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2050,
+          "data_type": "primitive",
+          "help_text": "Average annual insurance premium"
+        },
+        {
+          "name": "five_year_insurance",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 10250,
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_maintenance",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1150,
+          "data_type": "primitive",
+          "help_text": "Audi maintenance costs are above average"
+        },
+        {
+          "name": "five_year_maintenance",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 5750,
+          "data_type": "primitive"
+        },
+        {
+          "name": "annual_registration",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 415,
+          "data_type": "primitive"
+        },
+        {
+          "name": "five_year_registration",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2075,
+          "data_type": "primitive"
+        },
+        {
+          "name": "tax_incentives",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 0,
+          "data_type": "primitive",
+          "help_text": "No federal incentives for gas vehicles"
+        },
+        {
+          "name": "depreciation_rate",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 50,
+          "data_type": "primitive",
+          "help_text": "Estimated 5-year depreciation"
+        },
+        {
+          "name": "resale_value",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 22900,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_cost_of_ownership",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 52570,
+          "data_type": "primitive",
+          "help_text": "Total 5-year TCO (purchase + fuel + insurance + maintenance + registration - incentives - resale)"
+        },
+        {
+          "name": "cost_per_mile",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.3,
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Refined luxury sedan with excellent build quality, advanced technology, and Quattro all-wheel drive. Competitive with BMW on TCO but slightly higher depreciation. Interior quality and virtual cockpit are standout features. Premium fuel and maintenance costs add up over time, making it more expensive to own than the Tesla.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "tco_calculator",
+      "type": "TCO_Calculator",
+      "icon": "🧮",
+      "color": "#8b5cf6",
+      "public_identifier": "5-Year TCO Calculator",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "tco_calculator",
+          "data_type": "primitive"
+        },
+        {
+          "name": "calculator_name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "5-Year TCO Calculator",
+          "data_type": "primitive"
+        },
+        {
+          "name": "ownership_period_years",
+          "widget": "slider",
+          "editable": true,
+          "function": "display",
+          "value": 5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          },
+          "help_text": "Adjust ownership period to recalculate TCO"
+        },
+        {
+          "name": "annual_mileage",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 12000,
+          "data_type": "primitive",
+          "validation": {
+            "min": 5000,
+            "max": 30000
+          },
+          "help_text": "Average miles driven per year"
+        },
+        {
+          "name": "include_financing",
+          "widget": "checkbox",
+          "editable": true,
+          "function": "display",
+          "value": true,
+          "data_type": "primitive",
+          "help_text": "Include loan interest in TCO calculation"
+        },
+        {
+          "name": "down_payment_percentage",
+          "widget": "percentage",
+          "editable": true,
+          "function": "display",
+          "value": 20,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        {
+          "name": "loan_term_months",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": 60,
+          "data_type": "primitive",
+          "options": [
+            "36",
+            "48",
+            "60",
+            "72"
+          ]
+        },
+        {
+          "name": "assumptions",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "assumption": "Premium gas at $4.20/gallon",
+              "category": "Fuel"
+            },
+            {
+              "assumption": "Electricity at $0.16/kWh",
+              "category": "Fuel"
+            },
+            {
+              "assumption": "12,000 miles driven annually",
+              "category": "Usage"
+            },
+            {
+              "assumption": "6.5% interest rate on auto loans",
+              "category": "Financing"
+            },
+            {
+              "assumption": "$7,500 federal EV tax credit for Tesla",
+              "category": "Incentives"
+            },
+            {
+              "assumption": "Maintenance based on manufacturer schedules",
+              "category": "Maintenance"
+            }
+          ],
+          "data_type": "array"
+        }
+      ]
+    },
+    {
+      "id": "comparison_summary",
+      "type": "Comparison_Summary",
+      "icon": "📊",
+      "color": "#10b981",
+      "public_identifier": "5-Year TCO Comparison Summary",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "comparison_summary",
+          "data_type": "primitive"
+        },
+        {
+          "name": "summary_title",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "5-Year TCO Comparison Summary",
+          "data_type": "primitive"
+        },
+        {
+          "name": "lowest_tco_vehicle",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "Tesla Model 3",
+          "data_type": "primitive"
+        },
+        {
+          "name": "lowest_tco_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 36167,
+          "data_type": "primitive"
+        },
+        {
+          "name": "highest_tco_vehicle",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "BMW 330i",
+          "data_type": "primitive"
+        },
+        {
+          "name": "highest_tco_amount",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 53284,
+          "data_type": "primitive"
+        },
+        {
+          "name": "tco_difference",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 17117,
+          "data_type": "primitive",
+          "help_text": "Savings by choosing Tesla over BMW"
+        },
+        {
+          "name": "key_findings",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "finding": "Tesla Model 3 has the lowest 5-year TCO at $36,167",
+              "impact": "High"
+            },
+            {
+              "finding": "Electric vehicle saves $6,255-$9,335 on fuel costs over 5 years",
+              "impact": "High"
+            },
+            {
+              "finding": "Tesla maintenance costs are 58-79% lower than German luxury brands",
+              "impact": "High"
+            },
+            {
+              "finding": "$7,500 federal tax credit makes Tesla even more affordable",
+              "impact": "High"
+            },
+            {
+              "finding": "BMW and Audi have similar TCO (~$52,500-$53,300)",
+              "impact": "Medium"
+            },
+            {
+              "finding": "Tesla depreciation is lower than traditional luxury sedans",
+              "impact": "Medium"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "recommendation",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "For pure financial value, the Tesla Model 3 is the clear winner with 32% lower TCO than the BMW 330i and 31% lower than the Audi A4. The combination of federal tax credits, minimal maintenance, low electricity costs, and better resale value make it the most economical choice over 5 years. However, if driving dynamics and luxury brand prestige are priorities, the BMW 330i offers the best performance and handling, while the Audi A4 provides superior interior quality.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_for_value",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Tesla Model 3",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_for_driving_experience",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "BMW 330i",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_for_luxury",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Audi A4",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "decision_checklist",
+      "type": "Decision_Checklist",
+      "icon": "✅",
+      "color": "#f59e0b",
+      "public_identifier": "Vehicle Purchase Decision Checklist",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "decision_checklist",
+          "data_type": "primitive"
+        },
+        {
+          "name": "checklist_name",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Vehicle Purchase Decision Checklist",
+          "data_type": "primitive"
+        },
+        {
+          "name": "decision_factors",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "factor": "Test drive all three vehicles",
+              "completed": false,
+              "priority": "High"
+            },
+            {
+              "factor": "Verify federal and state EV incentive eligibility",
+              "completed": false,
+              "priority": "High"
+            },
+            {
+              "factor": "Check insurance quotes for each vehicle",
+              "completed": false,
+              "priority": "High"
+            },
+            {
+              "factor": "Confirm charging infrastructure availability (for Tesla)",
+              "completed": false,
+              "priority": "High"
+            },
+            {
+              "factor": "Review dealer inventory and wait times",
+              "completed": false,
+              "priority": "Medium"
+            },
+            {
+              "factor": "Compare warranty coverage and terms",
+              "completed": false,
+              "priority": "Medium"
+            },
+            {
+              "factor": "Research reliability ratings and owner reviews",
+              "completed": false,
+              "priority": "Medium"
+            },
+            {
+              "factor": "Evaluate trade-in value of current vehicle",
+              "completed": false,
+              "priority": "Medium"
+            },
+            {
+              "factor": "Get pre-approved for auto loan",
+              "completed": false,
+              "priority": "Medium"
+            },
+            {
+              "factor": "Compare lease vs buy options",
+              "completed": false,
+              "priority": "Low"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "target_decision_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": "2025-11-06",
+          "data_type": "primitive",
+          "help_text": "When do you plan to make your final decision?"
+        },
+        {
+          "name": "selected_vehicle",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "options": [
+            "Tesla Model 3",
+            "BMW 330i",
+            "Audi A4",
+            "Still deciding"
+          ],
+          "help_text": "Current preference"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "tco_calculator",
+      "target_entity_id": "vehicle_tesla_model3",
+      "relationship": "calculates_for",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Calculator parameters apply to Tesla TCO calculations"
+      }
+    },
+    {
+      "source_entity_id": "tco_calculator",
+      "target_entity_id": "vehicle_bmw_330i",
+      "relationship": "calculates_for",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Calculator parameters apply to BMW TCO calculations"
+      }
+    },
+    {
+      "source_entity_id": "tco_calculator",
+      "target_entity_id": "vehicle_audi_a4",
+      "relationship": "calculates_for",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Calculator parameters apply to Audi TCO calculations"
+      }
+    },
+    {
+      "source_entity_id": "vehicle_tesla_model3",
+      "target_entity_id": "comparison_summary",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Tesla data feeds into comparison summary"
+      }
+    },
+    {
+      "source_entity_id": "vehicle_bmw_330i",
+      "target_entity_id": "comparison_summary",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "BMW data feeds into comparison summary"
+      }
+    },
+    {
+      "source_entity_id": "vehicle_audi_a4",
+      "target_entity_id": "comparison_summary",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Audi data feeds into comparison summary"
+      }
+    },
+    {
+      "source_entity_id": "comparison_summary",
+      "target_entity_id": "decision_checklist",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Summary insights guide decision checklist"
+      }
+    }
+  ],
+  "created_at": "2025-10-28T16:51:02.955174",
+  "updated_at": "2025-10-28T16:52:32.063Z"
+}

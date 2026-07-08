@@ -1,0 +1,1113 @@
+{
+  "version": 1,
+  "task_description": "Compare Tokyo, Barcelona, and Bali for a multi-city trip and help plan the itinerary",
+  "entities": [
+    {
+      "id": "destination_tokyo",
+      "type": "Destination",
+      "icon": "🗼",
+      "color": "#e74c3c",
+      "public_identifier": "Tokyo",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "destination_tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo, Japan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 35.6762,
+            "lng": 139.6503
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "avg_daily_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1500,
+          "data_type": "primitive",
+          "help_text": "Average cost per day including accommodation, food, and activities"
+        },
+        {
+          "name": "suggested_duration_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": "6",
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          }
+        },
+        {
+          "name": "total_estimated_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 750,
+          "data_type": "primitive",
+          "help_text": "Daily budget × suggested duration"
+        },
+        {
+          "name": "best_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spring (March-May) & Fall (September-November)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "climate",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Humid subtropical with hot summers and mild winters",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_temperature_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "15-28°C (59-82°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo ranks as one of the world's safest cities with extremely low crime rates, 24/7 police presence, excellent emergency services, and strong public safety infrastructure. Solo travelers consistently report feeling very safe at all hours.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo has more Michelin-starred restaurants than any other city globally. Offers exceptional variety from street food to haute cuisine, including sushi, ramen, tempura, and izakaya experiences. Food quality is consistently outstanding across all price points.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Unique blend of ancient traditions and cutting-edge modernity. Historic temples, traditional tea ceremonies, sumo wrestling, alongside futuristic technology districts. Rich cultural experiences including cherry blossoms, festivals, and Japanese etiquette.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "transportation_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "transportation_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "World-class public transportation system with punctual trains and subways covering the entire city. Clean, efficient, and easy to navigate with English signage. JR Pass available for tourists.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Vibrant nightlife in districts like Shibuya, Roppongi, and Shinjuku. Karaoke bars, themed cafes, izakayas, nightclubs, and 24-hour entertainment options. Unique experiences like robot restaurants and themed bars.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language_barrier",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Moderate",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "tags",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Senso-ji Temple",
+            "Tokyo Skytree",
+            "Meiji Shrine",
+            "Shibuya Crossing",
+            "Tsukiji Outer Market",
+            "Imperial Palace",
+            "TeamLab Borderless"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "visa_requirements",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Visa-free for most countries (up to 90 days)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_barcelona",
+      "type": "Destination",
+      "icon": "🏛️",
+      "color": "#f39c12",
+      "public_identifier": "Barcelona",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "destination_barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona, Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "avg_daily_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1500,
+          "data_type": "primitive",
+          "help_text": "Average cost per day including accommodation, food, and activities"
+        },
+        {
+          "name": "suggested_duration_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": "6",
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          }
+        },
+        {
+          "name": "total_estimated_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 480,
+          "data_type": "primitive",
+          "help_text": "Daily budget × suggested duration"
+        },
+        {
+          "name": "best_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spring (April-June) & Fall (September-October)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "climate",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Mediterranean with warm, dry summers and mild winters",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_temperature_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "13-28°C (55-82°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Generally safe but pickpocketing and petty theft are common in tourist areas like Las Ramblas and the Gothic Quarter. Violent crime is rare. Travelers should remain vigilant with belongings, especially on public transport and crowded areas.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Exceptional Catalan and Spanish cuisine including tapas, paella, seafood, and pintxos. World-renowned restaurants including multiple Michelin-starred venues. Vibrant food markets like La Boqueria. Great wine culture and affordable dining options.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Rich Catalan culture with unique identity, language, and traditions. Gaudí's architectural masterpieces including Sagrada Família and Park Güell. World-class museums, Gothic Quarter history, vibrant street life, and passionate local festivals.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "transportation_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "transportation_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Comprehensive metro system covering major areas, extensive bus network, and bike-friendly infrastructure. Walkable city center with many attractions accessible on foot. Affordable public transportation with tourist passes available.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Legendary nightlife scene with beach clubs, rooftop bars, world-famous nightclubs, and late-night dining. Party continues until dawn with diverse venues from elegant cocktail bars to electronic music clubs. Vibrant street life and outdoor terraces.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language_barrier",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Low",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "tags",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Sagrada Família",
+            "Park Güell",
+            "Las Ramblas",
+            "Gothic Quarter",
+            "Casa Batlló",
+            "Camp Nou Stadium",
+            "La Boqueria Market",
+            "Barceloneta Beach"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "visa_requirements",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Schengen visa rules apply (visa-free for many countries up to 90 days)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_bali",
+      "type": "Destination",
+      "icon": "🏝️",
+      "color": "#27ae60",
+      "public_identifier": "Bali",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "destination_bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Indonesia",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Bali, Indonesia",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": -8.3405,
+            "lng": 115.092
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "avg_daily_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1500,
+          "data_type": "primitive",
+          "help_text": "Average cost per day including accommodation, food, and activities"
+        },
+        {
+          "name": "suggested_duration_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": "6",
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          }
+        },
+        {
+          "name": "total_estimated_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 480,
+          "data_type": "primitive",
+          "help_text": "Daily budget × suggested duration"
+        },
+        {
+          "name": "best_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Dry Season (April-October)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "climate",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tropical with distinct wet and dry seasons",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_temperature_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "26-30°C (79-86°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Generally safe for tourists with friendly locals. Petty theft and scams targeting tourists do occur, especially in crowded areas. Traffic safety is a concern with chaotic roads. Some areas require caution at night. Natural hazards like volcanic activity should be monitored.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Delicious Indonesian cuisine with dishes like nasi goreng, satay, and rendang. Fresh tropical fruits, excellent seafood, and diverse international dining options. Affordable warungs (local eateries) alongside upscale restaurants. Vibrant cafe culture in Ubud and Seminyak.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Rich Hindu-Balinese culture with stunning temples, daily offerings, traditional ceremonies, and spiritual practices. Unique arts including dance, music, wood carving, and painting. Warm hospitality and strong community traditions. Rice terrace landscapes and cultural heritage sites.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "transportation_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 6,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "transportation_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Limited public transportation infrastructure. Most tourists rely on private drivers, scooter rentals, or ride-hailing apps like Gojek and Grab. Traffic congestion is common in tourist areas. Roads can be narrow and challenging for inexperienced riders.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Vibrant nightlife in Seminyak and Canggu with beach clubs, sunset bars, and nightclubs. More relaxed evening scene in Ubud with live music and cultural performances. Famous beach clubs like Potato Head and Finns. Mix of party atmosphere and laid-back lounges.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language_barrier",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Low",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "tags",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Uluwatu Temple",
+            "Tegalalang Rice Terraces",
+            "Sacred Monkey Forest",
+            "Tanah Lot Temple",
+            "Mount Batur Sunrise Trek",
+            "Seminyak Beach",
+            "Ubud Art Market",
+            "Tirta Empul Temple"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "visa_requirements",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Visa on arrival (30 days, extendable) or e-Visa for most countries",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "trip_planner_1",
+      "type": "Multi_City_Trip_Planner",
+      "icon": "✈️",
+      "color": "#9b59b6",
+      "public_identifier": "Tokyo, Barcelona & Bali Adventure",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "trip_planner_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "trip_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Tokyo, Barcelona & Bali Adventure",
+          "data_type": "primitive",
+          "placeholder": "Name your trip"
+        },
+        {
+          "name": "total_duration_days",
+          "widget": "number",
+          "editable": false,
+          "function": "computed",
+          "value": 15,
+          "data_type": "primitive",
+          "help_text": "Sum of all destination durations"
+        },
+        {
+          "name": "total_estimated_budget",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1710,
+          "data_type": "primitive",
+          "help_text": "Sum of all destination costs (excluding flights)"
+        },
+        {
+          "name": "estimated_flight_costs",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1800,
+          "data_type": "primitive",
+          "help_text": "Estimated round-trip and inter-city flights"
+        },
+        {
+          "name": "total_trip_budget",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 3510,
+          "data_type": "primitive",
+          "help_text": "Total budget + flight costs"
+        },
+        {
+          "name": "start_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": "2025-10-22",
+          "data_type": "primitive",
+          "placeholder": "When does your trip start?"
+        },
+        {
+          "name": "end_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": "2025-10-08",
+          "data_type": "primitive",
+          "placeholder": "When does your trip end?"
+        },
+        {
+          "name": "travel_style",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "balanced",
+          "data_type": "primitive",
+          "options": [
+            "budget",
+            "balanced",
+            "luxury",
+            "adventure"
+          ],
+          "help_text": "Choose your preferred travel style"
+        },
+        {
+          "name": "trip_route_order",
+          "widget": "tags",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Tokyo",
+            "Barcelona",
+            "Bali"
+          ],
+          "data_type": "array",
+          "help_text": "Drag to reorder your destinations"
+        },
+        {
+          "name": "booking_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "planning",
+          "data_type": "primitive",
+          "options": [
+            "planning",
+            "booking",
+            "confirmed",
+            "in_progress",
+            "completed"
+          ]
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "",
+          "data_type": "primitive",
+          "placeholder": "Add trip notes, special requirements, or preferences"
+        }
+      ]
+    },
+    {
+      "id": "comparison_summary_1",
+      "type": "Comparison_Summary",
+      "icon": "📊",
+      "color": "#3498db",
+      "public_identifier": "Destination Comparison Overview",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "comparison_summary_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "title",
+          "widget": "heading",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Destination Comparison Overview",
+          "data_type": "primitive"
+        },
+        {
+          "name": "most_affordable",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "Bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "highest_safety",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_food",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_nightlife",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "easiest_transport",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "key_insights",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            "Tokyo offers the safest and most efficient experience but at a higher cost",
+            "Barcelona provides the best balance of culture, nightlife, and accessibility",
+            "Bali is the most budget-friendly with rich cultural experiences and natural beauty",
+            "All three destinations have low language barriers for English speakers",
+            "Combined trip offers diverse experiences: urban Japan, European architecture, tropical paradise"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "recommended_order",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo → Barcelona → Bali (follows logical geographic routing and climate considerations)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "packing_checklist_1",
+      "type": "Packing_Checklist",
+      "icon": "🎒",
+      "color": "#e67e22",
+      "public_identifier": "Multi-City Trip Packing List",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "packing_checklist_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "checklist_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Multi-City Trip Packing List",
+          "data_type": "primitive"
+        },
+        {
+          "name": "items",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "category": "Documents",
+              "item": "Passport (valid 6+ months)",
+              "packed": false
+            },
+            {
+              "category": "Documents",
+              "item": "Visa documents/confirmations",
+              "packed": false
+            },
+            {
+              "category": "Documents",
+              "item": "Flight tickets and hotel confirmations",
+              "packed": false
+            },
+            {
+              "category": "Documents",
+              "item": "Travel insurance papers",
+              "packed": false
+            },
+            {
+              "category": "Clothing",
+              "item": "Light layers for Tokyo",
+              "packed": false
+            },
+            {
+              "category": "Clothing",
+              "item": "Summer clothes for Barcelona",
+              "packed": false
+            },
+            {
+              "category": "Clothing",
+              "item": "Beach wear for Bali",
+              "packed": false
+            },
+            {
+              "category": "Clothing",
+              "item": "Modest clothing for temples",
+              "packed": false
+            },
+            {
+              "category": "Electronics",
+              "item": "Universal power adapter",
+              "packed": false
+            },
+            {
+              "category": "Electronics",
+              "item": "Phone and charger",
+              "packed": false
+            },
+            {
+              "category": "Electronics",
+              "item": "Camera",
+              "packed": false
+            },
+            {
+              "category": "Health",
+              "item": "Prescription medications",
+              "packed": false
+            },
+            {
+              "category": "Health",
+              "item": "Sunscreen (high SPF for Bali)",
+              "packed": false
+            },
+            {
+              "category": "Health",
+              "item": "Insect repellent",
+              "packed": false
+            },
+            {
+              "category": "Money",
+              "item": "Credit cards",
+              "packed": false
+            },
+            {
+              "category": "Money",
+              "item": "Some local currency for each destination",
+              "packed": false
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "completion_percentage",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive",
+          "help_text": "Percentage of items packed"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "destination_tokyo",
+      "target_entity_id": "trip_planner_1",
+      "relationship": "included_in",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Tokyo is part of the multi-city trip"
+      }
+    },
+    {
+      "source_entity_id": "destination_barcelona",
+      "target_entity_id": "trip_planner_1",
+      "relationship": "included_in",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Barcelona is part of the multi-city trip"
+      }
+    },
+    {
+      "source_entity_id": "destination_bali",
+      "target_entity_id": "trip_planner_1",
+      "relationship": "included_in",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Bali is part of the multi-city trip"
+      }
+    },
+    {
+      "source_entity_id": "trip_planner_1",
+      "target_entity_id": "comparison_summary_1",
+      "relationship": "summarizes",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Comparison summary aggregates data from all destinations"
+      }
+    },
+    {
+      "source_entity_id": "trip_planner_1",
+      "target_entity_id": "packing_checklist_1",
+      "relationship": "requires",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip requires packing preparation"
+      }
+    }
+  ],
+  "created_at": "2025-10-28T13:40:42.209573",
+  "updated_at": "2025-10-28T13:45:09.993Z"
+}

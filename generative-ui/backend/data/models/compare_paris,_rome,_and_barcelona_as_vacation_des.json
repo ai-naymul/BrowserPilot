@@ -1,0 +1,927 @@
+{
+  "version": 1,
+  "task_description": "Compare Paris, Rome, and Barcelona as vacation destinations for a 7-day trip",
+  "entities": [
+    {
+      "id": "destination_paris",
+      "type": "Destination_Paris",
+      "icon": "🗼",
+      "color": "#3b82f6",
+      "public_identifier": "Paris",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "destination_paris",
+          "data_type": "primitive"
+        },
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Paris",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "France",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Paris, France",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "The City of Light captivates with its iconic landmarks, world-class museums, charming cafés, and romantic ambiance. From the Eiffel Tower to the Louvre, Paris offers unparalleled art, culture, and cuisine.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_for",
+          "widget": "tags",
+          "editable": false,
+          "function": "display",
+          "value": [
+            "Art & Museums",
+            "Romance",
+            "Fine Dining",
+            "Architecture",
+            "Fashion"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.2,
+          "data_type": "primitive",
+          "help_text": "Overall destination rating out of 10"
+        },
+        {
+          "name": "overall_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris ranks exceptionally high due to its unmatched cultural offerings, iconic landmarks like the Eiffel Tower and Louvre, world-renowned cuisine, and romantic atmosphere. The city excels in art, architecture, and gastronomy, though it can be expensive and crowded during peak season.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.8,
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris is home to the Louvre, Musée d'Orsay, Centre Pompidou, and countless other world-class museums. The city's architecture spans from medieval Notre-Dame to modern La Défense. Rich literary, artistic, and philosophical heritage permeates every arrondissement.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris is the global capital of gastronomy with the most Michelin-starred restaurants in the world. From croissants and baguettes to haute cuisine, the city offers exceptional dining at every price point. Markets, bistros, and patisseries showcase France's culinary excellence.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris is generally safe for tourists with good police presence and emergency services. Petty crime like pickpocketing is common in tourist areas and metro stations. Certain neighborhoods should be avoided at night. Overall, standard urban precautions are sufficient.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "walkability_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive"
+        },
+        {
+          "name": "walkability_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris is exceptionally walkable with wide boulevards, pedestrian zones, and compact arrondissements. Many major attractions are within walking distance. The metro system is excellent for longer distances. Beautiful architecture makes walking a pleasure.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "estimated_daily_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 265,
+          "data_type": "primitive",
+          "help_text": "Average daily cost per person in EUR"
+        },
+        {
+          "name": "accommodation_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 770,
+          "data_type": "primitive",
+          "help_text": "Mid-range hotel for 7 nights"
+        },
+        {
+          "name": "food_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 490,
+          "data_type": "primitive",
+          "help_text": "Meals and drinks for 7 days"
+        },
+        {
+          "name": "transport_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 210,
+          "data_type": "primitive",
+          "help_text": "Metro, buses, and local transport"
+        },
+        {
+          "name": "activities_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 380,
+          "data_type": "primitive",
+          "help_text": "Museum entries, tours, and attractions"
+        },
+        {
+          "name": "total_estimated_cost_7days",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 2115,
+          "data_type": "primitive",
+          "help_text": "Total estimated cost for 7 days (excluding flights)"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "name": "Eiffel Tower",
+              "description": "Iconic iron lattice tower built in 1889, offering panoramic views of Paris from its observation decks",
+              "coordinates": {
+                "lat": 48.8584,
+                "lng": 2.2945
+              }
+            },
+            {
+              "name": "Louvre Museum",
+              "description": "World's largest art museum housing the Mona Lisa, Venus de Milo, and over 380,000 works of art",
+              "coordinates": {
+                "lat": 48.8606,
+                "lng": 2.3376
+              }
+            },
+            {
+              "name": "Notre-Dame Cathedral",
+              "description": "Medieval Gothic cathedral on Île de la Cité, currently under restoration after 2019 fire",
+              "coordinates": {
+                "lat": 48.853,
+                "lng": 2.3499
+              }
+            },
+            {
+              "name": "Arc de Triomphe",
+              "description": "Monumental arch honoring those who fought for France, center of the Place Charles de Gaulle",
+              "coordinates": {
+                "lat": 48.8738,
+                "lng": 2.295
+              }
+            },
+            {
+              "name": "Sacré-Cœur Basilica",
+              "description": "White-domed basilica atop Montmartre hill with stunning city views and artistic neighborhood",
+              "coordinates": {
+                "lat": 48.8867,
+                "lng": 2.3431
+              }
+            },
+            {
+              "name": "Musée d'Orsay",
+              "description": "Impressionist and Post-Impressionist masterpieces in a converted Beaux-Arts railway station",
+              "coordinates": {
+                "lat": 48.86,
+                "lng": 2.3266
+              }
+            },
+            {
+              "name": "Champs-Élysées",
+              "description": "Famous avenue lined with luxury shops, cafés, and theaters leading to the Arc de Triomphe",
+              "coordinates": {
+                "lat": 48.8698,
+                "lng": 2.3078
+              }
+            },
+            {
+              "name": "Versailles Palace",
+              "description": "Opulent former royal residence with Hall of Mirrors and extensive formal gardens (30 min from Paris)",
+              "coordinates": {
+                "lat": 48.8049,
+                "lng": 2.1204
+              }
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-June, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "French",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "EUR (€)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_rome",
+      "type": "Destination_Rome",
+      "icon": "🏛️",
+      "color": "#10b981",
+      "public_identifier": "Rome",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "destination_rome",
+          "data_type": "primitive"
+        },
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Rome",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Italy",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Rome, Italy",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 41.9028,
+            "lng": 12.4964
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "The Eternal City is a living museum where ancient ruins stand alongside Renaissance masterpieces. Rome offers unparalleled history, from the Colosseum to the Vatican, combined with exceptional Italian cuisine and vibrant street life.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_for",
+          "widget": "tags",
+          "editable": false,
+          "function": "display",
+          "value": [
+            "Ancient History",
+            "Architecture",
+            "Italian Cuisine",
+            "Art & Religion",
+            "Photography"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "help_text": "Overall destination rating out of 10"
+        },
+        {
+          "name": "overall_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Rome excels in historical significance with unmatched ancient ruins and Renaissance art. The Vatican Museums, Colosseum, and Roman Forum are bucket-list attractions. Authentic Italian cuisine and charming piazzas add to the appeal. Can be crowded and chaotic, with occasional service issues.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.7,
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Rome's 2,800-year history is visible everywhere. The Colosseum, Roman Forum, and Pantheon showcase ancient engineering. The Vatican houses Michelangelo's Sistine Chapel and St. Peter's Basilica. Baroque fountains, Renaissance palaces, and archaeological treasures make this an unparalleled cultural destination.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.3,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Authentic Roman cuisine features pasta classics like carbonara, amatriciana, and cacio e pepe. Thin-crust pizza, supplì, and gelato are exceptional. Traditional trattorias serve simple, high-quality dishes. Food is generally more affordable than Paris while maintaining excellent quality.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Rome is reasonably safe with major tourist areas well-patrolled. Pickpocketing is common near attractions like the Trevi Fountain and on crowded buses. Scams targeting tourists are frequent. Some neighborhoods should be avoided at night. Traffic can be chaotic and aggressive.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "walkability_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive"
+        },
+        {
+          "name": "walkability_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Rome's historic center is compact and walkable with many attractions within reasonable distance. Cobblestone streets and seven hills can be challenging. The metro is limited but useful. Walking between ruins, fountains, and piazzas is the best way to experience the city.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "estimated_daily_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 230,
+          "data_type": "primitive",
+          "help_text": "Average daily cost per person in EUR"
+        },
+        {
+          "name": "accommodation_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 630,
+          "data_type": "primitive",
+          "help_text": "Mid-range hotel for 7 nights"
+        },
+        {
+          "name": "food_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 420,
+          "data_type": "primitive",
+          "help_text": "Meals and drinks for 7 days"
+        },
+        {
+          "name": "transport_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 180,
+          "data_type": "primitive",
+          "help_text": "Metro, buses, and local transport"
+        },
+        {
+          "name": "activities_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 380,
+          "data_type": "primitive",
+          "help_text": "Museum entries, tours, and attractions"
+        },
+        {
+          "name": "total_estimated_cost_7days",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1840,
+          "data_type": "primitive",
+          "help_text": "Total estimated cost for 7 days (excluding flights)"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "name": "Colosseum",
+              "description": "Ancient amphitheater built in 80 AD, iconic symbol of Imperial Rome where gladiators fought",
+              "coordinates": {
+                "lat": 41.8902,
+                "lng": 12.4922
+              }
+            },
+            {
+              "name": "Vatican Museums & Sistine Chapel",
+              "description": "Vast collection of art and historical treasures culminating in Michelangelo's Sistine Chapel ceiling",
+              "coordinates": {
+                "lat": 41.9065,
+                "lng": 12.4536
+              }
+            },
+            {
+              "name": "St. Peter's Basilica",
+              "description": "Renaissance church and largest Christian basilica, with Michelangelo's dome and Pietà sculpture",
+              "coordinates": {
+                "lat": 41.9022,
+                "lng": 12.4539
+              }
+            },
+            {
+              "name": "Roman Forum",
+              "description": "Ancient civic center with ruins of temples, basilicas, and government buildings from Roman Empire",
+              "coordinates": {
+                "lat": 41.8925,
+                "lng": 12.4853
+              }
+            },
+            {
+              "name": "Trevi Fountain",
+              "description": "Baroque masterpiece and largest fountain in Rome, famous for coin-tossing tradition",
+              "coordinates": {
+                "lat": 41.9009,
+                "lng": 12.4833
+              }
+            },
+            {
+              "name": "Pantheon",
+              "description": "Best-preserved ancient Roman building with massive dome and oculus, now a church",
+              "coordinates": {
+                "lat": 41.8986,
+                "lng": 12.4768
+              }
+            },
+            {
+              "name": "Spanish Steps",
+              "description": "Monumental 135-step stairway connecting Piazza di Spagna with Trinità dei Monti church",
+              "coordinates": {
+                "lat": 41.9058,
+                "lng": 12.4823
+              }
+            },
+            {
+              "name": "Piazza Navona",
+              "description": "Baroque square built on ancient stadium with Bernini's Fountain of the Four Rivers",
+              "coordinates": {
+                "lat": 41.8992,
+                "lng": 12.4731
+              }
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-June, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Italian",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "EUR (€)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_barcelona",
+      "type": "Destination_Barcelona",
+      "icon": "🏖️",
+      "color": "#f59e0b",
+      "public_identifier": "Barcelona",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "destination_barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona, Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "description",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "A vibrant Mediterranean city blending Gaudí's whimsical modernist architecture with beautiful beaches, Gothic quarters, and lively street culture. Barcelona offers art, beaches, nightlife, and exceptional Catalan cuisine in a cosmopolitan setting.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_for",
+          "widget": "tags",
+          "editable": false,
+          "function": "display",
+          "value": [
+            "Architecture",
+            "Beach & City Combo",
+            "Nightlife",
+            "Tapas & Wine",
+            "Modernist Art"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.1,
+          "data_type": "primitive",
+          "help_text": "Overall destination rating out of 10"
+        },
+        {
+          "name": "overall_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona uniquely combines urban culture with beach relaxation. Gaudí's Sagrada Familia and Park Güell are architectural masterpieces. The Gothic Quarter offers medieval charm while Barceloneta provides beach access. Vibrant nightlife, excellent tapas, and a more laid-back atmosphere than Paris or Rome make it highly appealing.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona showcases Catalan modernism through Gaudí's unfinished Sagrada Familia and whimsical Park Güell. The Gothic Quarter preserves medieval history. Picasso Museum and Joan Miró Foundation highlight artistic heritage. Strong regional identity, language, and traditions distinguish Barcelona from the rest of Spain.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Catalan cuisine offers exceptional tapas, fresh seafood, and innovative cooking. La Boqueria market showcases regional ingredients. Pintxos bars and vermouth culture are highlights. More affordable than Paris with generous portions. Paella, jamón ibérico, and cava wine are must-tries.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8.3,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona is generally safe with good emergency services. Pickpocketing is very common in tourist areas, especially Las Ramblas and metro. Bag snatching from outdoor cafés occurs. Some neighborhoods like El Raval require caution at night. Overall, standard vigilance is needed but violent crime is rare.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "walkability_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.2,
+          "data_type": "primitive"
+        },
+        {
+          "name": "walkability_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona's grid layout and wide boulevards make walking easy. Most attractions are concentrated in Ciutat Vella and Eixample districts. The beachfront promenade is perfect for strolling. Excellent metro and bus systems complement walking. Bike lanes and rental systems add to mobility options.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "estimated_daily_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 225,
+          "data_type": "primitive",
+          "help_text": "Average daily cost per person in EUR"
+        },
+        {
+          "name": "accommodation_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 595,
+          "data_type": "primitive",
+          "help_text": "Mid-range hotel for 7 nights"
+        },
+        {
+          "name": "food_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 420,
+          "data_type": "primitive",
+          "help_text": "Meals and drinks for 7 days"
+        },
+        {
+          "name": "transport_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 175,
+          "data_type": "primitive",
+          "help_text": "Metro, buses, and local transport"
+        },
+        {
+          "name": "activities_cost_7days",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 380,
+          "data_type": "primitive",
+          "help_text": "Museum entries, tours, and attractions"
+        },
+        {
+          "name": "total_estimated_cost_7days",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1795,
+          "data_type": "primitive",
+          "help_text": "Total estimated cost for 7 days (excluding flights)"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "name": "Sagrada Familia",
+              "description": "Gaudí's unfinished basilica masterpiece, UNESCO site with stunning stained glass and organic architecture",
+              "coordinates": {
+                "lat": 41.4036,
+                "lng": 2.1744
+              }
+            },
+            {
+              "name": "Park Güell",
+              "description": "Whimsical public park with Gaudí's colorful mosaics, serpentine benches, and city views",
+              "coordinates": {
+                "lat": 41.4145,
+                "lng": 2.1527
+              }
+            },
+            {
+              "name": "Las Ramblas",
+              "description": "Famous tree-lined pedestrian boulevard with street performers, markets, and outdoor cafés",
+              "coordinates": {
+                "lat": 41.3811,
+                "lng": 2.1734
+              }
+            },
+            {
+              "name": "Gothic Quarter (Barri Gòtic)",
+              "description": "Medieval neighborhood with narrow streets, Roman ruins, and Barcelona Cathedral",
+              "coordinates": {
+                "lat": 41.3833,
+                "lng": 2.1769
+              }
+            },
+            {
+              "name": "Casa Batlló",
+              "description": "Gaudí's fantastical modernist building with bone-like balconies and dragon-scale roof",
+              "coordinates": {
+                "lat": 41.3916,
+                "lng": 2.1649
+              }
+            },
+            {
+              "name": "La Boqueria Market",
+              "description": "Vibrant public market with fresh produce, seafood, jamón, and tapas stalls since 1217",
+              "coordinates": {
+                "lat": 41.3816,
+                "lng": 2.1719
+              }
+            },
+            {
+              "name": "Barceloneta Beach",
+              "description": "Popular urban beach with golden sand, beach bars, and Mediterranean swimming",
+              "coordinates": {
+                "lat": 41.3794,
+                "lng": 2.1897
+              }
+            },
+            {
+              "name": "Montjuïc",
+              "description": "Hill with Olympic Stadium, Magic Fountain, museums, and panoramic city views",
+              "coordinates": {
+                "lat": 41.364,
+                "lng": 2.166
+              }
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-June, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Catalan, Spanish",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "EUR (€)",
+          "data_type": "primitive"
+        }
+      ]
+    }
+  ],
+  "dependencies": [],
+  "created_at": "2025-11-23T11:44:08.861210",
+  "updated_at": "2025-11-23T11:44:49.588Z"
+}
