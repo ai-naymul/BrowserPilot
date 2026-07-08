@@ -7,11 +7,12 @@ import asyncio
 import functools
 from PIL import Image
 import io
+from backend.config import GEMINI_MODEL_NAME
 
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
-MODEL = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+MODEL = genai.GenerativeModel(GEMINI_MODEL_NAME)
 
 # Universal system prompt - works for ANY website
 SYSTEM_PROMPT = """

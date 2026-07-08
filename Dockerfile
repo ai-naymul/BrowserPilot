@@ -25,28 +25,18 @@ WORKDIR /app
 
 # Copy Python requirements and install dependencies
 COPY requirements.txt .
-# Install compatible versions of numpy and pandas for Python 3.10
-RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir \
-    fastapi==0.111.0 \
-    uvicorn[standard]==0.29.0 \
-    playwright==1.53.0 \
-    google-generativeai==0.5.0 \
-    pydantic==2.7.1 \
-    bs4==0.0.2 \
-    lxml==5.2.1 \
-    markdownify==0.11.6 \
-    "numpy>=1.24.0,<2.3.0" \
-    "pandas>=2.0.0,<2.3.0" \
-    python-dateutil==2.9.0.post0 \
-    pytz==2025.2 \
-    tzdata==2025.2 \
-    reportlab==4.4.2
+# Install Python deps from requirements.txt (single source of truth). This pulls
+# patchright — the fork the code actually imports (NOT playwright) — then downloads
+# its Chromium. The Playwright base image already provides the system libraries
+# Chromium needs, so no `--with-deps` is required.
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-cache-dir -r requirements.txt \
+    && patchright install chromium
 
 # Copy backend source code
 COPY backend/ ./backend/
 
-# Copy built frontend from the frontend-builder stage
-COPY --from=frontend-builder /app/frontend/dist ./frontend/
+# Copy built frontend from the frontend-builder stage (served from frontend/dist)
+COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Create outputs directory
 RUN mkdir -p outputs
