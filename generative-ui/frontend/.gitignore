@@ -29,8 +29,8 @@ out/
 
 # Package manager lock files (choose one based on your package manager)
 # Uncomment the one you're using:
-# npm
-package-lock.json
+# npm — tracked for reproducible installs
+# package-lock.json
 # yarn
 yarn.lock
 # pnpm
@@ -122,12 +122,8 @@ jspm_packages/
 ehthumbs.db
 Thumbs.db
 
-# Generated configuration files
-eslint.config.js
-postcss.config.js
-tsconfig.app.json
-tsconfig.node.json
-vite.config.ts
+# NOTE: build config (vite.config.ts, postcss.config.js, tsconfig*.json,
+# eslint.config.js) is intentionally TRACKED — the app cannot build without it.
 
 # Temporary files
 *.tmp

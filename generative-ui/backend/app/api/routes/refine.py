@@ -38,6 +38,7 @@ from app.services.prompts import (
 from app.services.schema_merger import SchemaMerger
 from app.services.geocoding import geocoding_service
 from openai import AsyncOpenAI
+import httpx
 import os
 
 # Configure logging
@@ -1219,6 +1220,58 @@ async def render_from_data(request: DataRenderRequest) -> TaskCreateResponse:
     except Exception as e:
         logger.error(f"[render] render_from_data failed: {e}")
         return TaskCreateResponse(success=False, error=str(e))
+
+
+# ── Scrape → render orchestration (the end-to-end product flow) ───────────────
+# Scrape the URLs via BrowserPilot's structured-scrape endpoint, then render the
+# rows with render_from_data. Orchestration only — no scraping or LLM logic here.
+
+BROWSERPILOT_URL = os.getenv("BROWSERPILOT_URL", "http://localhost:8000")
+_SCRAPE_TIMEOUT_S = float(os.getenv("SCRAPE_TIMEOUT_S", "180"))
+
+
+class ScrapeRenderRequest(BaseModel):
+    """Render a dashboard by scraping URLs (via BrowserPilot) then rendering rows."""
+    urls: list[str] = Field(..., description="URLs to scrape")
+    question: str = Field(..., description="What the user wants to see")
+
+
+@router.post("/render-from-scrape", response_model=TaskCreateResponse)
+async def render_from_scrape(request: ScrapeRenderRequest) -> TaskCreateResponse:
+    """Scrape the given URLs via BrowserPilot, then render a grounded dashboard.
+
+    Fails gracefully at every step (never blank): missing URLs, an unreachable
+    scraper, a failed scrape, or empty results each return a clear message.
+    """
+    urls = [u for u in (request.urls or []) if isinstance(u, str) and u.strip()]
+    if not urls:
+        return TaskCreateResponse(success=False, error="Please provide at least one URL to scrape.")
+
+    # 1) Scrape → structured rows (BrowserPilot)
+    try:
+        async with httpx.AsyncClient(timeout=_SCRAPE_TIMEOUT_S) as client:
+            resp = await client.post(
+                f"{BROWSERPILOT_URL}/scrape/structured",
+                json={"urls": urls, "prompt": request.question},
+            )
+            resp.raise_for_status()
+            scrape = resp.json()
+    except httpx.HTTPError as e:
+        logger.error(f"[render] scrape call failed: {e}")
+        return TaskCreateResponse(success=False, error=f"Could not reach the scraper at {BROWSERPILOT_URL}: {e}")
+
+    if not scrape.get("success"):
+        return TaskCreateResponse(success=False, error=scrape.get("error") or "Scraping failed.")
+    rows = scrape.get("rows") or []
+    if not rows:
+        return TaskCreateResponse(success=False, error="The scrape returned no data to visualize.")
+
+    # 2) Render (LLM, grounded on the scraped rows)
+    return await render_from_data(DataRenderRequest(
+        rows=rows,
+        question=request.question,
+        source=scrape.get("source") or ", ".join(urls[:3]),
+    ))
 
 
 @router.get("/health")

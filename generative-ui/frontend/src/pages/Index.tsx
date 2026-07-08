@@ -14,6 +14,7 @@ import { syncRelatedEntities, fixObjectDisplay } from '@/utils/entitySync';
 import examplesData from '@/data/examples.json';
 import {
   createTask,
+  renderFromScrape,
   refineUI,
   checkBackendHealth,
   buildEntityHierarchy,
@@ -63,6 +64,10 @@ const IndexContent = () => {
   // NEW: Component-based UI state
   const [components, setComponents] = useState<ComponentSpec[]>([]);
   const [layout, setLayout] = useState<LayoutSpec | null>(null);
+
+  // Landing-screen mode: describe a task, or scrape a website into a dashboard
+  const [mode, setMode] = useState<'describe' | 'scrape'>('describe');
+  const [scrapeUrls, setScrapeUrls] = useState('');
 
   // UI state
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
@@ -360,6 +365,85 @@ const IndexContent = () => {
 
     console.log('[Delete] Cascade deleted:', deletedIds);
   }, [entityStore, toast]);
+
+  // Apply a generated response to state. Shared by scrape-and-visualize; both it
+  // and create-task return the same {data_model, ui_spec, components, layout,
+  // suggested_questions} envelope. (handleCreateTask keeps an equivalent inline
+  // block for now; it can adopt this helper once the app is E2E-verified.)
+  const applyTaskResponse = useCallback((response: any, inputLabel: string) => {
+    setDataModel(response.data_model);
+    setUiSpec(response.ui_spec);
+    setCurrentTaskId(response.data_model.id || Date.now().toString());
+
+    if (response.components && response.components.length > 0) {
+      setComponents(response.components as ComponentSpec[]);
+      setLayout((response.layout as LayoutSpec) || null);
+      setViewMode(preferredView || 'components');
+    } else if (response.data_model.entities && response.data_model.entities.length > 0) {
+      const typeCounts: Record<string, number> = {};
+      response.data_model.entities.forEach((e: any) => {
+        const type = e.type || 'Unknown';
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+      });
+      const primaryType = Object.entries(typeCounts).sort(([, a], [, b]) => b - a)[0]?.[0];
+      setComponents(generateComponentsFromEntities(response.data_model.entities, primaryType || initialPrimaryType));
+      setLayout(null);
+      setViewMode(preferredView || 'components');
+    } else {
+      setComponents([]);
+      setLayout(null);
+      setViewMode(preferredView || 'components');
+    }
+
+    setMessages([
+      { id: Date.now().toString(), role: 'user', content: inputLabel, timestamp: new Date() },
+      {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: response.data_model.task_description || 'Dashboard generated successfully!',
+        timestamp: new Date(),
+      },
+    ]);
+
+    if (response.data_model.entities && response.data_model.entities.length > 0) {
+      setSelectedEntity(response.data_model.entities[0]);
+      const typeCounts: Record<string, number> = {};
+      response.data_model.entities.forEach((e: any) => {
+        const type = e.type || 'Unknown';
+        typeCounts[type] = (typeCounts[type] || 0) + 1;
+      });
+      const primaryType = Object.entries(typeCounts).sort(([, a], [, b]) => b - a)[0]?.[0];
+      if (primaryType) setInitialPrimaryType(primaryType);
+    }
+
+    if (response.suggested_questions && response.suggested_questions.length > 0) {
+      setSuggestions(response.suggested_questions);
+      setSuggestedActions(convertQuestionsToActions(response.suggested_questions));
+    }
+
+    toast({ title: 'Success', description: 'Dashboard generated successfully!' });
+  }, [preferredView, initialPrimaryType, convertQuestionsToActions, toast]);
+
+  // Handle scrape-and-visualize: scrape URLs via BrowserPilot, then render a grounded dashboard.
+  const handleScrapeAndVisualize = async (urls: string[], question: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await renderFromScrape(urls, question) as any;
+      if (response.success && response.data_model) {
+        applyTaskResponse(response, question);
+      } else {
+        setError(response.error || 'Failed to build a dashboard from the scraped data');
+        toast({ title: 'Error', description: response.error || 'Failed to build dashboard', variant: 'destructive' });
+      }
+    } catch (err: any) {
+      console.error('Scrape-and-visualize error:', err);
+      setError(err.message || 'An error occurred');
+      toast({ title: 'Error', description: err.message || 'Failed to connect to backend', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Handle initial task creation
   const handleCreateTask = async (input: string) => {
@@ -943,33 +1027,86 @@ const IndexContent = () => {
           <div className="relative bg-card/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-border/50">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-2xl" />
             <div className="relative">
-              <label className="block text-sm font-semibold text-foreground/70 mb-4 uppercase tracking-wide">
-                What would you like to do?
-              </label>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const input = inputValue.trim();
-                if (input) {
-                  handleCreateTask(input);
-                  setInputValue('');
-                }
-              }}>
-                <textarea
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Describe your task... For example: Compare Paris, Rome, and Barcelona for a 7-day vacation"
-                  className="w-full px-5 py-4 bg-background/50 text-foreground border-2 border-border/50 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all mb-4 placeholder:text-muted-foreground/50 resize-none min-h-[120px] leading-relaxed backdrop-blur-sm"
-                  disabled={loading || backendHealthy === false}
-                  rows={4}
-                />
-                <Button
-                  type="submit"
-                  disabled={loading || !inputValue.trim() || backendHealthy === false}
-                  className="w-full h-12 text-base font-semibold rounded-xl bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all"
+              {/* Mode toggle: describe a task, or scrape a website into a dashboard */}
+              <div className="flex gap-2 mb-5 p-1 bg-background/40 rounded-xl border border-border/40">
+                <button
+                  type="button"
+                  onClick={() => setMode('describe')}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'describe' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}
                 >
-                  Generate Interface
-                </Button>
-              </form>
+                  Describe a task
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('scrape')}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${mode === 'scrape' ? 'bg-primary text-primary-foreground shadow' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Scrape a website
+                </button>
+              </div>
+
+              {mode === 'describe' ? (
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const input = inputValue.trim();
+                  if (input) {
+                    handleCreateTask(input);
+                    setInputValue('');
+                  }
+                }}>
+                  <textarea
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="Describe your task... For example: Compare Paris, Rome, and Barcelona for a 7-day vacation"
+                    className="w-full px-5 py-4 bg-background/50 text-foreground border-2 border-border/50 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all mb-4 placeholder:text-muted-foreground/50 resize-none min-h-[120px] leading-relaxed backdrop-blur-sm"
+                    disabled={loading || backendHealthy === false}
+                    rows={4}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={loading || !inputValue.trim() || backendHealthy === false}
+                    className="w-full h-12 text-base font-semibold rounded-xl bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    {loading ? 'Generating…' : 'Generate Interface'}
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const question = inputValue.trim();
+                  const urls = scrapeUrls.split('\n').map((u) => u.trim()).filter(Boolean);
+                  if (question && urls.length > 0) {
+                    handleScrapeAndVisualize(urls, question);
+                  }
+                }}>
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    placeholder="What do you want to see? e.g. Compare these products by price"
+                    className="w-full px-5 py-3 bg-background/50 text-foreground border-2 border-border/50 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all mb-3 placeholder:text-muted-foreground/50 backdrop-blur-sm"
+                    disabled={loading || backendHealthy === false}
+                  />
+                  <textarea
+                    value={scrapeUrls}
+                    onChange={(e) => setScrapeUrls(e.target.value)}
+                    placeholder={"Paste URLs, one per line…\nhttps://www.nike.com/t/...\nhttps://www.adidas.com/us/..."}
+                    className="w-full px-5 py-4 bg-background/50 text-foreground border-2 border-border/50 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all mb-4 placeholder:text-muted-foreground/50 resize-none min-h-[110px] leading-relaxed backdrop-blur-sm font-mono text-sm"
+                    disabled={loading || backendHealthy === false}
+                    rows={4}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={loading || !inputValue.trim() || !scrapeUrls.trim() || backendHealthy === false}
+                    className="w-full h-12 text-base font-semibold rounded-xl bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all"
+                  >
+                    {loading ? 'Scraping & building…' : 'Scrape & Visualize'}
+                  </Button>
+                  <p className="mt-3 text-xs text-muted-foreground/70 text-center">
+                    BrowserPilot scrapes each page (Ghost Mode) and builds a live dashboard from the real data.
+                  </p>
+                </form>
+              )}
 
               {error && (
                 <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">

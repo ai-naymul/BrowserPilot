@@ -14,25 +14,35 @@ standalone for now.
 - **Backend:** FastAPI (Python, Poetry) — LLM via OpenRouter (OpenAI SDK)
 - **Frontend:** Vite + React + TypeScript + shadcn/ui + Tailwind
 
-## Run it
+## Run the full stack (scrape → dashboard)
 
-### Backend
+Three processes: BrowserPilot (scraper, `:8000`), this gen-UI backend
+(renderer, `:8001`), and this frontend (`:8080`).
 
 ```bash
-cd backend
+# 1. BrowserPilot — the scraper — on :8000  (from the repo root)
+GOOGLE_API_KEY=your_gemini_key \
+  python -m uvicorn backend.main:app --port 8000
+
+# 2. gen-UI backend — the renderer — on :8001, pointed at BrowserPilot
+cd generative-ui/backend
 poetry install
-cp .env.example .env          # then fill in your keys
-# OPENROUTER_API_KEY is required (the LLM). FIRECRAWL_API_KEY is optional.
-poetry run uvicorn app.main:app --reload      # -> http://localhost:8000
-```
+OPENROUTER_API_KEY=your_openrouter_key \
+BROWSERPILOT_URL=http://localhost:8000 \
+  poetry run uvicorn app.main:app --port 8001
 
-### Frontend
-
-```bash
-cd frontend
+# 3. gen-UI frontend — on :8080, pointed at the gen-UI backend
+cd generative-ui/frontend
 npm install
-npm run dev                    # -> http://localhost:8080
+VITE_API_BASE_URL=http://localhost:8001 npm run dev
 ```
+
+Open `http://localhost:8080`, choose **"Scrape a website"**, paste product URLs
+and a question (e.g. *"compare these by price"*) → BrowserPilot scrapes them and
+a live dashboard builds itself.
+
+**Describe-a-task mode** (LLM synthesizes data, no scraping) also works with just
+the gen-UI backend + frontend.
 
 ## Notes
 

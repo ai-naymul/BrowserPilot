@@ -70,6 +70,9 @@ eggs/
 .eggs/
 lib/
 lib64/
+# The Python 'lib/' rule above must NOT swallow the frontend's source (src/lib)
+!frontend/src/lib/
+!frontend/src/lib/**
 parts/
 sdist/
 var/
