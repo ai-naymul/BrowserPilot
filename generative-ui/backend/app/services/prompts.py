@@ -437,6 +437,61 @@ For "Plan dinner party":
 # The LLM will naturally create appropriate entity structures based on user input
 
 
+def get_data_grounded_prompt(rows: list, question: str, source: str = "") -> str:
+    """
+    Prompt for rendering a dashboard GROUNDED on real, externally-provided data.
+
+    Unlike get_task_creation_prompt (which synthesizes data from an intent), this
+    instructs the model to visualize ONLY the rows provided and never invent
+    values. It reuses the same component/widget catalog so output matches the
+    renderer, and bakes in the renderer's strict prop rules.
+    """
+    import json as _json
+    data_json = _json.dumps(rows, ensure_ascii=False, indent=2)
+    source_line = f"\nDATA SOURCE: {source}" if source else ""
+
+    return f"""You are an expert at turning REAL structured data into a dynamic dashboard UI.
+
+USER QUESTION: "{question}"{source_line}
+
+You are given REAL data rows (scraped from the web). Build the best dashboard to
+answer the user's question USING ONLY THIS DATA.
+
+DATA ROWS (JSON):
+{data_json}
+
+🚨 GROUNDING RULES — MUST FOLLOW:
+1. USE ONLY the values present in the data rows above. NEVER invent, guess, estimate, or add data not present.
+2. If a value is missing for a row, omit it — do not fabricate.
+3. Choose components that best answer the question (comparisons -> comparison_table + bar_chart; key numbers -> metric_card; geographic -> map).
+4. Map each data column to an appropriate entity attribute (with the right widget) and/or component field.
+5. Preserve exact names, prices, ratings, and URLs from the data.
+
+COMPONENT PROP RULES (the renderer is strict — follow EXACTLY or components render blank):
+- bar_chart: every object in "data" MUST include a "label" field (the category shown on the axis) plus the numeric key(s). "bars" is a list of {{"dataKey": "<numeric_key>", "name": "<legend label>"}}.
+- comparison_table: every row in "data" MUST include a unique "id"; cells must be REAL non-empty values (never null, "N/A", or empty). "columns" is either ["col1","col2"] or a list of {{"key": "...", "label": "..."}}.
+- metric_card: props are {{"label": "...", "value": "..."}}; the value must come from the data.
+- For any location/address, include a "coordinates" object attribute {{"lat": <num>, "lng": <num>}} when the coordinates are known.
+
+{WIDGET_TYPES_REFERENCE}
+
+{FUNCTION_ROLES_REFERENCE}
+
+{COMPONENT_LIBRARY_REFERENCE}
+
+{ACTION_SYSTEM_REFERENCE}
+
+OUTPUT FORMAT — return ONLY a single valid JSON object (no prose, no code fences):
+{{
+  "task_description": "<one line describing the dashboard>",
+  "entities": [ /* optional: one per data row when the row is an inspectable item; each has id, type, public_identifier, and attributes:[{{"name","value","widget","function"}}] */ ],
+  "components": [ /* charts / tables / metric cards per the COMPONENT LIBRARY and the prop rules above */ ],
+  "layout": {{"type": "grid", "columns": 2, "gap": 16}}
+}}
+
+Return BOTH entities (for detail/metric/map rendering) AND components (for charts/tables) when useful. The output MUST be a single valid JSON object."""
+
+
 def get_task_creation_prompt(user_input: str, web_context: str = "") -> str:
     """
     Enhanced prompt for creating a NEW task-driven data model from scratch.

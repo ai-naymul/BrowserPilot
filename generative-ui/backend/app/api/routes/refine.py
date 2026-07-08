@@ -32,7 +32,8 @@ from app.services.storage import storage
 from app.services.prompts import (
     get_task_creation_prompt,
     get_information_addition_prompt,
-    get_refinement_prompt
+    get_refinement_prompt,
+    get_data_grounded_prompt
 )
 from app.services.schema_merger import SchemaMerger
 from app.services.geocoding import geocoding_service
@@ -1080,6 +1081,144 @@ async def create_task_from_input(request: TaskCreateRequest):
             success=False,
             error=str(e)
         )
+
+
+# ── Data-grounded rendering (generalized, any domain) ────────────────────────
+# Turns EXTERNAL data (e.g. scraped rows) + a question into a dashboard using the
+# same LLM catalog and validation as create_task, but GROUNDED on real data (the
+# model must not invent values). Reliability: schema-tight prompt, robust parse +
+# one repair retry, per-component validation/fallback, empty-entity guard. No
+# hardcoded per-domain logic — the LLM decides the dashboard for any question.
+
+_MAX_RENDER_ROWS = 60
+_MAX_RENDER_CELL_CHARS = 500
+
+
+class DataRenderRequest(BaseModel):
+    """Request to render a dashboard grounded on external data rows."""
+    rows: list[Dict[str, Any]] = Field(..., description="Structured data rows (e.g. scraped)")
+    question: str = Field(..., description="What the user wants to see")
+    source: Optional[str] = Field(None, description="Where the data came from (URL/site)")
+
+
+def _bound_render_rows(rows: list) -> list:
+    """Cap row count and per-cell length so prompts (and token cost) stay bounded."""
+    bounded = []
+    for row in rows[:_MAX_RENDER_ROWS]:
+        if not isinstance(row, dict):
+            continue
+        clean = {}
+        for k, v in row.items():
+            clean[k] = v[:_MAX_RENDER_CELL_CHARS] if isinstance(v, str) and len(v) > _MAX_RENDER_CELL_CHARS else v
+        bounded.append(clean)
+    return bounded
+
+
+def _extract_json_object(text: str) -> str:
+    """Extract a JSON object from an LLM reply (tolerates code fences / prose)."""
+    t = (text or "").strip()
+    if t.startswith("```json"):
+        t = t[7:]
+    elif t.startswith("```"):
+        t = t[3:]
+    if t.endswith("```"):
+        t = t[:-3]
+    t = t.strip()
+    start, end = t.find("{"), t.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return t[start:end + 1]
+    return t
+
+
+async def _grounded_render_call(prompt: str) -> dict:
+    """One grounded LLM call — low temperature + bounded tokens; returns parsed dict."""
+    response = await llm_client.chat.completions.create(
+        model="anthropic/claude-sonnet-4.5",
+        temperature=0.15,
+        max_tokens=16000,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return json.loads(_extract_json_object(response.choices[0].message.content))
+
+
+@router.post("/render-from-data", response_model=TaskCreateResponse)
+async def render_from_data(request: DataRenderRequest) -> TaskCreateResponse:
+    """Render a dashboard GROUNDED on provided data rows — generalized to any domain."""
+    from app.services.component_templates import generate_components_from_list
+
+    try:
+        rows = _bound_render_rows(request.rows or [])
+        if not rows:
+            return TaskCreateResponse(success=False, error="No data rows provided to render.")
+
+        prompt = get_data_grounded_prompt(rows, request.question, source=request.source or "")
+
+        # LLM call with one repair retry if the reply isn't valid JSON.
+        try:
+            result = await _grounded_render_call(prompt)
+        except json.JSONDecodeError as parse_err:
+            logger.warning(f"[render] invalid JSON, retrying once: {parse_err}")
+            result = await _grounded_render_call(
+                prompt + "\n\nYour previous reply was not valid JSON. Return ONLY one valid JSON object — no prose, no code fences."
+            )
+
+        # Entities — skip empty/invalid so one bad entity can't fail the whole render.
+        entities = []
+        for entity_data in result.get("entities", []):
+            try:
+                if not isinstance(entity_data, dict) or not entity_data.get("attributes"):
+                    continue
+                entities.append(Entity(**entity_data))
+            except Exception as ent_err:
+                logger.warning(f"[render] skipping invalid entity: {ent_err}")
+
+        # Components — validated with per-component fallback (never blanks the page).
+        component_specs = []
+        if result.get("components"):
+            try:
+                component_specs = generate_components_from_list(result["components"])
+            except Exception as comp_err:
+                logger.error(f"[render] component generation failed: {comp_err}")
+
+        # Layout (optional).
+        layout_spec = None
+        if isinstance(result.get("layout"), dict):
+            try:
+                layout_spec = LayoutSpec(**result["layout"])
+            except Exception as lay_err:
+                logger.warning(f"[render] layout parse failed: {lay_err}")
+
+        entities = await enrich_entities_with_geocoding(entities)
+
+        data_model = TaskDrivenDataModel(
+            version=1,
+            task_description=result.get("task_description", request.question),
+            entities=entities,
+            dependencies=[],
+            conversation_history=[{
+                "role": "user",
+                "content": request.question,
+                "timestamp": datetime.utcnow().isoformat(),
+            }],
+        )
+
+        from app.services.ui_generator import UIGenerator
+        ui_spec = UIGenerator().generate_task_ui(
+            data_model=data_model,
+            suggested_views=result.get("suggested_views", {}),
+        )
+
+        return TaskCreateResponse(
+            success=True,
+            data_model=data_model.to_render_spec(),
+            ui_spec=ui_spec,
+            components=[c.model_dump() for c in component_specs] if component_specs else None,
+            layout=layout_spec.model_dump() if layout_spec else None,
+            suggested_questions=[],
+        )
+    except Exception as e:
+        logger.error(f"[render] render_from_data failed: {e}")
+        return TaskCreateResponse(success=False, error=str(e))
 
 
 @router.get("/health")
