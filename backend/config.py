@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── AI Model ──────────────────────────────────────────────────────────────────
-GEMINI_MODEL_NAME: str = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash-preview-05-20")
+GEMINI_MODEL_NAME: str = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash")
 GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
 # ── User-Agent pool ──────────────────────────────────────────────────────────

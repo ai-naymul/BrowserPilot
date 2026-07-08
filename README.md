@@ -207,9 +207,16 @@ Open `http://localhost:8000` — done.
 ### Manual
 
 ```bash
+# 1. Backend
 git clone https://github.com/ai-naymul/BrowserPilot.git && cd BrowserPilot
 pip install -r requirements.txt
+patchright install chromium
 echo 'GOOGLE_API_KEY=your_key_here' > .env
+
+# 2. Build the dashboard the app serves (required — the API serves frontend/dist)
+cd frontend && npm install && npm run build && cd ..
+
+# 3. Run
 python -m uvicorn backend.main:app --reload
 ```
 

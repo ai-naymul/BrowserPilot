@@ -413,7 +413,26 @@ async def resume_bulk_job(job_id: str):
     return {"message": "Job resumed", "job_id": job_id}
 
 
-app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
+# Serve the built frontend (SPA). Prefer the production build in frontend/dist;
+# fall back to a legacy build copied straight into frontend/. If the frontend
+# isn't built, keep the API running and return a clear hint instead of crashing
+# at startup (StaticFiles raises if the directory is missing).
+_frontend_dist = Path("frontend/dist")
+_frontend_root = Path("frontend")
+if (_frontend_dist / "index.html").exists():
+    app.mount("/", StaticFiles(directory=str(_frontend_dist), html=True), name="static")
+elif (_frontend_root / "index.html").exists() and not (_frontend_root / "src").exists():
+    app.mount("/", StaticFiles(directory=str(_frontend_root), html=True), name="static")
+else:
+    print("⚠️  Frontend not built. Run: cd frontend && npm install && npm run build")
+
+    @app.get("/")
+    def _frontend_not_built():
+        return {
+            "status": "ok",
+            "detail": "BrowserPilot API is running, but the frontend has not been built. "
+                      "Run: cd frontend && npm install && npm run build",
+        }
 
 # Helper functions
 async def broadcast(job_id: str, msg: dict):
