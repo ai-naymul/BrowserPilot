@@ -87,6 +87,14 @@ We don't just claim stealth — we prove it. BrowserPilot passes every major bot
 | [DeviceAndBrowserInfo](https://deviceandbrowserinfo.com/) | **"You are human!"** |
 | [BrowserLeaks WebRTC](https://browserleaks.com/webrtc) | **No IP Leak** |
 
+**Don't trust screenshots — reproduce it yourself:**
+
+```bash
+make benchmark          # or: python -m backend.benchmark
+```
+
+Launches Ghost Mode against these detectors live and saves a screenshot + page text for each to `outputs/benchmark/`, plus an automated pass/fail summary. Use `--only sannysoft` to target one, or `--dry-run` to list them without launching a browser.
+
 <details>
 <summary><b>See benchmark screenshots</b></summary>
 
