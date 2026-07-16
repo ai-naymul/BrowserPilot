@@ -9,59 +9,58 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Jelly UI Design System */
-    --background: 0 0% 100%;
-    --foreground: 215 25% 12%;
+    /* Initial paint = the Signal dark theme (matches the runtime default in
+       useTheme), so there is no flash of a light theme on load. */
+    --background: 220 18% 3%;
+    --foreground: 0 0% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 12%;
+    --card: 220 15% 11%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 12%;
+    --popover: 220 15% 11%;
+    --popover-foreground: 0 0% 96%;
 
-    /* Primary - Blue accent */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - soft sky blue */
+    --primary: 199 95% 74%;
+    --primary-foreground: 220 18% 3%;
 
-    /* Secondary - Light gray */
-    --secondary: 210 17% 96%;
-    --secondary-foreground: 215 25% 12%;
+    /* Secondary - panel surface */
+    --secondary: 220 13% 15%;
+    --secondary-foreground: 0 0% 96%;
 
-    /* Muted - Medium gray */
-    --muted: 210 17% 96%;
-    --muted-foreground: 215 14% 46%;
+    /* Muted */
+    --muted: 220 13% 15%;
+    --muted-foreground: 220 9% 58%;
 
-    /* Accent - Gold selection */
-    --accent: 43 96% 56%;
-    --accent-foreground: 215 25% 12%;
+    /* Accent - soft sky blue (single accent; the old gold is removed) */
+    --accent: 199 95% 74%;
+    --accent-foreground: 220 18% 3%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 65% 60%;
+    --destructive-foreground: 0 0% 96%;
 
     /* Borders */
-    --border: 210 18% 90%;
-    --input: 210 18% 90%;
-    --ring: 217 91% 60%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 199 95% 74%;
 
-    /* Sidebar - Light gray background */
-    --sidebar-background: 210 17% 96%;
-    --sidebar-foreground: 215 25% 12%;
-    --sidebar-border: 210 18% 90%;
-    
-    /* Context Panel - Lightest gray */
-    --context-background: 210 20% 98%;
+    /* Shell surfaces — dark to match the Signal default (no light flash) */
+    --sidebar-background: 220 18% 3%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-border: 220 15% 18%;
 
-    /* Chat - White with border */
-    --chat-background: 0 0% 100%;
-    --chat-border: 210 18% 90%;
-    
-    /* Message bubbles */
-    --message-ai: 210 17% 95%;
-    --message-user: 217 91% 60%;
-    
+    --context-background: 220 18% 3%;
+
+    --chat-background: 220 13% 15%;
+    --chat-border: 220 15% 18%;
+
+    --message-ai: 220 13% 15%;
+    --message-user: 199 95% 74%;
+
     /* Entity tags */
-    --tag-safety: 0 84% 60%;
+    --tag-safety: 0 65% 60%;
     --tag-dietary: 142 71% 45%;
-    --tag-info: 217 91% 60%;
+    --tag-info: 199 95% 74%;
 
     --radius: 0.5rem;
 
