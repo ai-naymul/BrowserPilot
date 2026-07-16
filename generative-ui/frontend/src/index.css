@@ -269,6 +269,23 @@ All colors MUST be HSL.
     --ease-spring: cubic-bezier(.68,-.55,.265,1.55);
   }
 
+  /* Data numerals — the "instrument" signature: mono + tabular figures so
+     numbers align in columns and read unmistakably as data. */
+  .font-data {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.01em;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Data-semantic colors (calm, reserved for meaning like up/down, best/worst) */
+  .text-positive { color: hsl(152 52% 62%); }
+  .text-negative { color: hsl(0 66% 68%); }
+
   /* Surface styles */
   .surface {
     background: var(--glass);
@@ -405,7 +422,7 @@ All colors MUST be HSL.
   }
 
   .empty-chip:hover {
-    background: hsl(var(--accent-soft) / 1.2);
+    background: hsl(var(--accent-soft));
     border-color: hsl(var(--accent-border) / 0.5);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);

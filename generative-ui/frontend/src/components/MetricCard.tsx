@@ -275,14 +275,12 @@ export const MetricCard = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{
-        scale: 1.03,
-        y: -6,
-        transition: { duration: 0.15, ease: "easeOut" }
+        y: -2,
+        transition: { duration: 0.18, ease: "easeOut" }
       }}
-      whileTap={{ scale: 0.98 }}
       onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -327,27 +325,16 @@ export const MetricCard = ({
       {/* Original card content */}
       <div className="flex flex-col items-center gap-2 text-center">
         {Icon && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Icon className="h-8 w-8 text-primary" />
-          </motion.div>
+          <Icon className="h-7 w-7 text-primary/80" />
         )}
 
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {displayLabel}
         </p>
 
-        <motion.h3
-          className="text-4xl font-bold text-foreground"
-          initial={{ scale: 0.5 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
-        >
+        <h3 className="font-data text-3xl font-semibold tracking-tight text-foreground">
           {displayValue}
-        </motion.h3>
+        </h3>
 
         {sublabel && (
           <p className="text-sm text-muted-foreground">{sublabel}</p>
@@ -359,11 +346,11 @@ export const MetricCard = ({
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
             className={`flex items-center gap-1 text-sm font-medium ${
-              trend.direction === "up" ? "text-green-500" : "text-red-500"
+              trend.direction === "up" ? "text-positive" : "text-negative"
             }`}
           >
             <span>{trend.direction === "up" ? "↑" : "↓"}</span>
-            <span>{trend.value}%</span>
+            <span className="tabular">{trend.value}%</span>
           </motion.div>
         )}
 
@@ -393,25 +380,10 @@ export const MetricCard = ({
         <QuickActions items={quickActions} />
       )}
 
-      {/* Apple-style gradient overlay and glow effect */}
-      <motion.div
-        className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: hovered ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
+      {/* Calm: a subtle accent tint on hover — no blur glow. */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-xl bg-primary/[0.04] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
       />
-
-      {/* Glow effect when hovered */}
-      {hovered && (
-        <motion.div
-          className="pointer-events-none absolute -inset-[1px] rounded-xl bg-gradient-to-r from-primary/20 via-primary/30 to-primary/20 blur-md"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          style={{ zIndex: -1 }}
-        />
-      )}
     </motion.div>
   );
 };
