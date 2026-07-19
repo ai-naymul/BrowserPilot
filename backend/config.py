@@ -7,7 +7,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── AI Model ──────────────────────────────────────────────────────────────────
-GEMINI_MODEL_NAME: str = os.getenv("GEMINI_MODEL_NAME", "gemini-2.5-flash")
+# Use the "-latest" alias, not a dated/versioned id: Google retires specific
+# versions ("no longer available to new users"), but the alias always resolves
+# to the current Flash model. Override with GEMINI_MODEL_NAME if you need a pin.
+GEMINI_MODEL_NAME: str = os.getenv("GEMINI_MODEL_NAME", "gemini-flash-latest")
 GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
 
 # ── User-Agent pool ──────────────────────────────────────────────────────────

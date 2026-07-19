@@ -24,8 +24,9 @@ def test_get_random_ua_uses_env_pool(monkeypatch):
 
 def test_gemini_model_name_default():
     cfg = reload_config()
-    # Default must be a stable GA model, not a dated preview that Google will retire.
-    assert cfg.GEMINI_MODEL_NAME == "gemini-2.5-flash"
+    # Default must be the "-latest" alias — Google retires versioned ids for new
+    # users, but the alias always resolves to the current Flash model.
+    assert cfg.GEMINI_MODEL_NAME == "gemini-flash-latest"
 
 
 def test_gemini_model_name_from_env(monkeypatch):
