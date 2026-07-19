@@ -24,4 +24,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     target: 'es2020',
   },
+  esbuild: {
+    // Strip console.* and debugger from production builds — removes the many dev
+    // logs without editing every call site.
+    drop: mode === "production" ? ["console", "debugger"] : [],
+  },
 }));
