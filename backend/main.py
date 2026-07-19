@@ -461,7 +461,17 @@ async def _scrape_one_structured(bc, url: str, prompt: str) -> list:
     cleaned = extract_dom(html, url, title)
     content = json.dumps(cleaned, ensure_ascii=False)[:EXTRACTION_MAX_CHARS]
     prompt_text = _STRUCTURED_ROWS_PROMPT.format(prompt=prompt, url=url, content=content)
-    response = await asyncio.to_thread(functools.partial(MODEL.generate_content, prompt_text))
+    # Gemini extraction with one retry — the API returns transient 5xx / deadline
+    # errors under load, and a single retry absorbs most of them.
+    response = None
+    for attempt in range(2):
+        try:
+            response = await asyncio.to_thread(functools.partial(MODEL.generate_content, prompt_text))
+            break
+        except Exception as e:
+            if attempt == 1:
+                raise
+            print(f"⚠️ Gemini extraction transient error, retrying: {e}")
     rows = _parse_rows(getattr(response, "text", "") or "")
     for r in rows:
         r.setdefault("_source_url", url)
