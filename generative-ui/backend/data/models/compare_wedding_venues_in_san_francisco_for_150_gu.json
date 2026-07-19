@@ -1,0 +1,1656 @@
+{
+  "version": 1,
+  "task_description": "Compare wedding venues in San Francisco for 150 guests with detailed budget breakdowns and cost analysis",
+  "entities": [
+    {
+      "id": "venue_1",
+      "type": "Wedding_Venue",
+      "icon": "🏛️",
+      "color": "#8b5cf6",
+      "public_identifier": "The Fairmont San Francisco",
+      "attributes": [
+        {
+          "name": "venue_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "The Fairmont San Francisco",
+          "data_type": "primitive",
+          "help_text": "Name of the wedding venue"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "950 Mason Street, Nob Hill, San Francisco, CA 94108",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7925,
+            "lng": -122.4106
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "venue_type",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Historic Hotel Ballroom",
+          "data_type": "primitive",
+          "options": [
+            "Historic Hotel Ballroom",
+            "Modern Event Space",
+            "Garden Estate",
+            "Waterfront Venue",
+            "Winery",
+            "Restaurant"
+          ]
+        },
+        {
+          "name": "capacity",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 200,
+          "data_type": "primitive",
+          "validation": {
+            "min": 50,
+            "max": 500
+          }
+        },
+        {
+          "name": "guest_count",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "validation": {
+            "required": true,
+            "min": 1
+          },
+          "help_text": "Number of guests for your event"
+        },
+        {
+          "name": "venue_rental_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 8500,
+          "data_type": "primitive",
+          "help_text": "Base venue rental cost"
+        },
+        {
+          "name": "catering_per_person",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 185,
+          "data_type": "primitive",
+          "help_text": "Per person catering cost"
+        },
+        {
+          "name": "catering_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 185,
+          "data_type": "primitive",
+          "help_text": "Total catering cost (guest_count × catering_per_person)"
+        },
+        {
+          "name": "bar_package",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 4500,
+          "data_type": "primitive",
+          "help_text": "Open bar package cost"
+        },
+        {
+          "name": "service_staff_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3200,
+          "data_type": "primitive",
+          "help_text": "Service staff and coordination fees"
+        },
+        {
+          "name": "equipment_rentals",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2800,
+          "data_type": "primitive",
+          "help_text": "Tables, chairs, linens, AV equipment"
+        },
+        {
+          "name": "taxes_gratuity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 4675,
+          "data_type": "primitive",
+          "help_text": "Taxes and mandatory gratuity (typically 18-22%)"
+        },
+        {
+          "name": "total_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 51425,
+          "data_type": "primitive",
+          "help_text": "Total estimated cost for this venue"
+        },
+        {
+          "name": "cost_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 343,
+          "data_type": "primitive",
+          "help_text": "Cost per guest (total_cost ÷ guest_count)"
+        },
+        {
+          "name": "deposit_required",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 15000,
+          "data_type": "primitive",
+          "help_text": "Initial deposit to secure venue"
+        },
+        {
+          "name": "indoor_outdoor",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Indoor with Terrace Access",
+          "data_type": "primitive",
+          "options": [
+            "Indoor Only",
+            "Outdoor Only",
+            "Indoor with Terrace Access",
+            "Both Indoor & Outdoor Spaces"
+          ]
+        },
+        {
+          "name": "ambiance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.2,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "ambiance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "The Fairmont's Grand Ballroom features stunning 22-foot ceilings, crystal chandeliers, and classic San Francisco elegance. The historic architecture and luxurious finishes create a sophisticated atmosphere perfect for formal weddings.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "service_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "The Fairmont provides dedicated event coordinators, experienced catering staff, and white-glove service. Their team has decades of experience hosting high-end weddings and events with exceptional attention to detail.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "flexibility_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "flexibility_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Moderate flexibility - must use in-house catering and preferred vendor list. Some customization allowed for menu and decor, but strict policies on outside vendors and timeline requirements.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "parking_availability",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Valet parking available ($45/car), nearby public parking garages",
+          "data_type": "primitive"
+        },
+        {
+          "name": "availability_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Available - Limited Saturdays",
+          "data_type": "primitive",
+          "options": [
+            "Available",
+            "Available - Limited Saturdays",
+            "Waitlist Only",
+            "Booked"
+          ]
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Iconic Nob Hill location with stunning city views. Includes bridal suite and groom's room. In-house catering required. Perfect for classic, elegant weddings.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "venue_2",
+      "type": "Wedding_Venue",
+      "icon": "🏛️",
+      "color": "#8b5cf6",
+      "public_identifier": "City View at METREON",
+      "attributes": [
+        {
+          "name": "venue_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "City View at METREON",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "135 Fourth Street, SoMa, San Francisco, CA 94103",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7844,
+            "lng": -122.4035
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "venue_type",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Modern Event Space",
+          "data_type": "primitive",
+          "options": [
+            "Historic Hotel Ballroom",
+            "Modern Event Space",
+            "Garden Estate",
+            "Waterfront Venue",
+            "Winery",
+            "Restaurant"
+          ]
+        },
+        {
+          "name": "capacity",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 175,
+          "data_type": "primitive",
+          "validation": {
+            "min": 50,
+            "max": 500
+          }
+        },
+        {
+          "name": "guest_count",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "validation": {
+            "required": true,
+            "min": 1
+          }
+        },
+        {
+          "name": "venue_rental_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 6500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_per_person",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 165,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 165,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bar_package",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3800,
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_staff_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2800,
+          "data_type": "primitive"
+        },
+        {
+          "name": "equipment_rentals",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "taxes_gratuity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 4005,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 44055,
+          "data_type": "primitive"
+        },
+        {
+          "name": "cost_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 294,
+          "data_type": "primitive"
+        },
+        {
+          "name": "deposit_required",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 12000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "indoor_outdoor",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Indoor with Terrace Access",
+          "data_type": "primitive",
+          "options": [
+            "Indoor Only",
+            "Outdoor Only",
+            "Indoor with Terrace Access",
+            "Both Indoor & Outdoor Spaces"
+          ]
+        },
+        {
+          "name": "ambiance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "ambiance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Modern rooftop venue with floor-to-ceiling windows offering panoramic city views. Contemporary design with clean lines and urban sophistication. The outdoor terrace provides stunning sunset views of downtown San Francisco.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "service_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Professional event staff with good coordination. Service is reliable and attentive, though not quite at the luxury hotel level. Couples report smooth execution and responsive planning team.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "flexibility_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "flexibility_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Good flexibility with preferred vendor list but allows outside vendors with approval. Multiple catering options available. Customizable layouts and decor. More relaxed policies than traditional hotel venues.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "parking_availability",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "METREON parking garage ($25/car), nearby public transit accessible",
+          "data_type": "primitive"
+        },
+        {
+          "name": "availability_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Available",
+          "data_type": "primitive",
+          "options": [
+            "Available",
+            "Available - Limited Saturdays",
+            "Waitlist Only",
+            "Booked"
+          ]
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Modern downtown location near Yerba Buena Gardens. Great for contemporary, urban weddings. Excellent city skyline views. Easy public transit access for guests.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "venue_3",
+      "type": "Wedding_Venue",
+      "icon": "🏛️",
+      "color": "#8b5cf6",
+      "public_identifier": "Golden Gate Club at Presidio",
+      "attributes": [
+        {
+          "name": "venue_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Golden Gate Club at Presidio",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "135 Fisher Loop, Presidio, San Francisco, CA 94129",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7989,
+            "lng": -122.4662
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "venue_type",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Garden Estate",
+          "data_type": "primitive",
+          "options": [
+            "Historic Hotel Ballroom",
+            "Modern Event Space",
+            "Garden Estate",
+            "Waterfront Venue",
+            "Winery",
+            "Restaurant"
+          ]
+        },
+        {
+          "name": "capacity",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 180,
+          "data_type": "primitive",
+          "validation": {
+            "min": 50,
+            "max": 500
+          }
+        },
+        {
+          "name": "guest_count",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "validation": {
+            "required": true,
+            "min": 1
+          }
+        },
+        {
+          "name": "venue_rental_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 7200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_per_person",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 155,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 155,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bar_package",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_staff_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "equipment_rentals",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3500,
+          "data_type": "primitive",
+          "help_text": "Tent, tables, chairs, lighting for outdoor setup"
+        },
+        {
+          "name": "taxes_gratuity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3995,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 43945,
+          "data_type": "primitive"
+        },
+        {
+          "name": "cost_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 293,
+          "data_type": "primitive"
+        },
+        {
+          "name": "deposit_required",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 10000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "indoor_outdoor",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Both Indoor & Outdoor Spaces",
+          "data_type": "primitive",
+          "options": [
+            "Indoor Only",
+            "Outdoor Only",
+            "Indoor with Terrace Access",
+            "Both Indoor & Outdoor Spaces"
+          ]
+        },
+        {
+          "name": "ambiance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "ambiance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Stunning historic venue nestled in the Presidio with lush gardens, mature trees, and Golden Gate Bridge views. The combination of elegant indoor spaces and manicured outdoor grounds creates a romantic, natural setting perfect for garden weddings.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "service_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Experienced event staff familiar with outdoor weddings and weather contingencies. Professional coordination and setup. Service is warm and personable while maintaining high standards throughout the event.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "flexibility_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "flexibility_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "High flexibility - allows outside catering from approved list, choice of vendors for most services. Customizable indoor/outdoor configurations. Weather backup plans available. Couples have significant creative control over design and flow.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "parking_availability",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "On-site parking lot (free), additional Presidio parking nearby",
+          "data_type": "primitive"
+        },
+        {
+          "name": "availability_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Available - Limited Saturdays",
+          "data_type": "primitive",
+          "options": [
+            "Available",
+            "Available - Limited Saturdays",
+            "Waitlist Only",
+            "Booked"
+          ]
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "National park setting with bridge views. Perfect for garden ceremonies and outdoor receptions. Weather backup plan required. Popular for spring and summer weddings. Includes getting-ready rooms.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "venue_4",
+      "type": "Wedding_Venue",
+      "icon": "🏛️",
+      "color": "#8b5cf6",
+      "public_identifier": "The Ritz-Carlton San Francisco",
+      "attributes": [
+        {
+          "name": "venue_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "The Ritz-Carlton San Francisco",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "600 Stockton Street, Nob Hill, San Francisco, CA 94108",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7912,
+            "lng": -122.4071
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "venue_type",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Historic Hotel Ballroom",
+          "data_type": "primitive",
+          "options": [
+            "Historic Hotel Ballroom",
+            "Modern Event Space",
+            "Garden Estate",
+            "Waterfront Venue",
+            "Winery",
+            "Restaurant"
+          ]
+        },
+        {
+          "name": "capacity",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 220,
+          "data_type": "primitive",
+          "validation": {
+            "min": 50,
+            "max": 500
+          }
+        },
+        {
+          "name": "guest_count",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "validation": {
+            "required": true,
+            "min": 1
+          }
+        },
+        {
+          "name": "venue_rental_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 9500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_per_person",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 205,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 205,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bar_package",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 5200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_staff_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3800,
+          "data_type": "primitive"
+        },
+        {
+          "name": "equipment_rentals",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "taxes_gratuity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 5175,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 56925,
+          "data_type": "primitive"
+        },
+        {
+          "name": "cost_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 380,
+          "data_type": "primitive"
+        },
+        {
+          "name": "deposit_required",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 18000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "indoor_outdoor",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Indoor Only",
+          "data_type": "primitive",
+          "options": [
+            "Indoor Only",
+            "Outdoor Only",
+            "Indoor with Terrace Access",
+            "Both Indoor & Outdoor Spaces"
+          ]
+        },
+        {
+          "name": "ambiance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "ambiance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "The Ritz-Carlton epitomizes luxury with its neoclassical architecture, grand ballroom featuring soaring ceilings, ornate moldings, and magnificent crystal chandeliers. The refined elegance and impeccable attention to detail create an unforgettable atmosphere of sophistication and grandeur.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "service_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Legendary Ritz-Carlton service with dedicated wedding specialists, personal event coordinators, and highly trained staff. Every detail is meticulously planned and executed. Staff anticipates needs before they arise and delivers flawless, five-star service throughout.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "flexibility_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 6.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "flexibility_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Limited flexibility - exclusive in-house catering required, strict preferred vendor list. High standards mean less room for customization outside their established protocols. Premium pricing reflects their curated experience with limited deviation from their luxury brand standards.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "parking_availability",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Valet parking ($50/car), hotel guest parking available",
+          "data_type": "primitive"
+        },
+        {
+          "name": "availability_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Waitlist Only",
+          "data_type": "primitive",
+          "options": [
+            "Available",
+            "Available - Limited Saturdays",
+            "Waitlist Only",
+            "Booked"
+          ]
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Ultimate luxury wedding venue in San Francisco. Premium pricing includes exceptional service and amenities. Guest room block available at preferred rates. Perfect for formal, black-tie weddings.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "venue_5",
+      "type": "Wedding_Venue",
+      "icon": "🏛️",
+      "color": "#8b5cf6",
+      "public_identifier": "Foreign Cinema",
+      "attributes": [
+        {
+          "name": "venue_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Foreign Cinema",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": "2534 Mission Street, Mission District, San Francisco, CA 94110",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 37.7573,
+            "lng": -122.4189
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "venue_type",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Restaurant",
+          "data_type": "primitive",
+          "options": [
+            "Historic Hotel Ballroom",
+            "Modern Event Space",
+            "Garden Estate",
+            "Waterfront Venue",
+            "Winery",
+            "Restaurant"
+          ]
+        },
+        {
+          "name": "capacity",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 160,
+          "data_type": "primitive",
+          "validation": {
+            "min": 50,
+            "max": 500
+          }
+        },
+        {
+          "name": "guest_count",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "validation": {
+            "required": true,
+            "min": 1
+          }
+        },
+        {
+          "name": "venue_rental_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 5000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_per_person",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 145,
+          "data_type": "primitive"
+        },
+        {
+          "name": "catering_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 145,
+          "data_type": "primitive"
+        },
+        {
+          "name": "bar_package",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_staff_fee",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "equipment_rentals",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1800,
+          "data_type": "primitive"
+        },
+        {
+          "name": "taxes_gratuity",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3395,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 37345,
+          "data_type": "primitive"
+        },
+        {
+          "name": "cost_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 249,
+          "data_type": "primitive"
+        },
+        {
+          "name": "deposit_required",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 8000,
+          "data_type": "primitive"
+        },
+        {
+          "name": "indoor_outdoor",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Both Indoor & Outdoor Spaces",
+          "data_type": "primitive",
+          "options": [
+            "Indoor Only",
+            "Outdoor Only",
+            "Indoor with Terrace Access",
+            "Both Indoor & Outdoor Spaces"
+          ]
+        },
+        {
+          "name": "ambiance_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "ambiance_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Unique bohemian-chic atmosphere with an iconic outdoor courtyard featuring string lights and film projections. Industrial-meets-romantic aesthetic with exposed brick, lush greenery, and artistic touches. Perfect for couples seeking creative, unconventional wedding vibes in the Mission District.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "service_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "service_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Award-winning restaurant with experienced culinary team and attentive service staff. Event coordination is professional and creative. Known for exceptional farm-to-table cuisine and personalized approach to each wedding celebration.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "flexibility_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "flexibility_rating_reasoning",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Excellent flexibility - highly customizable menus, open to creative ideas, allows outside vendors for most services. Couples can personalize nearly every aspect. The team embraces unique visions and non-traditional celebrations. Great for couples wanting a distinctive, personalized experience.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "parking_availability",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Street parking, nearby public lots, BART accessible (16th Street Mission)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "availability_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Available",
+          "data_type": "primitive",
+          "options": [
+            "Available",
+            "Available - Limited Saturdays",
+            "Waitlist Only",
+            "Booked"
+          ]
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Iconic SF restaurant venue perfect for foodie couples. Renowned for exceptional cuisine and unique atmosphere. Film projections in courtyard add distinctive touch. Best value option with artistic charm.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "budget_comparison",
+      "type": "Budget_Comparison",
+      "icon": "💰",
+      "color": "#10b981",
+      "public_identifier": "SF Wedding Venue Budget Analysis - 150 Guests",
+      "attributes": [
+        {
+          "name": "comparison_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Wedding Venue Budget Analysis - 150 Guests",
+          "data_type": "primitive"
+        },
+        {
+          "name": "guest_count",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "help_text": "Total number of wedding guests"
+        },
+        {
+          "name": "lowest_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 37345,
+          "data_type": "primitive",
+          "help_text": "Lowest venue total cost (Foreign Cinema)"
+        },
+        {
+          "name": "highest_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 56925,
+          "data_type": "primitive",
+          "help_text": "Highest venue total cost (Ritz-Carlton)"
+        },
+        {
+          "name": "average_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 46739,
+          "data_type": "primitive",
+          "help_text": "Average cost across all venues"
+        },
+        {
+          "name": "lowest_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 249,
+          "data_type": "primitive",
+          "help_text": "Lowest cost per guest (Foreign Cinema)"
+        },
+        {
+          "name": "highest_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 380,
+          "data_type": "primitive",
+          "help_text": "Highest cost per guest (Ritz-Carlton)"
+        },
+        {
+          "name": "average_per_guest",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 312,
+          "data_type": "primitive",
+          "help_text": "Average cost per guest across all venues"
+        },
+        {
+          "name": "budget_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "$37,000 - $57,000",
+          "data_type": "primitive",
+          "help_text": "Total budget range for 150 guests"
+        },
+        {
+          "name": "best_value_venue",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Foreign Cinema",
+          "data_type": "primitive",
+          "help_text": "Best value based on cost per guest and ratings"
+        },
+        {
+          "name": "highest_rated_ambiance",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Ritz-Carlton San Francisco (9.8/10)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "highest_rated_service",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Ritz-Carlton San Francisco (10.0/10)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "most_flexible",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Foreign Cinema (9.5/10)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "cost_breakdown_summary",
+          "widget": "array",
+          "editable": false,
+          "function": "display",
+          "value": [
+            {
+              "category": "Venue Rental",
+              "average": 7340,
+              "range": "$5,000 - $9,500"
+            },
+            {
+              "category": "Catering (per person)",
+              "average": 171,
+              "range": "$145 - $205"
+            },
+            {
+              "category": "Bar Package",
+              "average": 4040,
+              "range": "$3,200 - $5,200"
+            },
+            {
+              "category": "Service Staff",
+              "average": 2900,
+              "range": "$2,200 - $3,800"
+            },
+            {
+              "category": "Equipment Rentals",
+              "average": 2560,
+              "range": "$1,800 - $3,500"
+            },
+            {
+              "category": "Taxes & Gratuity",
+              "average": 4249,
+              "range": "$3,395 - $5,175"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "recommendations",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "For best value with unique atmosphere: Foreign Cinema ($249/guest). For luxury experience: Ritz-Carlton ($380/guest). For garden setting: Golden Gate Club ($293/guest). For modern urban vibe: City View at METREON ($294/guest). For classic elegance: The Fairmont ($343/guest).",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "venue_checklist",
+      "type": "Venue_Selection_Checklist",
+      "icon": "✅",
+      "color": "#f59e0b",
+      "public_identifier": "Wedding Venue Decision Checklist",
+      "attributes": [
+        {
+          "name": "checklist_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Wedding Venue Decision Checklist",
+          "data_type": "primitive"
+        },
+        {
+          "name": "tasks",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "task": "Determine final guest count",
+              "done": true,
+              "priority": "High"
+            },
+            {
+              "task": "Set overall wedding budget",
+              "done": true,
+              "priority": "High"
+            },
+            {
+              "task": "Choose preferred wedding date(s)",
+              "done": false,
+              "priority": "High"
+            },
+            {
+              "task": "Schedule venue tours",
+              "done": false,
+              "priority": "High"
+            },
+            {
+              "task": "Review venue contracts and policies",
+              "done": false,
+              "priority": "High"
+            },
+            {
+              "task": "Check availability for preferred dates",
+              "done": false,
+              "priority": "High"
+            },
+            {
+              "task": "Request detailed cost breakdowns",
+              "done": false,
+              "priority": "Medium"
+            },
+            {
+              "task": "Verify catering options and restrictions",
+              "done": false,
+              "priority": "Medium"
+            },
+            {
+              "task": "Confirm vendor policies (in-house vs. outside)",
+              "done": false,
+              "priority": "Medium"
+            },
+            {
+              "task": "Check parking and accessibility for guests",
+              "done": false,
+              "priority": "Medium"
+            },
+            {
+              "task": "Review cancellation and postponement policies",
+              "done": false,
+              "priority": "Medium"
+            },
+            {
+              "task": "Ask about weather backup plans (outdoor venues)",
+              "done": false,
+              "priority": "Medium"
+            },
+            {
+              "task": "Inquire about getting-ready spaces",
+              "done": false,
+              "priority": "Low"
+            },
+            {
+              "task": "Check accommodation options for guests",
+              "done": false,
+              "priority": "Low"
+            },
+            {
+              "task": "Read recent reviews from other couples",
+              "done": false,
+              "priority": "Low"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "completion_percentage",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 13,
+          "data_type": "primitive",
+          "help_text": "Percentage of tasks completed"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "venue_1",
+      "target_entity_id": "budget_comparison",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Venue costs feed into overall budget comparison"
+      }
+    },
+    {
+      "source_entity_id": "venue_2",
+      "target_entity_id": "budget_comparison",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Venue costs feed into overall budget comparison"
+      }
+    },
+    {
+      "source_entity_id": "venue_3",
+      "target_entity_id": "budget_comparison",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Venue costs feed into overall budget comparison"
+      }
+    },
+    {
+      "source_entity_id": "venue_4",
+      "target_entity_id": "budget_comparison",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Venue costs feed into overall budget comparison"
+      }
+    },
+    {
+      "source_entity_id": "venue_5",
+      "target_entity_id": "budget_comparison",
+      "relationship": "contributes_to",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Venue costs feed into overall budget comparison"
+      }
+    },
+    {
+      "source_entity_id": "budget_comparison",
+      "target_entity_id": "venue_checklist",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Budget analysis informs venue selection decisions"
+      }
+    }
+  ],
+  "created_at": "2025-10-28T16:43:30.265377",
+  "updated_at": "2025-10-28T16:45:57.686Z"
+}

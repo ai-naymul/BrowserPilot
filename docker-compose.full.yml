@@ -1,0 +1,59 @@
+# Full stack, one command: BrowserPilot (scraper) + gen-UI (renderer + frontend).
+#
+#   GOOGLE_API_KEY=your_gemini_key docker compose -f docker-compose.full.yml up --build
+#
+# Then open http://localhost:8080 -> "Scrape a website".
+#
+# Runs entirely on a single Gemini key (RENDER_PROVIDER defaults to gemini).
+# Set GENUI_API_KEY to require an X-API-Key header on the LLM endpoints.
+#
+# NOTE: the BrowserPilot image is heavy (Chromium). Ensure adequate disk before
+# building. Not build-verified on the dev machine (near-full disk); the 3-command
+# dev setup in generative-ui/README.md is the verified path.
+
+services:
+  browserpilot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - SCRAPER_PROXIES=${SCRAPER_PROXIES:-[]}
+    shm_size: "2gb"
+    security_opt:
+      - seccomp:unconfined
+    restart: unless-stopped
+
+  genui-backend:
+    build:
+      context: ./generative-ui/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-dummy-not-used-with-gemini}
+      - RENDER_PROVIDER=${RENDER_PROVIDER:-gemini}
+      - BROWSERPILOT_URL=http://browserpilot:8000
+      - GENUI_API_KEY=${GENUI_API_KEY:-}
+    depends_on:
+      - browserpilot
+    restart: unless-stopped
+
+  genui-frontend:
+    build:
+      context: ./generative-ui/frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8001
+    ports:
+      - "8080:80"
+    depends_on:
+      - genui-backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: browserpilot-fullstack

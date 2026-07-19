@@ -1,0 +1,1731 @@
+{
+  "version": 2,
+  "task_description": "Plan a 21-day multi-city trip to Tokyo, Paris, and Barcelona with 7 days in each destination",
+  "entities": [
+    {
+      "id": "trip_plan_main",
+      "type": "Trip_Plan",
+      "icon": "✈️",
+      "color": "#3b82f6",
+      "public_identifier": "Tokyo, Paris & Barcelona Adventure",
+      "attributes": [
+        {
+          "name": "trip_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Tokyo, Paris & Barcelona Adventure",
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_duration",
+          "widget": "number",
+          "editable": false,
+          "function": "computed",
+          "value": 21,
+          "data_type": "primitive"
+        },
+        {
+          "name": "start_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          }
+        },
+        {
+          "name": "end_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          }
+        },
+        {
+          "name": "total_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 10500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "travelers",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 1,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "trip_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "planning",
+          "data_type": "primitive",
+          "options": [
+            "planning",
+            "booked",
+            "in_progress",
+            "completed"
+          ]
+        },
+        {
+          "name": "notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Multi-city European and Asian adventure. Focus on culture, food, and architecture.",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_tokyo",
+      "type": "Destination_Tokyo",
+      "icon": "🗼",
+      "color": "#ef4444",
+      "public_identifier": "Tokyo",
+      "attributes": [
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo, Japan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 35.6762,
+            "lng": 139.6503
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "duration_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          }
+        },
+        {
+          "name": "arrival_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": "2026-01-23",
+          "data_type": "primitive"
+        },
+        {
+          "name": "departure_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive"
+        },
+        {
+          "name": "estimated_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "accommodation_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1400,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 700,
+          "data_type": "primitive"
+        },
+        {
+          "name": "activities_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "transport_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo is one of the world's safest major cities with extremely low crime rates, efficient police presence, well-lit streets at all hours, and excellent emergency services. Solo travelers and families feel very secure day and night.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo offers an unparalleled blend of ancient traditions and cutting-edge modernity. From centuries-old temples and tea ceremonies to anime culture and robot restaurants, the city provides deep cultural immersion with respect for heritage and innovation.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo has more Michelin stars than any other city globally. From $3 convenience store meals to world-class sushi at Tsukiji, ramen shops, izakayas, and kaiseki dining, the quality and variety are exceptional at every price point.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "name": "Senso-ji Temple",
+              "description": "Tokyo's oldest Buddhist temple in Asakusa, featuring the iconic Thunder Gate and vibrant Nakamise shopping street",
+              "coordinates": {
+                "lat": 35.7148,
+                "lng": 139.7967
+              }
+            },
+            {
+              "name": "Shibuya Crossing",
+              "description": "World's busiest pedestrian crossing, epitome of Tokyo's organized chaos and urban energy",
+              "coordinates": {
+                "lat": 35.6595,
+                "lng": 139.7004
+              }
+            },
+            {
+              "name": "Meiji Shrine",
+              "description": "Serene Shinto shrine surrounded by forest in the heart of the city, dedicated to Emperor Meiji",
+              "coordinates": {
+                "lat": 35.6764,
+                "lng": 139.6993
+              }
+            },
+            {
+              "name": "Tokyo Skytree",
+              "description": "World's tallest tower at 634m, offering panoramic views of Tokyo and Mount Fuji on clear days",
+              "coordinates": {
+                "lat": 35.7101,
+                "lng": 139.8107
+              }
+            },
+            {
+              "name": "Tsukiji Outer Market",
+              "description": "Famous fish market with fresh sushi, street food, and authentic Japanese culinary experiences",
+              "coordinates": {
+                "lat": 35.6654,
+                "lng": 139.7707
+              }
+            },
+            {
+              "name": "Harajuku & Takeshita Street",
+              "description": "Youth fashion capital with quirky shops, kawaii culture, and trendy cafes",
+              "coordinates": {
+                "lat": 35.6702,
+                "lng": 139.7027
+              }
+            },
+            {
+              "name": "Imperial Palace East Gardens",
+              "description": "Beautiful traditional Japanese gardens on the grounds of the Emperor's residence",
+              "coordinates": {
+                "lat": 35.6852,
+                "lng": 139.7528
+              }
+            },
+            {
+              "name": "TeamLab Borderless",
+              "description": "Immersive digital art museum with stunning interactive light installations",
+              "coordinates": {
+                "lat": 35.6246,
+                "lng": 139.7756
+              }
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "March-May (spring/cherry blossoms) or October-November (fall foliage)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japanese (English limited outside tourist areas)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japanese Yen (JPY)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "timezone",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "JST (UTC+9)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_paris",
+      "type": "Destination_Paris",
+      "icon": "🗼",
+      "color": "#3b82f6",
+      "public_identifier": "Paris",
+      "attributes": [
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Paris",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "France",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Paris, France",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 48.8566,
+            "lng": 2.3522
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "duration_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          }
+        },
+        {
+          "name": "arrival_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": "2026-01-23",
+          "data_type": "primitive"
+        },
+        {
+          "name": "departure_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive"
+        },
+        {
+          "name": "estimated_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3700,
+          "data_type": "primitive"
+        },
+        {
+          "name": "accommodation_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 800,
+          "data_type": "primitive"
+        },
+        {
+          "name": "activities_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 600,
+          "data_type": "primitive"
+        },
+        {
+          "name": "transport_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 100,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris is generally safe for tourists but requires awareness of pickpockets in tourist areas like the Eiffel Tower, metro stations, and Montmartre. Avoid displaying valuables and stay vigilant in crowded areas. Most neighborhoods are safe, though some suburbs should be avoided at night.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris is the epitome of art, culture, and sophistication. Home to the Louvre, Musée d'Orsay, Notre-Dame, and countless galleries, the city shaped Western art and philosophy. From café culture to haute couture, every street corner breathes history and elegance.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris is the world capital of gastronomy with legendary bistros, patisseries, fromageries, and Michelin-starred restaurants. From fresh croissants and perfect baguettes to coq au vin and escargot, French cuisine reaches its pinnacle here. Wine culture is exceptional.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "name": "Eiffel Tower",
+              "description": "Iconic 330m iron lattice tower, symbol of Paris and must-see landmark with stunning city views",
+              "coordinates": {
+                "lat": 48.8584,
+                "lng": 2.2945
+              }
+            },
+            {
+              "name": "Louvre Museum",
+              "description": "World's largest art museum housing the Mona Lisa, Venus de Milo, and 38,000 masterpieces",
+              "coordinates": {
+                "lat": 48.8606,
+                "lng": 2.3376
+              }
+            },
+            {
+              "name": "Notre-Dame Cathedral",
+              "description": "Medieval Gothic cathedral on Île de la Cité, currently under restoration after 2019 fire",
+              "coordinates": {
+                "lat": 48.853,
+                "lng": 2.3499
+              }
+            },
+            {
+              "name": "Arc de Triomphe",
+              "description": "Monumental arch honoring French military victories, at the center of Place Charles de Gaulle",
+              "coordinates": {
+                "lat": 48.8738,
+                "lng": 2.295
+              }
+            },
+            {
+              "name": "Sacré-Cœur Basilica",
+              "description": "White-domed basilica atop Montmartre hill with panoramic views and bohemian atmosphere",
+              "coordinates": {
+                "lat": 48.8867,
+                "lng": 2.3431
+              }
+            },
+            {
+              "name": "Musée d'Orsay",
+              "description": "Impressionist art museum in a stunning Beaux-Arts railway station, featuring Monet, Van Gogh, Renoir",
+              "coordinates": {
+                "lat": 48.86,
+                "lng": 2.3266
+              }
+            },
+            {
+              "name": "Champs-Élysées",
+              "description": "Famous avenue lined with luxury shops, cafés, and theaters leading to the Arc de Triomphe",
+              "coordinates": {
+                "lat": 48.8698,
+                "lng": 2.3078
+              }
+            },
+            {
+              "name": "Versailles Palace",
+              "description": "Opulent royal château with Hall of Mirrors and magnificent gardens, 30 minutes from Paris",
+              "coordinates": {
+                "lat": 48.8049,
+                "lng": 2.1204
+              }
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-June or September-October (mild weather, fewer crowds)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "French (English widely spoken in tourist areas)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Euro (EUR)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "timezone",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "CET (UTC+1)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_barcelona",
+      "type": "Destination_Barcelona",
+      "icon": "🏖️",
+      "color": "#f59e0b",
+      "public_identifier": "Barcelona",
+      "attributes": [
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona, Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "coordinates",
+          "widget": "object",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "lat": 41.3851,
+            "lng": 2.1734
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "duration_days",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          }
+        },
+        {
+          "name": "arrival_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": "2026-01-23",
+          "data_type": "primitive"
+        },
+        {
+          "name": "departure_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive"
+        },
+        {
+          "name": "estimated_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "accommodation_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 650,
+          "data_type": "primitive"
+        },
+        {
+          "name": "activities_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 550,
+          "data_type": "primitive"
+        },
+        {
+          "name": "transport_cost",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 100,
+          "data_type": "primitive"
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona is generally safe but has issues with pickpocketing, especially on Las Ramblas, metro, and beach areas. Tourists should watch belongings carefully. Violent crime is rare. The Gothic Quarter can feel sketchy late at night. Overall, standard urban precautions ensure a safe visit.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona is a cultural powerhouse with Gaudí's architectural masterpieces, Picasso's legacy, vibrant Catalan identity, and Mediterranean lifestyle. The city blends Gothic history with modernist innovation, flamenco with contemporary art, and maintains strong traditions while embracing creativity.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating_reasoning",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona excels with tapas culture, fresh seafood, paella, jamón ibérico, and innovative Catalan cuisine. The city has numerous Michelin-starred restaurants alongside authentic bodegas. Markets like La Boqueria offer incredible fresh produce. Wine and vermouth culture is exceptional.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "top_attractions",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "name": "Sagrada Família",
+              "description": "Gaudí's unfinished masterpiece basilica, Barcelona's most iconic landmark with stunning modernist architecture",
+              "coordinates": {
+                "lat": 41.4036,
+                "lng": 2.1744
+              }
+            },
+            {
+              "name": "Park Güell",
+              "description": "Whimsical public park designed by Gaudí with colorful mosaics, serpentine benches, and city views",
+              "coordinates": {
+                "lat": 41.4145,
+                "lng": 2.1527
+              }
+            },
+            {
+              "name": "Las Ramblas",
+              "description": "Famous tree-lined pedestrian boulevard with street performers, markets, and vibrant atmosphere",
+              "coordinates": {
+                "lat": 41.3818,
+                "lng": 2.1744
+              }
+            },
+            {
+              "name": "Casa Batlló",
+              "description": "Gaudí's fantastical modernist building with organic shapes and colorful facade on Passeig de Gràcia",
+              "coordinates": {
+                "lat": 41.3916,
+                "lng": 2.1649
+              }
+            },
+            {
+              "name": "Gothic Quarter (Barri Gòtic)",
+              "description": "Medieval neighborhood with narrow streets, Roman ruins, and historic Barcelona Cathedral",
+              "coordinates": {
+                "lat": 41.3828,
+                "lng": 2.1764
+              }
+            },
+            {
+              "name": "La Boqueria Market",
+              "description": "Vibrant food market on Las Ramblas with fresh produce, seafood, jamón, and local delicacies",
+              "coordinates": {
+                "lat": 41.3816,
+                "lng": 2.1719
+              }
+            },
+            {
+              "name": "Barceloneta Beach",
+              "description": "Popular urban beach with golden sand, Mediterranean swimming, and beachfront restaurants",
+              "coordinates": {
+                "lat": 41.3773,
+                "lng": 2.19
+              }
+            },
+            {
+              "name": "Camp Nou",
+              "description": "FC Barcelona's legendary football stadium, Europe's largest, offering stadium tours and museum",
+              "coordinates": {
+                "lat": 41.3809,
+                "lng": 2.1228
+              }
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-June or September-October (warm weather, beach season, fewer tourists)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "language",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spanish & Catalan (English common in tourist areas)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Euro (EUR)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "timezone",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "CET (UTC+1)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "budget_tracker",
+      "type": "Budget_Tracker",
+      "icon": "💰",
+      "color": "#10b981",
+      "public_identifier": "Trip Budget Tracker",
+      "attributes": [
+        {
+          "name": "tracker_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Trip Budget Tracker",
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_planned_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 10500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "tokyo_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "paris_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3700,
+          "data_type": "primitive"
+        },
+        {
+          "name": "barcelona_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3200,
+          "data_type": "primitive"
+        },
+        {
+          "name": "flights_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_spent",
+          "widget": "currency",
+          "editable": true,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive"
+        },
+        {
+          "name": "remaining_budget",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 10500,
+          "data_type": "primitive"
+        },
+        {
+          "name": "budget_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "on_track",
+          "data_type": "primitive",
+          "options": [
+            "under_budget",
+            "on_track",
+            "over_budget"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "travel_checklist",
+      "type": "Travel_Checklist",
+      "icon": "✅",
+      "color": "#8b5cf6",
+      "public_identifier": "Pre-Trip Checklist",
+      "attributes": [
+        {
+          "name": "checklist_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Pre-Trip Checklist",
+          "data_type": "primitive"
+        },
+        {
+          "name": "tasks",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "task": "Book flights (Tokyo → Paris → Barcelona → Home)",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Book accommodations in all 3 cities",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Apply for travel insurance",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Check passport validity (6+ months)",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Book Sagrada Família tickets (Barcelona)",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Reserve Louvre time slot (Paris)",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Get JR Pass for Tokyo transport",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Download offline maps and translation apps",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Notify bank of international travel",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Exchange currency or get travel card",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Pack appropriate clothing for all climates",
+              "done": false,
+              "priority": "low"
+            },
+            {
+              "task": "Create day-by-day itinerary",
+              "done": false,
+              "priority": "low"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "completion_percentage",
+          "widget": "percentage",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "weather_tokyo",
+      "type": "Weather_Pattern",
+      "icon": "🌤️",
+      "color": "#10b981",
+      "public_identifier": "Tokyo",
+      "attributes": [
+        {
+          "name": "destination_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "March-May, September-November",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "March-May (Cherry Blossom)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "January-February, July-August",
+          "data_type": "primitive"
+        },
+        {
+          "name": "spring_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "10-20°C (50-68°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "summer_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "25-32°C (77-90°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "fall_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "15-23°C (59-73°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "winter_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "2-10°C (36-50°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "rainfall_level",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "June-September (Rainy Season & Typhoons)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "humidity_level",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "High (60-80% year-round)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "spring_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "summer_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "fall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "winter_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "special_events",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Cherry Blossoms (late March-early April), Fall Foliage (November)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "weather_notes",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spring offers cherry blossoms and mild weather. Summer is hot, humid with typhoon risk. Fall has comfortable temps and beautiful foliage. Winter is cold but dry with fewer crowds.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "crowd_level_peak",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Very High",
+          "data_type": "primitive"
+        },
+        {
+          "name": "crowd_level_offpeak",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Low-Medium",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "weather_paris",
+      "type": "Weather_Pattern",
+      "icon": "🌤️",
+      "color": "#10b981",
+      "public_identifier": "Paris",
+      "attributes": [
+        {
+          "name": "destination_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Paris",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-June, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "June-August",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "November-March",
+          "data_type": "primitive"
+        },
+        {
+          "name": "spring_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "10-18°C (50-64°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "summer_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "18-25°C (64-77°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "fall_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "10-16°C (50-61°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "winter_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "3-8°C (37-46°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "rainfall_level",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Moderate year-round, slightly higher in May-June",
+          "data_type": "primitive"
+        },
+        {
+          "name": "humidity_level",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Moderate (65-75%)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "spring_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "summer_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "fall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "winter_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 6,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "special_events",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Paris Fashion Week (Feb/Mar & Sep/Oct), Bastille Day (July 14), Christmas Markets (Dec)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "weather_notes",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spring and fall offer pleasant weather with fewer crowds. Summer is warm and lively but crowded. Winter is cold and gray but romantic with holiday decorations. Rain is possible year-round, so pack an umbrella.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "crowd_level_peak",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Very High",
+          "data_type": "primitive"
+        },
+        {
+          "name": "crowd_level_offpeak",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Medium",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "weather_barcelona",
+      "type": "Weather_Pattern",
+      "icon": "🌤️",
+      "color": "#10b981",
+      "public_identifier": "Barcelona",
+      "attributes": [
+        {
+          "name": "destination_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-June, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "peak_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "July-August",
+          "data_type": "primitive"
+        },
+        {
+          "name": "off_season",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "November-March",
+          "data_type": "primitive"
+        },
+        {
+          "name": "spring_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "13-20°C (55-68°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "summer_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "23-30°C (73-86°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "fall_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "15-22°C (59-72°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "winter_temp_range",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "8-15°C (46-59°F)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "rainfall_level",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Low, mainly in September-October and spring",
+          "data_type": "primitive"
+        },
+        {
+          "name": "humidity_level",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Moderate (60-70%)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "spring_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "summer_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "fall_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 10,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "winter_rating",
+          "widget": "rating",
+          "editable": false,
+          "function": "display",
+          "value": 7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "special_events",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "La Mercè Festival (Sept), Sant Jordi (April 23), Primavera Sound (May/June), Sónar Festival (June)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "weather_notes",
+          "widget": "long_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona enjoys a Mediterranean climate with mild winters and warm summers. Late spring and early fall offer ideal beach weather without extreme heat. Summer can be very hot and crowded. Winter is mild and pleasant for sightseeing.",
+          "data_type": "primitive"
+        },
+        {
+          "name": "crowd_level_peak",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Extremely High",
+          "data_type": "primitive"
+        },
+        {
+          "name": "crowd_level_offpeak",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Low-Medium",
+          "data_type": "primitive"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "destination_tokyo",
+      "relationship": "includes",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip includes Tokyo as first destination"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "destination_paris",
+      "relationship": "includes",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip includes Paris as second destination"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "destination_barcelona",
+      "relationship": "includes",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip includes Barcelona as third destination"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "budget_tracker",
+      "relationship": "tracks",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Budget tracker monitors trip expenses"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "travel_checklist",
+      "relationship": "manages",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Checklist tracks trip preparation tasks"
+      }
+    },
+    {
+      "source_entity_id": "budget_tracker",
+      "target_entity_id": "destination_tokyo",
+      "relationship": "allocates_budget_for",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Budget allocated for Tokyo portion"
+      }
+    },
+    {
+      "source_entity_id": "budget_tracker",
+      "target_entity_id": "destination_paris",
+      "relationship": "allocates_budget_for",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Budget allocated for Paris portion"
+      }
+    },
+    {
+      "source_entity_id": "budget_tracker",
+      "target_entity_id": "destination_barcelona",
+      "relationship": "allocates_budget_for",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Budget allocated for Barcelona portion"
+      }
+    },
+    {
+      "source_entity_id": "destination_tokyo",
+      "target_entity_id": "weather_tokyo",
+      "relationship": "has_weather_pattern",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "destination_paris",
+      "target_entity_id": "weather_paris",
+      "relationship": "has_weather_pattern",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "destination_barcelona",
+      "target_entity_id": "weather_barcelona",
+      "relationship": "has_weather_pattern",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "weather_tokyo",
+      "relationship": "considers_weather",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "weather_paris",
+      "relationship": "considers_weather",
+      "mechanism": "reference",
+      "metadata": {}
+    },
+    {
+      "source_entity_id": "trip_plan_main",
+      "target_entity_id": "weather_barcelona",
+      "relationship": "considers_weather",
+      "mechanism": "reference",
+      "metadata": {}
+    }
+  ],
+  "created_at": "2025-11-17T17:28:24.316179",
+  "updated_at": "2025-11-17T17:38:10.270Z"
+}

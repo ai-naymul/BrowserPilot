@@ -1,0 +1,1102 @@
+{
+  "version": 1,
+  "task_description": "Compare Tokyo, Barcelona, and Bali for multi-city trip planning and create an actionable travel itinerary",
+  "entities": [
+    {
+      "id": "trip_plan_1",
+      "type": "Multi_City_Trip",
+      "icon": "✈️",
+      "color": "#3b82f6",
+      "public_identifier": "Tokyo, Barcelona & Bali Adventure",
+      "attributes": [
+        {
+          "name": "trip_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Tokyo, Barcelona & Bali Adventure",
+          "data_type": "primitive",
+          "placeholder": "Name your trip",
+          "help_text": "Give your multi-city trip a memorable name"
+        },
+        {
+          "name": "trip_dates",
+          "widget": "date_range",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          },
+          "help_text": "Select your overall trip start and end dates"
+        },
+        {
+          "name": "total_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 8500,
+          "data_type": "primitive",
+          "help_text": "Total budget for the entire trip"
+        },
+        {
+          "name": "travelers",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 1,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 20
+          },
+          "help_text": "Number of travelers"
+        },
+        {
+          "name": "trip_style",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "filterable",
+          "value": "balanced",
+          "data_type": "primitive",
+          "options": [
+            "budget",
+            "balanced",
+            "luxury",
+            "adventure",
+            "cultural"
+          ],
+          "help_text": "Choose your travel style preference"
+        },
+        {
+          "name": "status",
+          "widget": "badge",
+          "editable": true,
+          "function": "display",
+          "value": "planning",
+          "data_type": "primitive",
+          "options": [
+            "planning",
+            "booking",
+            "confirmed",
+            "in_progress",
+            "completed"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "destination_tokyo",
+      "type": "Destination_Tokyo",
+      "icon": "🗼",
+      "color": "#ef4444",
+      "public_identifier": "Tokyo",
+      "attributes": [
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japan",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "address": "Tokyo, Japan",
+            "lat": 35.6762,
+            "lng": 139.6503
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "suggested_duration",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          },
+          "help_text": "Recommended days to stay"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "March-May, September-November",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_daily_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 180,
+          "data_type": "primitive",
+          "help_text": "Average cost per day (accommodation, food, activities)"
+        },
+        {
+          "name": "total_estimated_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 850,
+          "data_type": "primitive",
+          "help_text": "Total cost = duration × daily budget"
+        },
+        {
+          "name": "flight_cost_estimate",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 850,
+          "data_type": "primitive",
+          "help_text": "Estimated round-trip flight cost"
+        },
+        {
+          "name": "climate",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Temperate, humid subtropical",
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": 9.2,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "top_attractions",
+          "widget": "tags",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Senso-ji Temple",
+            "Shibuya Crossing",
+            "Tokyo Skytree",
+            "Meiji Shrine",
+            "Tsukiji Outer Market"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "highlights",
+          "widget": "long_text",
+          "editable": true,
+          "function": "thumbnail",
+          "value": "Ancient temples meet futuristic technology, incredible food scene, cherry blossoms, safe and clean",
+          "data_type": "primitive"
+        },
+        {
+          "name": "considerations",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Language barrier, expensive, crowded public transport during rush hour",
+          "data_type": "primitive"
+        },
+        {
+          "name": "visa_requirements",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Visa-free for most countries (up to 90 days)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Japanese Yen (JPY)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_barcelona",
+      "type": "Destination_Barcelona",
+      "icon": "🏛️",
+      "color": "#f59e0b",
+      "public_identifier": "Barcelona",
+      "attributes": [
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Spain",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "address": "Barcelona, Spain",
+            "lat": 41.3874,
+            "lng": 2.1686
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "suggested_duration",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 4,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          },
+          "help_text": "Recommended days to stay"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "May-June, September-October",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_daily_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "help_text": "Average cost per day (accommodation, food, activities)"
+        },
+        {
+          "name": "total_estimated_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 650,
+          "data_type": "primitive",
+          "help_text": "Total cost = duration × daily budget"
+        },
+        {
+          "name": "flight_cost_estimate",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 650,
+          "data_type": "primitive",
+          "help_text": "Estimated round-trip flight cost"
+        },
+        {
+          "name": "climate",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Mediterranean, warm and sunny",
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": 8.9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.3,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 9.2,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7.5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "top_attractions",
+          "widget": "tags",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Sagrada Familia",
+            "Park Güell",
+            "La Rambla",
+            "Gothic Quarter",
+            "Casa Batlló"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "highlights",
+          "widget": "long_text",
+          "editable": true,
+          "function": "thumbnail",
+          "value": "Gaudí architecture, Mediterranean beaches, vibrant nightlife, tapas culture, walkable city",
+          "data_type": "primitive"
+        },
+        {
+          "name": "considerations",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Pickpocketing in tourist areas, very crowded in summer, some tourist traps",
+          "data_type": "primitive"
+        },
+        {
+          "name": "visa_requirements",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Schengen visa required for non-EU citizens",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Euro (EUR)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "destination_bali",
+      "type": "Destination_Bali",
+      "icon": "🏝️",
+      "color": "#10b981",
+      "public_identifier": "Bali",
+      "attributes": [
+        {
+          "name": "city_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "country",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Indonesia",
+          "data_type": "primitive"
+        },
+        {
+          "name": "location",
+          "widget": "location",
+          "editable": false,
+          "function": "display",
+          "value": {
+            "address": "Bali, Indonesia",
+            "lat": -8.3405,
+            "lng": 115.092
+          },
+          "data_type": "dict"
+        },
+        {
+          "name": "suggested_duration",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 6,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 30
+          },
+          "help_text": "Recommended days to stay"
+        },
+        {
+          "name": "best_time_to_visit",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "April-October (dry season)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "avg_daily_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 85,
+          "data_type": "primitive",
+          "help_text": "Average cost per day (accommodation, food, activities)"
+        },
+        {
+          "name": "total_estimated_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 750,
+          "data_type": "primitive",
+          "help_text": "Total cost = duration × daily budget"
+        },
+        {
+          "name": "flight_cost_estimate",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 750,
+          "data_type": "primitive",
+          "help_text": "Estimated round-trip flight cost"
+        },
+        {
+          "name": "climate",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tropical, warm year-round",
+          "data_type": "primitive"
+        },
+        {
+          "name": "overall_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "sortable",
+          "value": 8.7,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "culture_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "food_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8.3,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "nightlife_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 7.8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "safety_rating",
+          "widget": "rating",
+          "editable": true,
+          "function": "display",
+          "value": 8,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10
+          }
+        },
+        {
+          "name": "top_attractions",
+          "widget": "tags",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Ubud Rice Terraces",
+            "Tanah Lot Temple",
+            "Uluwatu Temple",
+            "Sacred Monkey Forest",
+            "Seminyak Beach"
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "highlights",
+          "widget": "long_text",
+          "editable": true,
+          "function": "thumbnail",
+          "value": "Beautiful beaches, affordable luxury, yoga and wellness retreats, rice terraces, friendly locals",
+          "data_type": "primitive"
+        },
+        {
+          "name": "considerations",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Traffic congestion, tourist crowds in popular areas, rainy season November-March",
+          "data_type": "primitive"
+        },
+        {
+          "name": "visa_requirements",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Visa on arrival for most countries (30 days)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "currency",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Indonesian Rupiah (IDR)",
+          "data_type": "primitive"
+        }
+      ]
+    },
+    {
+      "id": "budget_calculator_1",
+      "type": "Budget_Calculator",
+      "icon": "💰",
+      "color": "#8b5cf6",
+      "public_identifier": "Multi-City Trip Budget",
+      "attributes": [
+        {
+          "name": "calculator_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Multi-City Trip Budget",
+          "data_type": "primitive"
+        },
+        {
+          "name": "tokyo_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1750,
+          "data_type": "primitive",
+          "help_text": "Tokyo: $900 (stay) + $850 (flight)"
+        },
+        {
+          "name": "barcelona_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1250,
+          "data_type": "primitive",
+          "help_text": "Barcelona: $600 (stay) + $650 (flight)"
+        },
+        {
+          "name": "bali_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1260,
+          "data_type": "primitive",
+          "help_text": "Bali: $510 (stay) + $750 (flight)"
+        },
+        {
+          "name": "total_trip_cost",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 4260,
+          "data_type": "primitive",
+          "help_text": "Sum of all destination costs"
+        },
+        {
+          "name": "miscellaneous_expenses",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 500,
+          "data_type": "primitive",
+          "help_text": "Travel insurance, souvenirs, contingency"
+        },
+        {
+          "name": "grand_total",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 4760,
+          "data_type": "primitive",
+          "help_text": "Total trip cost + miscellaneous"
+        },
+        {
+          "name": "cost_per_day",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 317,
+          "data_type": "primitive",
+          "help_text": "Grand total ÷ 15 days"
+        },
+        {
+          "name": "budget_status",
+          "widget": "badge",
+          "editable": false,
+          "function": "display",
+          "value": "Over Budget",
+          "data_type": "primitive",
+          "help_text": "Comparison with planned budget"
+        }
+      ]
+    },
+    {
+      "id": "comparison_matrix_1",
+      "type": "Comparison_Matrix",
+      "icon": "📊",
+      "color": "#ec4899",
+      "public_identifier": "Destination Comparison",
+      "attributes": [
+        {
+          "name": "matrix_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Destination Comparison",
+          "data_type": "primitive"
+        },
+        {
+          "name": "most_affordable",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Bali",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_food",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_culture",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "best_nightlife",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Barcelona",
+          "data_type": "primitive"
+        },
+        {
+          "name": "safest",
+          "widget": "short_text",
+          "editable": false,
+          "function": "display",
+          "value": "Tokyo",
+          "data_type": "primitive"
+        },
+        {
+          "name": "recommended_order",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "1. Tokyo (5 days)",
+            "2. Bali (6 days)",
+            "3. Barcelona (4 days)"
+          ],
+          "data_type": "array",
+          "help_text": "Suggested itinerary order"
+        }
+      ]
+    },
+    {
+      "id": "travel_checklist_1",
+      "type": "Travel_Checklist",
+      "icon": "✅",
+      "color": "#06b6d4",
+      "public_identifier": "Multi-City Trip Preparation",
+      "attributes": [
+        {
+          "name": "checklist_name",
+          "widget": "short_text",
+          "editable": false,
+          "function": "publicIdentifier",
+          "value": "Multi-City Trip Preparation",
+          "data_type": "primitive"
+        },
+        {
+          "name": "pre_trip_tasks",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "task": "Check visa requirements for all destinations",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Book flights (consider open-jaw tickets)",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Reserve accommodations",
+              "done": false,
+              "priority": "high"
+            },
+            {
+              "task": "Get travel insurance",
+              "done": true,
+              "priority": "high"
+            },
+            {
+              "task": "Notify bank of international travel",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Check vaccination requirements",
+              "done": false,
+              "priority": "medium"
+            },
+            {
+              "task": "Download offline maps",
+              "done": false,
+              "priority": "low"
+            },
+            {
+              "task": "Learn basic phrases in Japanese and Spanish",
+              "done": false,
+              "priority": "low"
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "packing_list",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "item": "Passport (valid 6+ months)",
+              "packed": false
+            },
+            {
+              "item": "Travel adapters (Japan, Europe, Indonesia)",
+              "packed": false
+            },
+            {
+              "item": "Light layers for Tokyo",
+              "packed": false
+            },
+            {
+              "item": "Beachwear for Bali",
+              "packed": false
+            },
+            {
+              "item": "Walking shoes",
+              "packed": false
+            },
+            {
+              "item": "Medications and prescriptions",
+              "packed": false
+            }
+          ],
+          "data_type": "array"
+        },
+        {
+          "name": "completion_percentage",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 13,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "itinerary_planner_1",
+      "type": "Itinerary_Planner",
+      "icon": "🗓️",
+      "color": "#f97316",
+      "public_identifier": "15-Day Multi-City Itinerary",
+      "attributes": [
+        {
+          "name": "planner_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "15-Day Multi-City Itinerary",
+          "data_type": "primitive"
+        },
+        {
+          "name": "total_days",
+          "widget": "number",
+          "editable": false,
+          "function": "computed",
+          "value": 15,
+          "data_type": "primitive",
+          "help_text": "Total trip duration"
+        },
+        {
+          "name": "route_optimization",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "Consider geographic routing to minimize jet lag and travel time",
+          "data_type": "primitive"
+        },
+        {
+          "name": "suggested_route",
+          "widget": "short_text",
+          "editable": true,
+          "function": "display",
+          "value": "Tokyo → Bali → Barcelona (or reverse)",
+          "data_type": "primitive"
+        },
+        {
+          "name": "daily_schedule",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [],
+          "data_type": "array",
+          "help_text": "Add daily activities and plans"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "destination_tokyo",
+      "relationship": "includes",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip includes Tokyo as a destination"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "destination_barcelona",
+      "relationship": "includes",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip includes Barcelona as a destination"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "destination_bali",
+      "relationship": "includes",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip includes Bali as a destination"
+      }
+    },
+    {
+      "source_entity_id": "destination_tokyo",
+      "target_entity_id": "budget_calculator_1",
+      "relationship": "feeds_into",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Tokyo costs contribute to total budget"
+      }
+    },
+    {
+      "source_entity_id": "destination_barcelona",
+      "target_entity_id": "budget_calculator_1",
+      "relationship": "feeds_into",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Barcelona costs contribute to total budget"
+      }
+    },
+    {
+      "source_entity_id": "destination_bali",
+      "target_entity_id": "budget_calculator_1",
+      "relationship": "feeds_into",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Bali costs contribute to total budget"
+      }
+    },
+    {
+      "source_entity_id": "budget_calculator_1",
+      "target_entity_id": "trip_plan_1",
+      "relationship": "validates",
+      "mechanism": "validate",
+      "metadata": {
+        "description": "Budget calculator validates trip plan budget"
+      }
+    },
+    {
+      "source_entity_id": "comparison_matrix_1",
+      "target_entity_id": "itinerary_planner_1",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Comparison insights inform itinerary planning"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "travel_checklist_1",
+      "relationship": "requires",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip requires completion of checklist"
+      }
+    },
+    {
+      "source_entity_id": "itinerary_planner_1",
+      "target_entity_id": "trip_plan_1",
+      "relationship": "details",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Itinerary provides detailed schedule for trip"
+      }
+    }
+  ],
+  "created_at": "2025-10-28T12:11:52.953176",
+  "updated_at": "2025-10-28T12:13:41.708Z"
+}

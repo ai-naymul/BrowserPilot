@@ -1,0 +1,878 @@
+{
+  "version": 1,
+  "task_description": "Plan and manage relocation to San Francisco, including housing search, budget planning, and move coordination",
+  "entities": [
+    {
+      "id": "moving_plan_1",
+      "type": "Moving_Plan",
+      "icon": "🚚",
+      "color": "#3b82f6",
+      "public_identifier": "San Francisco, CA",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "moving_plan_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "destination_city",
+          "widget": "location",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "San Francisco, CA",
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          },
+          "help_text": "Your destination city"
+        },
+        {
+          "name": "current_location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "placeholder": "Where are you moving from?",
+          "help_text": "Your current city or address"
+        },
+        {
+          "name": "target_move_date",
+          "widget": "date",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          },
+          "help_text": "When do you plan to move?"
+        },
+        {
+          "name": "move_reason",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Career",
+          "data_type": "primitive",
+          "options": [
+            "Career",
+            "Education",
+            "Family",
+            "Lifestyle",
+            "Other"
+          ],
+          "help_text": "Primary reason for moving"
+        },
+        {
+          "name": "household_size",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 1,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 10,
+            "required": true
+          },
+          "help_text": "Number of people moving"
+        },
+        {
+          "name": "has_pets",
+          "widget": "checkbox",
+          "editable": true,
+          "function": "filterable",
+          "value": false,
+          "data_type": "primitive",
+          "help_text": "Will you be bringing pets?"
+        },
+        {
+          "name": "has_vehicle",
+          "widget": "checkbox",
+          "editable": true,
+          "function": "filterable",
+          "value": false,
+          "data_type": "primitive",
+          "help_text": "Will you need parking?"
+        },
+        {
+          "name": "move_status",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Planning",
+          "data_type": "primitive",
+          "options": [
+            "Planning",
+            "Housing Search",
+            "Packing",
+            "In Transit",
+            "Settling In",
+            "Completed"
+          ],
+          "help_text": "Current stage of your move"
+        },
+        {
+          "name": "progress_percentage",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 5,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 100
+          },
+          "help_text": "Overall move completion"
+        }
+      ]
+    },
+    {
+      "id": "housing_search_1",
+      "type": "Housing_Search",
+      "icon": "🏠",
+      "color": "#8b5cf6",
+      "public_identifier": "San Francisco Apartment Hunt",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "housing_search_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "search_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "San Francisco Apartment Hunt",
+          "data_type": "primitive",
+          "placeholder": "Name your housing search"
+        },
+        {
+          "name": "preferred_neighborhoods",
+          "widget": "tags",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "Mission District",
+            "SoMa",
+            "Nob Hill"
+          ],
+          "data_type": "array",
+          "options": [
+            "Mission District",
+            "SoMa",
+            "Nob Hill",
+            "Marina",
+            "Castro",
+            "Hayes Valley",
+            "Pacific Heights",
+            "Richmond",
+            "Sunset",
+            "North Beach",
+            "Financial District",
+            "Potrero Hill",
+            "Dogpatch",
+            "Russian Hill",
+            "Haight-Ashbury"
+          ],
+          "help_text": "Which neighborhoods interest you?"
+        },
+        {
+          "name": "housing_type",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "display",
+          "value": "Apartment",
+          "data_type": "primitive",
+          "options": [
+            "Studio",
+            "Apartment",
+            "Condo",
+            "Townhouse",
+            "House",
+            "Room in Shared Apartment"
+          ],
+          "help_text": "Type of housing you're looking for"
+        },
+        {
+          "name": "bedrooms",
+          "widget": "dropdown",
+          "editable": true,
+          "function": "filterable",
+          "value": 1,
+          "data_type": "primitive",
+          "options": [
+            "Studio",
+            "1",
+            "2",
+            "3",
+            "4+"
+          ],
+          "help_text": "Number of bedrooms needed"
+        },
+        {
+          "name": "monthly_rent_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3000,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1000,
+            "required": true
+          },
+          "help_text": "Maximum monthly rent you can afford"
+        },
+        {
+          "name": "must_haves",
+          "widget": "multi_select",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "In-unit laundry",
+            "Pet-friendly"
+          ],
+          "data_type": "array",
+          "options": [
+            "In-unit laundry",
+            "Parking",
+            "Pet-friendly",
+            "Dishwasher",
+            "Gym",
+            "Outdoor space",
+            "Elevator",
+            "Doorman",
+            "Natural light",
+            "Updated kitchen",
+            "Near public transit",
+            "Bike storage"
+          ],
+          "help_text": "Non-negotiable amenities"
+        },
+        {
+          "name": "nice_to_haves",
+          "widget": "multi_select",
+          "editable": true,
+          "function": "display",
+          "value": [
+            "Gym",
+            "Outdoor space"
+          ],
+          "data_type": "array",
+          "options": [
+            "In-unit laundry",
+            "Parking",
+            "Pet-friendly",
+            "Dishwasher",
+            "Gym",
+            "Outdoor space",
+            "Elevator",
+            "Doorman",
+            "Natural light",
+            "Updated kitchen",
+            "Near public transit",
+            "Bike storage",
+            "Rooftop deck",
+            "Concierge"
+          ],
+          "help_text": "Preferred but flexible amenities"
+        },
+        {
+          "name": "commute_location",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "placeholder": "Where will you be commuting to?",
+          "help_text": "Office or school address for commute planning"
+        },
+        {
+          "name": "max_commute_time",
+          "widget": "slider",
+          "editable": true,
+          "function": "display",
+          "value": 30,
+          "data_type": "primitive",
+          "validation": {
+            "min": 10,
+            "max": 90
+          },
+          "help_text": "Maximum acceptable commute in minutes"
+        },
+        {
+          "name": "saved_listings",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [],
+          "data_type": "array",
+          "help_text": "Apartments you're interested in"
+        }
+      ]
+    },
+    {
+      "id": "move_budget_1",
+      "type": "Move_Budget",
+      "icon": "💰",
+      "color": "#10b981",
+      "public_identifier": "SF Move Budget",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "move_budget_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "budget_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Move Budget",
+          "data_type": "primitive",
+          "placeholder": "Name your budget"
+        },
+        {
+          "name": "total_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 10000,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "required": true
+          },
+          "help_text": "Total amount available for moving expenses"
+        },
+        {
+          "name": "first_month_rent",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3000,
+          "data_type": "primitive",
+          "help_text": "First month's rent payment"
+        },
+        {
+          "name": "security_deposit",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3000,
+          "data_type": "primitive",
+          "help_text": "Typically equal to one month's rent"
+        },
+        {
+          "name": "moving_company",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2500,
+          "data_type": "primitive",
+          "help_text": "Professional movers or truck rental"
+        },
+        {
+          "name": "travel_costs",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 800,
+          "data_type": "primitive",
+          "help_text": "Flights, gas, hotels during move"
+        },
+        {
+          "name": "furniture_purchases",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 2000,
+          "data_type": "primitive",
+          "help_text": "New furniture and household items"
+        },
+        {
+          "name": "utility_deposits",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 400,
+          "data_type": "primitive",
+          "help_text": "Electric, gas, internet, etc."
+        },
+        {
+          "name": "emergency_fund",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 1500,
+          "data_type": "primitive",
+          "help_text": "Buffer for unexpected expenses"
+        },
+        {
+          "name": "other_expenses",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 500,
+          "data_type": "primitive",
+          "help_text": "Miscellaneous costs"
+        },
+        {
+          "name": "total_estimated_costs",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 13700,
+          "data_type": "primitive",
+          "help_text": "Sum of all expense categories"
+        },
+        {
+          "name": "remaining_budget",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 1300,
+          "data_type": "primitive",
+          "help_text": "Budget remaining after estimated costs"
+        },
+        {
+          "name": "budget_status",
+          "widget": "badge",
+          "editable": false,
+          "function": "computed",
+          "value": "On Track",
+          "data_type": "primitive",
+          "help_text": "Budget health indicator"
+        }
+      ]
+    },
+    {
+      "id": "move_checklist_1",
+      "type": "Move_Checklist",
+      "icon": "✅",
+      "color": "#f59e0b",
+      "public_identifier": "SF Move Checklist",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "move_checklist_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "checklist_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Move Checklist",
+          "data_type": "primitive",
+          "placeholder": "Name your checklist"
+        },
+        {
+          "name": "tasks",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "id": "task_1",
+              "category": "Housing",
+              "task": "Research San Francisco neighborhoods",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": "",
+              "done": true
+            },
+            {
+              "id": "task_2",
+              "category": "Housing",
+              "task": "Schedule apartment viewings",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": "",
+              "done": true
+            },
+            {
+              "id": "task_3",
+              "category": "Housing",
+              "task": "Submit rental applications",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": "",
+              "done": true
+            },
+            {
+              "id": "task_4",
+              "category": "Housing",
+              "task": "Sign lease agreement",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": "",
+              "done": true
+            },
+            {
+              "id": "task_5",
+              "category": "Logistics",
+              "task": "Get moving quotes from 3+ companies",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_6",
+              "category": "Logistics",
+              "task": "Book moving company or rent truck",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_7",
+              "category": "Logistics",
+              "task": "Purchase packing supplies",
+              "priority": "Medium",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_8",
+              "category": "Logistics",
+              "task": "Start packing non-essentials",
+              "priority": "Medium",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_9",
+              "category": "Administrative",
+              "task": "Update address with USPS",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_10",
+              "category": "Administrative",
+              "task": "Transfer or update driver's license",
+              "priority": "Medium",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_11",
+              "category": "Administrative",
+              "task": "Register to vote in California",
+              "priority": "Medium",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_12",
+              "category": "Administrative",
+              "task": "Update address with banks and credit cards",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_13",
+              "category": "Utilities",
+              "task": "Set up electricity and gas",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_14",
+              "category": "Utilities",
+              "task": "Set up internet and cable",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_15",
+              "category": "Utilities",
+              "task": "Cancel or transfer current utilities",
+              "priority": "Medium",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_16",
+              "category": "Healthcare",
+              "task": "Find new primary care doctor",
+              "priority": "Medium",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_17",
+              "category": "Healthcare",
+              "task": "Transfer prescriptions to SF pharmacy",
+              "priority": "High",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_18",
+              "category": "Local Setup",
+              "task": "Research public transportation options (BART, Muni)",
+              "priority": "Medium",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_19",
+              "category": "Local Setup",
+              "task": "Get Clipper Card for transit",
+              "priority": "Low",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            },
+            {
+              "id": "task_20",
+              "category": "Local Setup",
+              "task": "Explore neighborhood and find grocery stores",
+              "priority": "Low",
+              "due_date": null,
+              "completed": false,
+              "notes": ""
+            }
+          ],
+          "data_type": "array",
+          "help_text": "Track all your moving tasks"
+        },
+        {
+          "name": "completion_percentage",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 20,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0,
+            "max": 100
+          },
+          "help_text": "Percentage of tasks completed"
+        }
+      ]
+    },
+    {
+      "id": "cost_of_living_calculator_1",
+      "type": "Cost_Calculator",
+      "icon": "🧮",
+      "color": "#ec4899",
+      "public_identifier": "SF Cost of Living Calculator",
+      "attributes": [
+        {
+          "name": "id",
+          "widget": "short_text",
+          "editable": false,
+          "function": "identifier",
+          "value": "cost_of_living_calculator_1",
+          "data_type": "primitive"
+        },
+        {
+          "name": "calculator_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "SF Cost of Living Calculator",
+          "data_type": "primitive",
+          "placeholder": "Name your calculator"
+        },
+        {
+          "name": "current_city",
+          "widget": "location",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "placeholder": "Your current city",
+          "help_text": "For comparison purposes"
+        },
+        {
+          "name": "current_monthly_income",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "help_text": "Your current monthly take-home pay"
+        },
+        {
+          "name": "sf_monthly_rent",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 3000,
+          "data_type": "primitive",
+          "help_text": "Expected monthly rent in SF"
+        },
+        {
+          "name": "sf_monthly_groceries",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 600,
+          "data_type": "primitive",
+          "help_text": "Estimated monthly grocery costs"
+        },
+        {
+          "name": "sf_monthly_transportation",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "help_text": "Transit pass, gas, parking, etc."
+        },
+        {
+          "name": "sf_monthly_utilities",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 150,
+          "data_type": "primitive",
+          "help_text": "Electric, gas, internet, phone"
+        },
+        {
+          "name": "sf_monthly_entertainment",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 400,
+          "data_type": "primitive",
+          "help_text": "Dining, activities, subscriptions"
+        },
+        {
+          "name": "sf_monthly_other",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 300,
+          "data_type": "primitive",
+          "help_text": "Healthcare, personal care, misc"
+        },
+        {
+          "name": "total_monthly_expenses",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 4600,
+          "data_type": "primitive",
+          "help_text": "Total estimated monthly expenses in SF"
+        },
+        {
+          "name": "recommended_annual_salary",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 108000,
+          "data_type": "primitive",
+          "help_text": "Recommended gross annual salary (expenses × 12 × 1.95 for taxes/savings)"
+        },
+        {
+          "name": "cost_comparison_notes",
+          "widget": "long_text",
+          "editable": true,
+          "function": "display",
+          "value": "San Francisco has one of the highest costs of living in the US. Housing is typically 2-3x the national average. However, salaries are also higher to compensate.",
+          "data_type": "primitive",
+          "help_text": "Notes about cost differences"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "moving_plan_1",
+      "target_entity_id": "housing_search_1",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Moving plan details inform housing search criteria"
+      }
+    },
+    {
+      "source_entity_id": "moving_plan_1",
+      "target_entity_id": "move_budget_1",
+      "relationship": "requires",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Moving plan requires budget planning"
+      }
+    },
+    {
+      "source_entity_id": "moving_plan_1",
+      "target_entity_id": "move_checklist_1",
+      "relationship": "manages",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Moving plan progress updates based on checklist completion"
+      }
+    },
+    {
+      "source_entity_id": "housing_search_1",
+      "target_entity_id": "move_budget_1",
+      "relationship": "impacts",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Housing choices affect budget calculations"
+      }
+    },
+    {
+      "source_entity_id": "housing_search_1",
+      "target_entity_id": "cost_of_living_calculator_1",
+      "relationship": "informs",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Housing costs feed into cost of living calculations"
+      }
+    },
+    {
+      "source_entity_id": "move_checklist_1",
+      "target_entity_id": "moving_plan_1",
+      "relationship": "updates",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Checklist completion updates overall move progress"
+      }
+    }
+  ],
+  "created_at": "2025-10-25T14:52:24.429671",
+  "updated_at": "2025-10-25T14:53:00.154Z"
+}

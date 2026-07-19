@@ -1,4 +1,4 @@
-import asyncio, json, os, uuid, shutil, base64, time
+import asyncio, json, os, uuid, shutil, base64, time, functools
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, BackgroundTasks, UploadFile, Form
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -8,8 +8,10 @@ from backend.proxy_manager import SmartProxyManager  # Updated import
 from backend.agent import run_agent
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from backend.config import WS_BASE_URL, STREAM_SESSION_TIMEOUT_S
-from backend.bulk_engine import BulkEngine, BulkJobConfig
+from backend.config import WS_BASE_URL, STREAM_SESSION_TIMEOUT_S, EXTRACTION_MAX_CHARS
+from backend.bulk_engine import BulkEngine, BulkJobConfig, extract_dom
+from backend.browser_controller import BrowserController
+from backend.universal_extractor import MODEL
 
 app = FastAPI()
 
@@ -411,6 +413,111 @@ async def resume_bulk_job(job_id: str):
 
     tasks[job_id] = asyncio.create_task(_run())
     return {"message": "Job resumed", "job_id": job_id}
+
+
+# ── Structured scrape: URLs -> JSON rows for the generative dashboard ─────────
+# Synchronous (awaits and returns rows in the response — not the async job/WS
+# flow). Reuses extract_dom (HTML cleaning) + the configured Gemini MODEL with an
+# array-aware parser, since neither existing path returns row-records. Ghost Mode
+# is on via BrowserController.__aenter__. One bad URL is reported, never fatal.
+
+class StructuredScrapeRequest(BaseModel):
+    urls: list[str]
+    prompt: str
+    max_rows: int | None = None
+
+
+_STRUCTURED_ROWS_PROMPT = (
+    "You extract structured tabular data from a web page.\n"
+    "USER GOAL: {prompt}\n"
+    "SOURCE URL: {url}\n\n"
+    "Return ONLY a JSON ARRAY of flat record objects that match the goal, e.g. "
+    '[{{"name": "...", "price": "..."}}]. Every record MUST use the SAME keys. '
+    "Use ONLY data present on the page — never invent values. No prose, no markdown.\n\n"
+    "PAGE CONTENT:\n{content}"
+)
+
+
+def _parse_rows(raw: str) -> list:
+    """Extract a JSON array of record dicts from an LLM reply (array-aware, tolerant)."""
+    if not raw:
+        return []
+    start, end = raw.find("["), raw.rfind("]") + 1
+    if start == -1 or end <= start:
+        return []
+    try:
+        data = json.loads(raw[start:end])
+    except json.JSONDecodeError:
+        return []
+    return [r for r in data if isinstance(r, dict)]
+
+
+async def _scrape_one_structured(bc, url: str, prompt: str) -> list:
+    """Scrape one URL into a list of flat record dicts (reuses extract_dom + Gemini)."""
+    await bc.page.goto(url, wait_until="domcontentloaded", timeout=45000)
+    await bc.page.wait_for_timeout(1500)
+    title = await bc.page.title()
+    html = await bc.page.content()
+    cleaned = extract_dom(html, url, title)
+    content = json.dumps(cleaned, ensure_ascii=False)[:EXTRACTION_MAX_CHARS]
+    prompt_text = _STRUCTURED_ROWS_PROMPT.format(prompt=prompt, url=url, content=content)
+    # Gemini extraction with one retry — the API returns transient 5xx / deadline
+    # errors under load, and a single retry absorbs most of them.
+    response = None
+    for attempt in range(2):
+        try:
+            response = await asyncio.to_thread(functools.partial(MODEL.generate_content, prompt_text))
+            break
+        except Exception as e:
+            if attempt == 1:
+                raise
+            print(f"⚠️ Gemini extraction transient error, retrying: {e}")
+    rows = _parse_rows(getattr(response, "text", "") or "")
+    for r in rows:
+        r.setdefault("_source_url", url)
+    return rows
+
+
+@app.post("/scrape/structured")
+async def scrape_structured(req: StructuredScrapeRequest):
+    """Scrape URLs and return structured JSON rows for the generative dashboard."""
+    urls = [u for u in (req.urls or []) if isinstance(u, str) and u.strip()]
+    if not urls:
+        return {"success": False, "rows": [], "source": [], "error": "No URLs provided."}
+
+    proxy_info = smart_proxy_manager.get_best_proxy()
+    proxy = proxy_info.to_playwright_dict() if proxy_info else None
+    proxy_country = proxy_info.location if proxy_info else None
+
+    rows: list = []
+    errors: list = []
+    bc = BrowserController(headless=False, proxy=proxy,
+                           proxy_country=proxy_country, block_resources=True)
+    try:
+        await bc.__aenter__()
+        for url in urls:
+            try:
+                rows.extend(await _scrape_one_structured(bc, url, req.prompt))
+            except Exception as e:
+                print(f"⚠️ structured scrape failed for {url}: {e}")
+                errors.append({"url": url, "error": str(e)})
+            if req.max_rows and len(rows) >= req.max_rows:
+                rows = rows[: req.max_rows]
+                break
+    except Exception as e:
+        return {"success": False, "rows": [], "source": urls, "error": f"Browser error: {e}"}
+    finally:
+        try:
+            await bc.__aexit__(None, None, None)
+        except Exception:
+            pass
+
+    return {
+        "success": bool(rows),
+        "rows": rows,
+        "source": urls,
+        **({"error": f"{len(errors)} of {len(urls)} URL(s) failed"} if errors else {}),
+    }
 
 
 # Serve the built frontend (SPA). Prefer the production build in frontend/dist;

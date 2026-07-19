@@ -1,0 +1,487 @@
+{
+  "version": 1,
+  "task_description": "Plan and organize a trip to Japan including itinerary, budget, and activities",
+  "entities": [
+    {
+      "id": "trip_plan_1",
+      "type": "Trip_Plan",
+      "icon": "🗾",
+      "color": "#e11d48",
+      "public_identifier": "Japan Adventure",
+      "attributes": [
+        {
+          "name": "trip_name",
+          "widget": "short_text",
+          "editable": true,
+          "function": "publicIdentifier",
+          "value": "Japan Adventure",
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          },
+          "placeholder": "My Japan Trip",
+          "help_text": "Give your trip a memorable name"
+        },
+        {
+          "name": "travel_dates",
+          "widget": "date_range",
+          "editable": true,
+          "function": "display",
+          "value": null,
+          "data_type": "primitive",
+          "validation": {
+            "required": true
+          },
+          "help_text": "When are you planning to visit?"
+        },
+        {
+          "name": "travelers",
+          "widget": "number",
+          "editable": true,
+          "function": "display",
+          "value": 2,
+          "data_type": "primitive",
+          "validation": {
+            "min": 1,
+            "max": 20,
+            "required": true
+          },
+          "help_text": "Number of people traveling"
+        },
+        {
+          "name": "trip_style",
+          "widget": "radio",
+          "editable": true,
+          "function": "filterable",
+          "value": "balanced",
+          "data_type": "primitive",
+          "options": [
+            "budget",
+            "balanced",
+            "luxury"
+          ],
+          "help_text": "Choose your travel style"
+        },
+        {
+          "name": "total_budget",
+          "widget": "currency",
+          "editable": true,
+          "function": "display",
+          "value": 5000,
+          "data_type": "primitive",
+          "validation": {
+            "min": 0
+          },
+          "help_text": "Total budget for the entire trip (USD)"
+        },
+        {
+          "name": "interests",
+          "widget": "multi_select",
+          "editable": true,
+          "function": "filterable",
+          "value": [
+            "culture",
+            "food",
+            "nature"
+          ],
+          "data_type": "array",
+          "options": [
+            "culture",
+            "food",
+            "nature",
+            "shopping",
+            "nightlife",
+            "temples",
+            "technology",
+            "anime",
+            "hot_springs",
+            "hiking"
+          ],
+          "help_text": "What interests you most about Japan?"
+        }
+      ]
+    },
+    {
+      "id": "itinerary_1",
+      "type": "Itinerary",
+      "icon": "📍",
+      "color": "#0ea5e9",
+      "public_identifier": "[{'city': 'Tokyo', 'nights': 4, 'activities': ['Visit Senso-ji Temple', 'Explore Shibuya', 'Tsukiji Outer Market'], 'accommodation': '', 'notes': 'Start in the capital city'}, {'city': 'Kyoto', 'nights': 3, 'activities': ['Fushimi Inari Shrine', 'Arashiyama Bamboo Grove', 'Kinkaku-ji Temple'], 'accommodation': '', 'notes': 'Traditional culture and temples'}, {'city': 'Osaka', 'nights': 2, 'activities': ['Osaka Castle', 'Dotonbori Street Food', 'Namba District'], 'accommodation': '', 'notes': 'Food capital of Japan'}]",
+      "attributes": [
+        {
+          "name": "destinations",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "city": "Tokyo",
+              "nights": 4,
+              "activities": [
+                "Visit Senso-ji Temple",
+                "Explore Shibuya",
+                "Tsukiji Outer Market"
+              ],
+              "accommodation": "",
+              "notes": "Start in the capital city"
+            },
+            {
+              "city": "Kyoto",
+              "nights": 3,
+              "activities": [
+                "Fushimi Inari Shrine",
+                "Arashiyama Bamboo Grove",
+                "Kinkaku-ji Temple"
+              ],
+              "accommodation": "",
+              "notes": "Traditional culture and temples"
+            },
+            {
+              "city": "Osaka",
+              "nights": 2,
+              "activities": [
+                "Osaka Castle",
+                "Dotonbori Street Food",
+                "Namba District"
+              ],
+              "accommodation": "",
+              "notes": "Food capital of Japan"
+            }
+          ],
+          "data_type": "array",
+          "help_text": "Plan your route through Japan"
+        },
+        {
+          "name": "total_nights",
+          "widget": "number",
+          "editable": false,
+          "function": "computed",
+          "value": 9,
+          "data_type": "primitive",
+          "help_text": "Calculated from destinations"
+        }
+      ]
+    },
+    {
+      "id": "budget_tracker_1",
+      "type": "Budget_Tracker",
+      "icon": "💰",
+      "color": "#10b981",
+      "public_identifier": "[{'category': 'Flights', 'estimated': 1200, 'actual': 0, 'paid': False, 'notes': ''}, {'category': 'Accommodation', 'estimated': 1350, 'actual': 0, 'paid': False, 'notes': '9 nights average $150/night'}, {'category': 'JR Pass', 'estimated': 280, 'actual': 0, 'paid': False, 'notes': '7-day pass for 2 travelers'}, {'category': 'Food & Dining', 'estimated': 900, 'actual': 0, 'paid': False, 'notes': '$50/day per person'}, {'category': 'Activities & Entrance Fees', 'estimated': 600, 'actual': 0, 'paid': False, 'notes': 'Temples, museums, experiences'}, {'category': 'Shopping & Souvenirs', 'estimated': 400, 'actual': 0, 'paid': False, 'notes': ''}, {'category': 'Miscellaneous', 'estimated': 270, 'actual': 0, 'paid': False, 'notes': 'Local transport, pocket wifi, etc.'}]",
+      "attributes": [
+        {
+          "name": "expenses",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "category": "Flights",
+              "estimated": 1200,
+              "actual": 0,
+              "paid": false,
+              "notes": ""
+            },
+            {
+              "category": "Accommodation",
+              "estimated": 1350,
+              "actual": 0,
+              "paid": false,
+              "notes": "9 nights average $150/night"
+            },
+            {
+              "category": "JR Pass",
+              "estimated": 280,
+              "actual": 0,
+              "paid": false,
+              "notes": "7-day pass for 2 travelers"
+            },
+            {
+              "category": "Food & Dining",
+              "estimated": 900,
+              "actual": 0,
+              "paid": false,
+              "notes": "$50/day per person"
+            },
+            {
+              "category": "Activities & Entrance Fees",
+              "estimated": 600,
+              "actual": 0,
+              "paid": false,
+              "notes": "Temples, museums, experiences"
+            },
+            {
+              "category": "Shopping & Souvenirs",
+              "estimated": 400,
+              "actual": 0,
+              "paid": false,
+              "notes": ""
+            },
+            {
+              "category": "Miscellaneous",
+              "estimated": 270,
+              "actual": 0,
+              "paid": false,
+              "notes": "Local transport, pocket wifi, etc."
+            }
+          ],
+          "data_type": "array",
+          "help_text": "Track estimated vs actual expenses"
+        },
+        {
+          "name": "total_estimated",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 5000,
+          "data_type": "primitive",
+          "help_text": "Sum of all estimated expenses"
+        },
+        {
+          "name": "total_spent",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 0,
+          "data_type": "primitive",
+          "help_text": "Sum of all actual expenses"
+        },
+        {
+          "name": "remaining_budget",
+          "widget": "currency",
+          "editable": false,
+          "function": "computed",
+          "value": 5000,
+          "data_type": "primitive",
+          "help_text": "Budget remaining"
+        }
+      ]
+    },
+    {
+      "id": "checklist_1",
+      "type": "Trip_Checklist",
+      "icon": "✅",
+      "color": "#8b5cf6",
+      "public_identifier": "[{'task': 'Book flights', 'done': False, 'priority': 'high', 'due_date': None, 'category': 'booking'}, {'task': 'Apply for/check passport validity', 'done': False, 'priority': 'high', 'due_date': None, 'category': 'documents'}, {'task': 'Purchase JR Pass', 'done': False, 'priority': 'high', 'due_date': None, 'category': 'booking'}, {'task': 'Book accommodations', 'done': False, 'priority': 'high', 'due_date': None, 'category': 'booking'}, {'task': 'Get travel insurance', 'done': False, 'priority': 'medium', 'due_date': None, 'category': 'documents'}, {'task': 'Reserve pocket WiFi or SIM card', 'done': False, 'priority': 'medium', 'due_date': None, 'category': 'booking'}, {'task': 'Notify bank of travel dates', 'done': False, 'priority': 'medium', 'due_date': None, 'category': 'documents'}, {'task': 'Download offline maps and translation apps', 'done': False, 'priority': 'medium', 'due_date': None, 'category': 'preparation'}, {'task': 'Exchange some currency to Yen', 'done': False, 'priority': 'low', 'due_date': None, 'category': 'preparation'}, {'task': 'Pack luggage', 'done': False, 'priority': 'low', 'due_date': None, 'category': 'preparation'}]",
+      "attributes": [
+        {
+          "name": "tasks",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "task": "Book flights",
+              "done": true,
+              "priority": "high",
+              "due_date": null,
+              "category": "booking"
+            },
+            {
+              "task": "Apply for/check passport validity",
+              "done": false,
+              "priority": "high",
+              "due_date": null,
+              "category": "documents"
+            },
+            {
+              "task": "Purchase JR Pass",
+              "done": true,
+              "priority": "high",
+              "due_date": null,
+              "category": "booking"
+            },
+            {
+              "task": "Book accommodations",
+              "done": true,
+              "priority": "high",
+              "due_date": null,
+              "category": "booking"
+            },
+            {
+              "task": "Get travel insurance",
+              "done": false,
+              "priority": "medium",
+              "due_date": null,
+              "category": "documents"
+            },
+            {
+              "task": "Reserve pocket WiFi or SIM card",
+              "done": false,
+              "priority": "medium",
+              "due_date": null,
+              "category": "booking"
+            },
+            {
+              "task": "Notify bank of travel dates",
+              "done": false,
+              "priority": "medium",
+              "due_date": null,
+              "category": "documents"
+            },
+            {
+              "task": "Download offline maps and translation apps",
+              "done": false,
+              "priority": "medium",
+              "due_date": null,
+              "category": "preparation"
+            },
+            {
+              "task": "Exchange some currency to Yen",
+              "done": false,
+              "priority": "low",
+              "due_date": null,
+              "category": "preparation"
+            },
+            {
+              "task": "Pack luggage",
+              "done": false,
+              "priority": "low",
+              "due_date": null,
+              "category": "preparation"
+            }
+          ],
+          "data_type": "array",
+          "help_text": "Keep track of everything you need to do"
+        },
+        {
+          "name": "completion_percentage",
+          "widget": "progress",
+          "editable": false,
+          "function": "computed",
+          "value": 30,
+          "data_type": "primitive",
+          "help_text": "Percentage of tasks completed"
+        }
+      ]
+    },
+    {
+      "id": "packing_list_1",
+      "type": "Packing_List",
+      "icon": "🎒",
+      "color": "#f59e0b",
+      "public_identifier": "[{'item': 'Passport', 'packed': False, 'category': 'documents', 'quantity': 1}, {'item': 'Flight confirmations', 'packed': False, 'category': 'documents', 'quantity': 1}, {'item': 'Hotel confirmations', 'packed': False, 'category': 'documents', 'quantity': 1}, {'item': 'JR Pass voucher', 'packed': False, 'category': 'documents', 'quantity': 1}, {'item': 'Credit cards & cash', 'packed': False, 'category': 'documents', 'quantity': 1}, {'item': 'Phone charger & adapter', 'packed': False, 'category': 'electronics', 'quantity': 1}, {'item': 'Comfortable walking shoes', 'packed': False, 'category': 'clothing', 'quantity': 2}, {'item': 'Light jacket', 'packed': False, 'category': 'clothing', 'quantity': 1}, {'item': 'Medications', 'packed': False, 'category': 'health', 'quantity': 1}, {'item': 'Reusable water bottle', 'packed': False, 'category': 'accessories', 'quantity': 1}]",
+      "attributes": [
+        {
+          "name": "items",
+          "widget": "array",
+          "editable": true,
+          "function": "display",
+          "value": [
+            {
+              "item": "Passport",
+              "packed": false,
+              "category": "documents",
+              "quantity": 1
+            },
+            {
+              "item": "Flight confirmations",
+              "packed": false,
+              "category": "documents",
+              "quantity": 1
+            },
+            {
+              "item": "Hotel confirmations",
+              "packed": false,
+              "category": "documents",
+              "quantity": 1
+            },
+            {
+              "item": "JR Pass voucher",
+              "packed": false,
+              "category": "documents",
+              "quantity": 1
+            },
+            {
+              "item": "Credit cards & cash",
+              "packed": false,
+              "category": "documents",
+              "quantity": 1
+            },
+            {
+              "item": "Phone charger & adapter",
+              "packed": false,
+              "category": "electronics",
+              "quantity": 1
+            },
+            {
+              "item": "Comfortable walking shoes",
+              "packed": false,
+              "category": "clothing",
+              "quantity": 2
+            },
+            {
+              "item": "Light jacket",
+              "packed": false,
+              "category": "clothing",
+              "quantity": 1
+            },
+            {
+              "item": "Medications",
+              "packed": false,
+              "category": "health",
+              "quantity": 1
+            },
+            {
+              "item": "Reusable water bottle",
+              "packed": false,
+              "category": "accessories",
+              "quantity": 1
+            }
+          ],
+          "data_type": "array",
+          "help_text": "What to bring on your trip"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "itinerary_1",
+      "relationship": "defines",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip plan defines the overall parameters for the itinerary"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "budget_tracker_1",
+      "relationship": "sets_budget_for",
+      "mechanism": "update",
+      "metadata": {
+        "description": "Total budget from trip plan flows to budget tracker"
+      }
+    },
+    {
+      "source_entity_id": "itinerary_1",
+      "target_entity_id": "budget_tracker_1",
+      "relationship": "influences",
+      "mechanism": "compute",
+      "metadata": {
+        "description": "Itinerary length affects accommodation and food budgets"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "checklist_1",
+      "relationship": "generates_tasks_for",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip plan generates preparation tasks"
+      }
+    },
+    {
+      "source_entity_id": "trip_plan_1",
+      "target_entity_id": "packing_list_1",
+      "relationship": "informs",
+      "mechanism": "reference",
+      "metadata": {
+        "description": "Trip style and interests inform what to pack"
+      }
+    }
+  ],
+  "created_at": "2025-10-25T14:56:50.362132",
+  "updated_at": "2025-10-25T14:57:28.087Z"
+}

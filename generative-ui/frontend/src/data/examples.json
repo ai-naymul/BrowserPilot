@@ -1,0 +1,38 @@
+{
+  "examples": [
+    {
+      "emoji": "✈️",
+      "text": "Compare Paris, Rome, and Barcelona for 7 day vacation",
+      "category": "travel"
+    },
+    {
+      "emoji": "🏠",
+      "text": "I'm moving to San Francisco and need to find an apartment",
+      "category": "relocation"
+    },
+    {
+      "emoji": "🍽️",
+      "text": "I'm hosting a dinner party for 12 people",
+      "category": "events"
+    },
+    {
+      "emoji": "🏫",
+      "text": "Compare universities in California for computer science",
+      "category": "education"
+    },
+    {
+      "emoji": "🚗",
+      "text": "Help me choose between Tesla Model 3, BMW i4, and Polestar 2",
+      "category": "shopping"
+    },
+    {
+      "emoji": "💼",
+      "text": "Compare job offers in NYC, Seattle, and Austin",
+      "category": "career"
+    }
+  ],
+  "meta": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-21"
+  }
+}
