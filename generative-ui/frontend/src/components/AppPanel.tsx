@@ -285,13 +285,15 @@ export const AppPanel = ({
                   exit={{ opacity: 0 }}
                   className="p-6 h-full overflow-auto"
                 >
-                  <div className="space-y-6">
+                  {/* `tabular` gives every number in the dashboard tabular figures
+                      so columns align (cascades to tables, charts, cards). */}
+                  <div className="space-y-6 tabular">
                     {renderableComponents.map((component, idx) => (
                       <motion.div
                         key={`${component.type}-${idx}`}
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.05 }}
+                        transition={{ delay: Math.min(idx * 0.06, 0.5), duration: 0.35, ease: "easeOut" }}
                       >
                         <DynamicComponentRenderer
                           spec={component}
