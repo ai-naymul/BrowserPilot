@@ -66,6 +66,8 @@ class _FakeClient:
 @pytest.fixture(autouse=True)
 def _offline(monkeypatch):
     monkeypatch.setattr(refine, "enrich_entities_with_geocoding", AsyncMock(side_effect=lambda e: e))
+    # Pin the provider so tests don't depend on import-time env/.env state.
+    monkeypatch.setattr(refine, "RENDER_PROVIDER", "openrouter")
 
 
 def _mock_scrape(monkeypatch, payload=None, exc=None):

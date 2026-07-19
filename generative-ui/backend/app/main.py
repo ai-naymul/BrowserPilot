@@ -4,7 +4,7 @@ Main FastAPI application for Generative UI Browser Backend
 
 from dotenv import load_dotenv
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Header, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -26,6 +26,14 @@ if api_key:
 else:
     print("✗ Warning: No API key found!")
 
+def require_api_key(x_api_key: str = Header(default=None, alias="X-API-Key")):
+    """Gate the money-spending endpoints. If GENUI_API_KEY is unset, auth is
+    disabled (local dev); if set, requests must send a matching X-API-Key header."""
+    expected = os.getenv("GENUI_API_KEY")
+    if expected and x_api_key != expected:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
+
+
 def create_app() -> FastAPI:
     """Create and configure the FastAPI application"""
 
@@ -37,8 +45,9 @@ def create_app() -> FastAPI:
         redoc_url="/redoc"
     )
 
-    # Initialize rate limiter
-    limiter = Limiter(key_func=get_remote_address)
+    # Initialize rate limiter — a per-IP default so the LLM endpoints can't be
+    # hammered into unbounded spend. Override with RATE_LIMIT (e.g. "10/minute").
+    limiter = Limiter(key_func=get_remote_address, default_limits=[os.getenv("RATE_LIMIT", "30/minute")])
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -83,24 +92,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Include routers
-    app.include_router(
-        generate_router,
-        prefix="/api",
-        tags=["generation"]
-    )
-    
-    # Configure rate limiter for scrape router
-    scrape_limiter = Limiter(key_func=get_remote_address)
-    app.state.limiter = scrape_limiter
-    
-    app.include_router(
-        scrape_router,
-        prefix="/api",
-        tags=["scraping"]
-    )
-    app.include_router(refine_router, prefix="/api", tags=["refine"])
-    app.include_router(entity_matcher_router, prefix="/api", tags=["entity-matching"])
+    # Include routers — the money-spending ones are gated by require_api_key (a
+    # no-op unless GENUI_API_KEY is set) and covered by the default rate limit.
+    _protected = [Depends(require_api_key)]
+    app.include_router(generate_router, prefix="/api", tags=["generation"], dependencies=_protected)
+    app.include_router(scrape_router, prefix="/api", tags=["scraping"], dependencies=_protected)
+    app.include_router(refine_router, prefix="/api", tags=["refine"], dependencies=_protected)
+    app.include_router(entity_matcher_router, prefix="/api", tags=["entity-matching"], dependencies=_protected)
 
     return app
 
