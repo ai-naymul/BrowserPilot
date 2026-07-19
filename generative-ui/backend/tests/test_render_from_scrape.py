@@ -82,7 +82,7 @@ async def test_scrape_render_happy_path(monkeypatch):
     _mock_scrape(monkeypatch, payload={
         "success": True,
         "rows": [{"name": "Nike", "price": "$120"}, {"name": "Adidas", "price": "$95"}],
-        "source": "nike.com, adidas.com",
+        "source": ["https://nike.com/x", "https://adidas.com/y"],  # BrowserPilot returns a list
     })
     _mock_llm_ok(monkeypatch)
     resp = await render_from_scrape(ScrapeRenderRequest(

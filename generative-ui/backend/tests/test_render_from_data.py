@@ -111,3 +111,16 @@ async def test_render_invalid_component_falls_back_not_crash(monkeypatch):
     assert resp.success is True
     # invalid spec becomes a visible 'text' fallback node, never a blank/crash
     assert resp.components and resp.components[0]["type"] == "text"
+
+
+@pytest.mark.asyncio
+async def test_render_via_gemini_provider(monkeypatch):
+    # Same flow, but through the Gemini provider path (one-key operation).
+    monkeypatch.setattr(refine, "RENDER_PROVIDER", "gemini")
+    fake_model = SimpleNamespace(generate_content=lambda *a, **k: SimpleNamespace(text=_GOOD_LLM_JSON))
+    monkeypatch.setattr(refine, "_get_gemini_render_model", lambda: fake_model)
+    resp = await render_from_data(DataRenderRequest(
+        rows=[{"name": "Nike", "price": "$120"}, {"name": "Adidas", "price": "$95"}],
+        question="compare these prices"))
+    assert resp.success is True
+    assert resp.components and {"bar_chart", "comparison_table"} <= {c["type"] for c in resp.components}

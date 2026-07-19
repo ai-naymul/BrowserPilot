@@ -1131,15 +1131,47 @@ def _extract_json_object(text: str) -> str:
     return t
 
 
+# Render LLM provider: Gemini (one key — the same one the scraper uses) or
+# OpenRouter/Claude. Defaults to Gemini when GOOGLE_API_KEY is present so the whole
+# product can run on a single key; set RENDER_PROVIDER=openrouter to use Claude.
+RENDER_PROVIDER = os.getenv("RENDER_PROVIDER", "gemini" if os.getenv("GOOGLE_API_KEY") else "openrouter")
+GEMINI_RENDER_MODEL = os.getenv("GEMINI_RENDER_MODEL", "gemini-flash-latest")
+
+_gemini_render_model = None
+
+
+def _get_gemini_render_model():
+    """Lazily build the Gemini model (import + configure only when first used)."""
+    global _gemini_render_model
+    if _gemini_render_model is None:
+        import google.generativeai as genai
+        genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+        _gemini_render_model = genai.GenerativeModel(GEMINI_RENDER_MODEL)
+    return _gemini_render_model
+
+
 async def _grounded_render_call(prompt: str) -> dict:
-    """One grounded LLM call — low temperature + bounded tokens; returns parsed dict."""
-    response = await llm_client.chat.completions.create(
-        model="anthropic/claude-sonnet-4.5",
-        temperature=0.15,
-        max_tokens=16000,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return json.loads(_extract_json_object(response.choices[0].message.content))
+    """One grounded LLM call — low temperature + bounded tokens; returns parsed dict.
+
+    Provider-agnostic: Gemini or OpenRouter/Claude per RENDER_PROVIDER.
+    """
+    if RENDER_PROVIDER == "gemini":
+        model = _get_gemini_render_model()
+        resp = await asyncio.to_thread(
+            lambda: model.generate_content(
+                prompt, generation_config={"temperature": 0.15, "max_output_tokens": 8192}
+            )
+        )
+        text = getattr(resp, "text", "") or ""
+    else:
+        response = await llm_client.chat.completions.create(
+            model="anthropic/claude-sonnet-4.5",
+            temperature=0.15,
+            max_tokens=16000,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = response.choices[0].message.content
+    return json.loads(_extract_json_object(text))
 
 
 @router.post("/render-from-data", response_model=TaskCreateResponse)
@@ -1266,11 +1298,15 @@ async def render_from_scrape(request: ScrapeRenderRequest) -> TaskCreateResponse
     if not rows:
         return TaskCreateResponse(success=False, error="The scrape returned no data to visualize.")
 
-    # 2) Render (LLM, grounded on the scraped rows)
+    # 2) Render (LLM, grounded on the scraped rows). BrowserPilot returns `source`
+    # as a list of URLs; DataRenderRequest.source is a string, so coerce it.
+    src = scrape.get("source")
+    if isinstance(src, list):
+        src = ", ".join(str(u) for u in src)
     return await render_from_data(DataRenderRequest(
         rows=rows,
         question=request.question,
-        source=scrape.get("source") or ", ".join(urls[:3]),
+        source=src or ", ".join(urls[:3]),
     ))
 
 
