@@ -438,6 +438,26 @@ _STRUCTURED_ROWS_PROMPT = (
 )
 
 
+def _gemini_text(resp) -> str:
+    """Safely pull text from a Gemini response. `.text` RAISES (not caught by
+    getattr's default) on multi-part / thinking-model responses, so fall back to
+    concatenating the real text parts and skipping thought parts."""
+    try:
+        return resp.text or ""
+    except Exception:
+        pass
+    out = []
+    try:
+        for cand in (resp.candidates or []):
+            for p in (getattr(cand.content, "parts", None) or []):
+                t = getattr(p, "text", None)
+                if t and not getattr(p, "thought", False):
+                    out.append(t)
+    except Exception:
+        pass
+    return "".join(out)
+
+
 def _parse_rows(raw: str) -> list:
     """Extract a JSON array of record dicts from an LLM reply (array-aware, tolerant)."""
     if not raw:
@@ -472,7 +492,7 @@ async def _scrape_one_structured(bc, url: str, prompt: str) -> list:
             if attempt == 1:
                 raise
             print(f"⚠️ Gemini extraction transient error, retrying: {e}")
-    rows = _parse_rows(getattr(response, "text", "") or "")
+    rows = _parse_rows(_gemini_text(response))
     for r in rows:
         r.setdefault("_source_url", url)
     return rows

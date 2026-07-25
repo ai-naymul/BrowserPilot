@@ -11,6 +11,7 @@ Architecture:
 
 import asyncio
 import json
+import re
 import time
 import uuid
 import logging
@@ -265,6 +266,16 @@ def extract_dom(html: str, url: str, title: str) -> dict:
         if name and content and name in ("description", "og:title", "og:description", "keywords"):
             meta[name] = content[:300]
 
+    # ── Repeated "record" blocks (product cards, listing rows, search results) ──
+    # The heading/paragraph passes above are tuned for article pages and miss the
+    # data on listing/e-commerce pages: prices live in short tags (dropped by the
+    # >20-char paragraph filter) and ratings are encoded in CSS classes
+    # (get_text returns nothing). Capture repeated item containers as whole-text
+    # records — including a product's title attribute, its price text, and any
+    # value that lives only in a class — so the extractor LLM actually sees the
+    # data. Fully generalized: no per-site selectors.
+    records = _extract_records(soup)
+
     return {
         "url": url,
         "title": title,
@@ -274,7 +285,68 @@ def extract_dom(html: str, url: str, title: str) -> dict:
         "links": links[:30],
         "tables": tables,
         "images": images,
+        "records": records,
     }
+
+
+# Classes/attributes that carry structured data on listing pages.
+_DATA_CLASS_RE = re.compile(
+    r"price|cost|amount|rating|star|score|review|value|discount|sale|stock|avail",
+    re.I,
+)
+# Class hints that mark a repeated item container (product card, list row).
+_ITEM_CLASS_RE = re.compile(
+    r"product|item|card|listing|result|tile|entry|post|article|cell|row",
+    re.I,
+)
+
+
+def _record_text(el) -> str:
+    """Flatten one item container into a single data-bearing line.
+
+    Pulls the visible text, prepends any product title/alt attributes (real
+    names are often only in `title=`), and appends class tokens for values that
+    render with no text (e.g. `<p class="star-rating Three">`)."""
+    parts: list[str] = []
+    # Real product names frequently live only in a title/alt attribute.
+    for a in el.find_all(attrs={"title": True}, limit=3):
+        t = (a.get("title") or "").strip()
+        if t:
+            parts.append(t)
+    txt = el.get_text(" ", strip=True)
+    if txt:
+        parts.append(txt)
+    # Surface values encoded only in class names (ratings, stock state, …).
+    for d in el.find_all(class_=_DATA_CLASS_RE, limit=12):
+        if not d.get_text(strip=True):
+            cls = " ".join(d.get("class") or [])
+            if cls:
+                parts.append(cls)
+    line = " | ".join(dict.fromkeys(p for p in parts if p))  # de-dupe, keep order
+    return line[:400]
+
+
+def _extract_records(soup) -> list:
+    """Capture up to ~60 repeated item blocks as flat text records."""
+    els = soup.find_all(class_=_ITEM_CLASS_RE, limit=400)
+    if len(els) < 3:
+        els = soup.find_all(["article", "li", "tr"], limit=400)
+
+    records: list[str] = []
+    seen: set[str] = set()
+    for el in els:
+        # Skip containers that merely wrap other item blocks (avoids capturing a
+        # whole grid as one giant record + each card again).
+        if el.find(class_=_ITEM_CLASS_RE):
+            continue
+        line = _record_text(el)
+        if len(line) < 8 or line in seen:
+            continue
+        seen.add(line)
+        records.append(line)
+        if len(records) >= 60:
+            break
+    return records
 
 
 # ── Main engine ──────────────────────────────────────────────────────────────

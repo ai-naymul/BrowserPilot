@@ -321,6 +321,50 @@ class TestExtractDom:
         assert len(result["links"]) == 2
         assert result["links"][0]["text"] == "Page One"
 
+    def test_records_capture_listing_data(self):
+        # Listing/e-commerce pages hide the data in short tags and CSS classes
+        # that the heading/paragraph passes drop. `records` must recover the
+        # price (short tag), the full title (title attr), and the class-encoded
+        # rating so the extractor LLM can see them.
+        html = """
+        <html><body><section>
+          <article class="product_pod">
+            <h3><a title="A Light in the Attic" href="/x">A Light in the ...</a></h3>
+            <p class="star-rating Three"></p>
+            <p class="price_color">£51.77</p>
+            <p class="instock availability">In stock</p>
+          </article>
+          <article class="product_pod">
+            <h3><a title="Tipping the Velvet" href="/y">Tipping the ...</a></h3>
+            <p class="star-rating One"></p>
+            <p class="price_color">£53.74</p>
+          </article>
+        </section></body></html>
+        """
+        result = extract_dom(html, "https://books.toscrape.com/", "Books")
+        recs = result["records"]
+        assert len(recs) == 2
+        joined = " ".join(recs)
+        assert "A Light in the Attic" in joined     # full title from title attr
+        assert "£51.77" in joined                    # price from a short tag
+        assert "star-rating Three" in joined         # rating encoded in class
+
+    def test_records_skip_wrapper_containers(self):
+        # A container that only wraps other item blocks must not be captured as
+        # one giant record (which would also double-count each child).
+        html = """
+        <html><body>
+          <ul class="listing">
+            <li class="item"><a title="One">One</a> <span class="price">$1</span></li>
+            <li class="item"><a title="Two">Two</a> <span class="price">$2</span></li>
+          </ul>
+        </body></html>
+        """
+        result = extract_dom(html, "https://test.com", "Test")
+        recs = result["records"]
+        assert len(recs) == 2
+        assert all("One" in r or "Two" in r for r in recs)
+
 
 # ── BulkJobConfig ────────────────────────────────────────────────────────────
 
