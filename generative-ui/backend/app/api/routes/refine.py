@@ -10,6 +10,7 @@ Handles:
 
 import asyncio
 import json
+import re as _re
 import logging
 from typing import Dict, Any, Optional
 from datetime import datetime
@@ -165,14 +166,7 @@ Make questions SPECIFIC to this task. Use actual entity names. Don't be generic.
 Return ONLY a JSON array of 4 strings, nothing else:
 ["Question 1?", "Question 2?", "Question 3?", "Question 4?"]"""
 
-        response = await llm_client.chat.completions.create(
-            model="anthropic/claude-sonnet-4.5",
-            temperature=0.7,
-            # max_tokens=300,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        
-        response_text = response.choices[0].message.content.strip()
+        response_text = (await _llm_chat_text(prompt, temperature=0.7, max_tokens=1024, json_mode=True)).strip()
         
         # Clean JSON markers
         if response_text.startswith("```json"):
@@ -431,14 +425,7 @@ async def handle_add_information(
     except Exception as e:
         logger.warning(f"Could not save prompt to file: {e}")
     
-    response = await llm_client.chat.completions.create(
-        model="anthropic/claude-sonnet-4.5",
-        temperature=0.75,
-        max_tokens=60000,  # High limit for complex entities with many attributes
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
-    response_text = response.choices[0].message.content.strip()
+    response_text = (await _llm_chat_text(prompt, temperature=0.75, max_tokens=60000, json_mode=True)).strip()
     logger.info(f"LLM response length: {len(response_text)} chars")
     logger.debug(f"LLM response preview: {response_text[:500]}...")
     
@@ -640,16 +627,7 @@ Correct Answer: Paris
 YOUR RESPONSE (just the entity name, nothing else):"""
 
     try:
-        response = await llm_client.chat.completions.create(
-            model="anthropic/claude-3.5-sonnet",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0,
-            max_tokens=50
-        )
-
-        extracted = response.choices[0].message.content.strip()
+        extracted = (await _llm_chat_text(prompt, temperature=0, max_tokens=50, json_mode=False)).strip()
         logger.info(f"LLM extracted: '{extracted}' from query: '{user_query}'")
 
         # Validate the extracted name exists
@@ -832,14 +810,7 @@ async def handle_refine_analysis(
 
     # Call LLM with higher token limit for complex components
     logger.info(f"[Refine] Calling LLM with prompt length: {len(prompt)} chars")
-    response = await llm_client.chat.completions.create(
-        model="anthropic/claude-sonnet-4.5",
-        temperature=0.75,
-        max_tokens=60000,  # High limit for complex component generation
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    response_text = response.choices[0].message.content.strip()
+    response_text = (await _llm_chat_text(prompt, temperature=0.75, max_tokens=60000, json_mode=True)).strip()
     logger.info(f"[Refine] LLM response length: {len(response_text)} chars")
 
     # Parse response
@@ -966,14 +937,8 @@ async def create_task_from_input(request: TaskCreateRequest):
             prompt += "\n\nIMPORTANT: Use the real-world data above to create accurate, specific entities with actual neighborhood names, prices, and details. DO NOT create placeholder or generic data."
         
         # Call LLM with higher temperature for creativity
-        response = await llm_client.chat.completions.create(
-            model="anthropic/claude-sonnet-4.5",
-            temperature=0.75,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        
-        response_text = response.choices[0].message.content.strip()
-        
+        response_text = (await _llm_chat_text(prompt, temperature=0.75, max_tokens=32768, json_mode=True)).strip()
+
         # Parse JSON
         if response_text.startswith("```json"):
             response_text = response_text[7:]
@@ -1150,6 +1115,29 @@ def _get_gemini_render_model():
     return _gemini_render_model
 
 
+def _gemini_text(resp) -> str:
+    """Safely pull text from a Gemini response.
+
+    The `.text` quick accessor RAISES (it doesn't return the default via getattr)
+    when the response isn't a single text Part — e.g. multi-part replies or
+    thinking models that prepend a `thought` part. Fall back to concatenating the
+    real text parts and skipping thought parts."""
+    try:
+        return resp.text or ""
+    except Exception:
+        pass
+    out = []
+    try:
+        for cand in (resp.candidates or []):
+            for p in (getattr(cand.content, "parts", None) or []):
+                t = getattr(p, "text", None)
+                if t and not getattr(p, "thought", False):
+                    out.append(t)
+    except Exception:
+        pass
+    return "".join(out)
+
+
 async def _grounded_render_call(prompt: str) -> dict:
     """One grounded LLM call — low temperature + bounded tokens; returns parsed dict.
 
@@ -1157,12 +1145,21 @@ async def _grounded_render_call(prompt: str) -> dict:
     """
     if RENDER_PROVIDER == "gemini":
         model = _get_gemini_render_model()
+        # response_mime_type forces syntactically valid JSON — the flash model
+        # otherwise drops a comma ~2 times in 3 on a large (~14k-char) dashboard
+        # spec, which no amount of retrying reliably fixes. Structured output
+        # makes the reply parseable by construction.
         resp = await asyncio.to_thread(
             lambda: model.generate_content(
-                prompt, generation_config={"temperature": 0.15, "max_output_tokens": 8192}
+                prompt,
+                generation_config={
+                    "temperature": 0.15,
+                    "max_output_tokens": 8192,
+                    "response_mime_type": "application/json",
+                },
             )
         )
-        text = getattr(resp, "text", "") or ""
+        text = _gemini_text(resp)
     else:
         response = await llm_client.chat.completions.create(
             model="anthropic/claude-sonnet-4.5",
@@ -1171,7 +1168,63 @@ async def _grounded_render_call(prompt: str) -> dict:
             messages=[{"role": "user", "content": prompt}],
         )
         text = response.choices[0].message.content
-    return json.loads(_extract_json_object(text))
+    return _loads_tolerant(text)
+
+
+def _loads_tolerant(text: str) -> dict:
+    """Parse a JSON object from an LLM reply, self-healing the usual slips.
+
+    Even with structured output the flash model occasionally drops a comma on a
+    large (~14k-char) spec. The JSON decoder reports the exact offset of an
+    "Expecting ',' delimiter" error, so we insert the missing comma there and
+    re-parse — a targeted, deterministic repair that avoids a slow regeneration.
+    Also strips trailing commas. Raises json.JSONDecodeError if still unparseable
+    (the caller then retries with a fresh generation)."""
+    s = _extract_json_object(text)
+    for _ in range(12):
+        try:
+            return json.loads(s)
+        except json.JSONDecodeError as e:
+            pos = e.pos if e.pos is not None else -1
+            if "delimiter" in (e.msg or "") and 0 <= pos <= len(s):
+                s = s[:pos] + "," + s[pos:]  # insert the dropped comma
+                continue
+            repaired = _re.sub(r",(\s*[}\]])", r"\1", s)  # trailing comma
+            if repaired != s:
+                s = repaired
+                continue
+            raise
+    return json.loads(s)  # exhausted repairs → surface the error to the caller
+
+
+_REFINE_MODEL = os.getenv("REFINE_MODEL", "anthropic/claude-sonnet-4.5")
+
+
+async def _llm_chat_text(
+    prompt: str, *, temperature: float = 0.3, max_tokens: int = 8192, json_mode: bool = True
+) -> str:
+    """Provider-agnostic single-turn completion → raw text.
+
+    Uses the SAME provider as the render path (Gemini or OpenRouter/Claude per
+    RENDER_PROVIDER), so refine / follow-up / suggestions run on the single key
+    the rest of the product uses — no separate OpenRouter key required for a
+    Gemini-only deployment."""
+    if RENDER_PROVIDER == "gemini":
+        model = _get_gemini_render_model()
+        # Floor at 256: gemini-flash-latest is a thinking model, so a tiny budget
+        # (e.g. the caller's 50) gets fully consumed by thinking, leaving no answer.
+        cfg = {"temperature": temperature, "max_output_tokens": max(256, min(max_tokens, 32768))}
+        if json_mode:
+            cfg["response_mime_type"] = "application/json"
+        resp = await asyncio.to_thread(lambda: model.generate_content(prompt, generation_config=cfg))
+        return _gemini_text(resp)
+    response = await llm_client.chat.completions.create(
+        model=_REFINE_MODEL,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content or ""
 
 
 @router.post("/render-from-data", response_model=TaskCreateResponse)
@@ -1186,14 +1239,24 @@ async def render_from_data(request: DataRenderRequest) -> TaskCreateResponse:
 
         prompt = get_data_grounded_prompt(rows, request.question, source=request.source or "")
 
-        # LLM call with one repair retry if the reply isn't valid JSON.
-        try:
-            result = await _grounded_render_call(prompt)
-        except json.JSONDecodeError as parse_err:
-            logger.warning(f"[render] invalid JSON, retrying once: {parse_err}")
-            result = await _grounded_render_call(
-                prompt + "\n\nYour previous reply was not valid JSON. Return ONLY one valid JSON object — no prose, no code fences."
+        # LLM call with up to 2 fresh-regeneration retries if the reply isn't
+        # valid JSON. Malformed JSON from the model is intermittent, so a fresh
+        # generation almost always parses; deterministic repairs handle the rest.
+        result = None
+        last_err: json.JSONDecodeError | None = None
+        for attempt in range(3):
+            p = prompt if attempt == 0 else (
+                prompt + "\n\nYour previous reply was not valid JSON. Return ONLY one "
+                "valid JSON object — no prose, no code fences, no trailing commas."
             )
+            try:
+                result = await _grounded_render_call(p)
+                break
+            except json.JSONDecodeError as parse_err:
+                last_err = parse_err
+                logger.warning(f"[render] invalid JSON (attempt {attempt + 1}/3): {parse_err}")
+        if result is None:
+            raise last_err or json.JSONDecodeError("render produced no valid JSON", "", 0)
 
         # Entities — skip empty/invalid so one bad entity can't fail the whole render.
         entities = []
@@ -1376,15 +1439,8 @@ Make suggestions SPECIFIC and ACTIONABLE. Use actual names if available.
 Return ONLY a JSON array of 5 strings:
 ["Suggestion 1", "Suggestion 2", "Suggestion 3", "Suggestion 4", "Suggestion 5"]"""
 
-        response = await llm_client.chat.completions.create(
-            model="anthropic/claude-sonnet-4.5",
-            temperature=0.7,
-            # max_tokens=200,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        
-        response_text = response.choices[0].message.content.strip()
-        
+        response_text = (await _llm_chat_text(prompt, temperature=0.7, max_tokens=1024, json_mode=True)).strip()
+
         # Clean JSON markers
         if response_text.startswith("```json"):
             response_text = response_text[7:]
