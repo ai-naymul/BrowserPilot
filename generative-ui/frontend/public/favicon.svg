@@ -1,6 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="4" fill="#2563eb"/>
-  <circle cx="16" cy="16" r="12" fill="#ffffff"/>
-  <circle cx="16" cy="16" r="8" fill="#2563eb"/>
-  <circle cx="16" cy="16" r="4" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <defs>
+    <linearGradient id="bp-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1524"/>
+      <stop offset="1" stop-color="#050608"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded dark tile — soft-glass dark identity -->
+  <rect width="40" height="40" rx="9" fill="url(#bp-bg)"/>
+  <rect x="0.6" y="0.6" width="38.8" height="38.8" rx="8.6" fill="none" stroke="#7dd3fc" stroke-opacity="0.2"/>
+  <!-- Approach mark: a guided path landing on a target inside a browser window -->
+  <rect x="6" y="8" width="28" height="26" rx="6" fill="none" stroke="#7dd3fc" stroke-opacity="0.5" stroke-width="2.5"/>
+  <line x1="6" y1="14.5" x2="34" y2="14.5" stroke="#7dd3fc" stroke-opacity="0.35" stroke-width="1.6"/>
+  <circle cx="10" cy="11.2" r="1.15" fill="#7dd3fc" fill-opacity="0.55"/>
+  <path d="M11 19 C 16 21 20 23 24 28" fill="none" stroke="#7dd3fc" stroke-width="2.8" stroke-linecap="round"/>
+  <circle cx="24" cy="28" r="3.8" fill="#7dd3fc" fill-opacity="0.16"/>
+  <circle cx="24" cy="28" r="2.7" fill="#7dd3fc"/>
 </svg>

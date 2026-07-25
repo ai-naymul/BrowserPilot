@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 132" width="520" height="132" font-family="'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c1524"/>
+      <stop offset="1" stop-color="#050608"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#111c2f"/>
+      <stop offset="1" stop-color="#080c14"/>
+    </linearGradient>
+  </defs>
+  <!-- Self-contained dark card so it reads on both light and dark READMEs -->
+  <rect x="1" y="1" width="518" height="130" rx="22" fill="url(#card)"/>
+  <rect x="1.5" y="1.5" width="517" height="129" rx="21.5" fill="none" stroke="#7dd3fc" stroke-opacity="0.22"/>
+
+  <!-- App-icon: the Approach mark inside a rounded tile (matches the favicon) -->
+  <g transform="translate(26,30) scale(1.8)">
+    <rect width="40" height="40" rx="9" fill="url(#tile)" stroke="#7dd3fc" stroke-opacity="0.25"/>
+    <rect x="6" y="8" width="28" height="26" rx="6" fill="none" stroke="#7dd3fc" stroke-opacity="0.5" stroke-width="2.5"/>
+    <line x1="6" y1="14.5" x2="34" y2="14.5" stroke="#7dd3fc" stroke-opacity="0.35" stroke-width="1.6"/>
+    <circle cx="10" cy="11.2" r="1.15" fill="#7dd3fc" fill-opacity="0.55"/>
+    <path d="M11 19 C 16 21 20 23 24 28" fill="none" stroke="#7dd3fc" stroke-width="2.8" stroke-linecap="round"/>
+    <circle cx="24" cy="28" r="3.8" fill="#7dd3fc" fill-opacity="0.16"/>
+    <circle cx="24" cy="28" r="2.7" fill="#7dd3fc"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="122" y="64" font-size="41" font-weight="700" letter-spacing="-0.5">
+    <tspan fill="#f5f5f7">Browser</tspan><tspan fill="#7dd3fc">Pilot</tspan>
+  </text>
+  <text x="124" y="94" font-size="15" font-weight="500" fill="#8f99a8" letter-spacing="0.2">Turn any website into a live dashboard</text>
+</svg>
