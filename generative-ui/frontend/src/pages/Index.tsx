@@ -4,14 +4,14 @@ import { EntitySidebar } from '@/components/layout/EntitySidebar';
 import { MainPanel } from '@/components/layout/MainPanel';
 import { ContextPanel } from '@/components/layout/ContextPanel';
 import { ChatInterface } from '@/components/layout/ChatInterface';
-import { TriPaneSkeleton, RefinementSkeleton } from '@/components/SkeletonLoader';
+import { TriPaneSkeleton } from '@/components/SkeletonLoader';
 import { Entity, ChatMessage } from '@/types/entity';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, AlertCircle, LayoutGrid, List } from 'lucide-react';
 import { updateComputedFields } from '@/utils/computedFields';
 import { syncRelatedEntities, fixObjectDisplay } from '@/utils/entitySync';
-import examplesData from '@/data/examples.json';
+import { SCRAPE_TEMPLATES, type ScrapeTemplate } from '@/lib/templates';
 import {
   createTask,
   renderFromScrape,
@@ -66,7 +66,7 @@ const IndexContent = () => {
   const [layout, setLayout] = useState<LayoutSpec | null>(null);
 
   // Landing-screen mode: describe a task, or scrape a website into a dashboard
-  const [mode, setMode] = useState<'describe' | 'scrape'>('describe');
+  const [mode, setMode] = useState<'describe' | 'scrape'>('scrape');
   const [scrapeUrls, setScrapeUrls] = useState('');
 
   // UI state
@@ -442,6 +442,25 @@ const IndexContent = () => {
       toast({ title: 'Error', description: err.message || 'Failed to connect to backend', variant: 'destructive' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // One-click template: pin the inputs, then run the real scrape→render flow.
+  // Templates with no URLs are "bring your own" — we fill the prompt and let the
+  // user paste URLs rather than auto-running.
+  const useTemplate = (t: ScrapeTemplate) => {
+    if (loading || backendHealthy === false) return;
+    setMode('scrape');
+    setInputValue(t.prompt);
+    if (t.urls.length > 0) {
+      setScrapeUrls(t.urls.join('\n'));
+      handleScrapeAndVisualize(t.urls, t.prompt);
+    } else {
+      setScrapeUrls('');
+      // Nudge focus to the URL field so "bring your own" is obvious.
+      requestAnimationFrame(() => {
+        document.getElementById('scrape-urls-input')?.focus();
+      });
     }
   };
 
@@ -952,8 +971,9 @@ const IndexContent = () => {
   if (loading) {
     return (
       <div className="fixed inset-0 bg-background z-[100] overflow-hidden">
+        <div className="atmosphere" aria-hidden="true" />
         {/* Always show tri-pane skeleton matching actual UI layout */}
-        <div className="flex flex-col h-full w-full">
+        <div className="relative z-10 flex flex-col h-full w-full">
           {/* Header skeleton */}
           <div className="flex items-center justify-between gap-2 p-3 border-b border-border bg-sidebar">
             <div className="flex items-center gap-3">
@@ -977,7 +997,7 @@ const IndexContent = () => {
             initial={{ y: 10, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="bg-card/95 backdrop-blur-xl border border-border/50 rounded-full px-5 py-2.5 shadow-xl flex items-center gap-2.5"
+            className="glass-panel-strong !rounded-full px-5 py-2.5 flex items-center gap-2.5"
           >
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
             <span className="text-sm font-medium text-foreground">
@@ -992,40 +1012,39 @@ const IndexContent = () => {
   // Show initial input screen if no data
   if (!dataModel || !uiSpec) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="w-full max-w-2xl">
+      <div className="relative min-h-screen flex flex-col items-center justify-center p-8 bg-background overflow-hidden">
+        <div className="atmosphere" aria-hidden="true" />
+        <div className="relative z-10 w-full max-w-5xl">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-10"
+            className="text-center mb-8"
           >
             <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
-              Generative UI Browser
+              BrowserPilot
             </h1>
             <p className="text-lg text-muted-foreground/80">
-              Describe your task, and we'll generate an intelligent interface
+              Turn any website into a live dashboard — one sentence in, an interface out.
             </p>
           </motion.div>
           
           {/* Backend Health Check */}
           {backendHealthy === false && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="mb-4 max-w-2xl mx-auto p-4 rounded-xl border border-destructive/30 bg-destructive/10 flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-red-900">Backend Connection Error</p>
-                <p className="text-sm text-red-700 mt-1">
-                  Cannot connect to backend at http://localhost:8000. 
-                  Please make sure the backend server is running.
+                <p className="font-medium text-foreground">Backend not reachable</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Can't reach the render backend on <code className="text-xs">:8001</code>.
+                  Scraping also needs the BrowserPilot scraper on <code className="text-xs">:8000</code>.
+                  The one-command <code className="text-xs">docker compose</code> starts both.
                 </p>
-                <code className="text-xs bg-red-100 px-2 py-1 rounded mt-2 inline-block">
-                  cd backend && uvicorn app.main:app --reload --port 8000
-                </code>
               </div>
             </div>
           )}
-          
-          <div className="relative bg-card/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-border/50">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 rounded-2xl" />
+
+          <div className="relative glass-panel-strong p-8 max-w-2xl mx-auto">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] via-transparent to-transparent rounded-[inherit] pointer-events-none" />
             <div className="relative">
               {/* Mode toggle: describe a task, or scrape a website into a dashboard */}
               <div className="flex gap-2 mb-5 p-1 bg-background/40 rounded-xl border border-border/40">
@@ -1088,6 +1107,7 @@ const IndexContent = () => {
                     disabled={loading || backendHealthy === false}
                   />
                   <textarea
+                    id="scrape-urls-input"
                     value={scrapeUrls}
                     onChange={(e) => setScrapeUrls(e.target.value)}
                     placeholder={"Paste URLs, one per line…\nhttps://www.nike.com/t/...\nhttps://www.adidas.com/us/..."}
@@ -1116,41 +1136,55 @@ const IndexContent = () => {
             </div>
           </div>
 
-          {/* View info - simplified */}
-          <p className="mt-4 text-xs text-muted-foreground text-center">
-            Results will show in a tri-pane layout with list, map, and details
-          </p>
-
+          {/* Template gallery — the hero. One click runs a real scrape → live dashboard. */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8"
+            transition={{ delay: 0.25 }}
+            className="mt-12"
           >
-            <p className="mb-4 text-sm font-semibold text-foreground/70 uppercase tracking-wider text-center">
-              Try an example
+            <p className="mb-5 text-sm font-semibold text-muted-foreground uppercase tracking-wider text-center">
+              Start from a template
             </p>
-            <div className="grid grid-cols-1 gap-3">
-              {examplesData.examples.slice(0, 3).map((example, idx) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SCRAPE_TEMPLATES.map((t, idx) => (
                 <motion.button
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
+                  key={t.slug}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 + idx * 0.1 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleCreateTask(example.text)}
+                  transition={{ delay: 0.3 + idx * 0.06, duration: 0.35, ease: 'easeOut' }}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.985 }}
+                  onClick={() => useTemplate(t)}
                   disabled={loading || backendHealthy === false}
-                  className="relative overflow-hidden group text-left px-6 py-4 bg-card/50 backdrop-blur-sm text-foreground rounded-2xl border border-border/50 hover:border-primary/40 hover:bg-card/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-lg"
+                  className="group relative overflow-hidden text-left p-5 glass-panel glass-hover disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl">{example.emoji}</span>
-                    <span className="font-medium text-sm">{example.text}</span>
+                  <div className="flex items-start gap-3">
+                    <span className="text-3xl leading-none" aria-hidden="true">{t.emoji}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-foreground truncate">{t.title}</h3>
+                        {t.urls.length === 0 && (
+                          <span className="text-[10px] uppercase tracking-wide text-primary/80 border border-primary/30 rounded px-1.5 py-0.5">
+                            your URLs
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground leading-snug">{t.oneliner}</p>
+                    </div>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground/70">{t.category}</span>
+                    <span className="text-sm font-medium text-primary opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0">
+                      Use →
+                    </span>
+                  </div>
                 </motion.button>
               ))}
             </div>
+            <p className="mt-6 text-center text-xs text-muted-foreground/70">
+              Every template runs a real scrape in Ghost Mode and builds the dashboard live — or paste your own URLs above.
+            </p>
           </motion.div>
         </div>
 
@@ -1162,9 +1196,10 @@ const IndexContent = () => {
 
   // Show full UI once data is loaded
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden">
+    <div className="relative flex flex-col h-screen w-full overflow-hidden bg-background">
+      <div className="atmosphere" aria-hidden="true" />
       {/* Header with task description */}
-      <div className="flex items-center justify-between gap-2 p-3 border-b border-border bg-sidebar">
+      <div className="relative z-10 flex items-center justify-between gap-2 p-3 border-b border-white/10 bg-sidebar/80 backdrop-blur-xl">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-medium text-foreground">
             {dataModel.entities.length >= 3
@@ -1223,7 +1258,7 @@ const IndexContent = () => {
 
       {/* Cards View - Tri-Pane AppPanel Layout (OpenAI-style) */}
       {viewMode === 'components' && (
-        <div className="flex-1 overflow-hidden bg-background">
+        <div className="relative z-10 flex-1 overflow-hidden p-3">
           {components.length > 0 || entityStore.getVisibleEntities().length > 0 ? (
             <AppPanel
               title={dataModel.entities.length >= 2
@@ -1254,7 +1289,7 @@ const IndexContent = () => {
 
       {/* Details View - Entity-based UI with organized panels */}
       {viewMode === 'entities' && (
-        <div className="flex flex-1 overflow-hidden">
+        <div className="relative z-10 flex flex-1 overflow-hidden">
           <EntitySidebar
             entities={entities}
             selectedId={selectedEntity?.id}
