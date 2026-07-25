@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { soften } from "@/lib/colors";
 
 interface ChartBar {
   dataKey: string;
@@ -34,7 +35,7 @@ export const BarChartWidget = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-border bg-card p-6"
+      className="glass-panel p-6"
     >
       {yAxisLabel && (
         <h4 className="mb-4 text-sm font-medium text-muted-foreground">{yAxisLabel}</h4>
@@ -73,7 +74,7 @@ export const BarChartWidget = ({
               key={bar.dataKey}
               dataKey={bar.dataKey}
               name={bar.name}
-              fill={bar.color || defaultColors[idx % defaultColors.length]}
+              fill={soften(bar.color) || defaultColors[idx % defaultColors.length]}
               radius={[4, 4, 0, 0]}
               animationDuration={1000}
             />

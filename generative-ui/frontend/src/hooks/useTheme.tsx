@@ -10,19 +10,19 @@ const themeConfigs: Record<Theme, Record<string, string>> = {
     "--card-foreground": "0 0% 96%",
     "--popover": "220 15% 11%",
     "--popover-foreground": "0 0% 96%",
-    "--primary": "199 95% 74%",          // Soft sky blue (#7dd3fc)
+    "--primary": "199 80% 80%",          // Soft sky blue (#7dd3fc)
     "--primary-foreground": "220 18% 3%",
     "--secondary": "220 13% 15%",        // Main panel background (#111318)
     "--secondary-foreground": "0 0% 96%",
     "--muted": "220 13% 15%",
     "--muted-foreground": "220 9% 58%",
-    "--accent": "199 95% 74%",           // Soft sky blue (same as primary)
+    "--accent": "199 80% 80%",           // Soft sky blue (same as primary)
     "--accent-foreground": "220 18% 3%",
     "--destructive": "0 65% 60%",
     "--destructive-foreground": "0 0% 96%",
     "--border": "220 15% 18%",           // Subtle cool grey (#2a2f3a)
     "--input": "220 15% 18%",
-    "--ring": "199 95% 74%",             // Sky blue focus ring
+    "--ring": "199 80% 80%",             // Sky blue focus ring
   },
   cyberpunk: {
     "--background": "280 100% 4%",

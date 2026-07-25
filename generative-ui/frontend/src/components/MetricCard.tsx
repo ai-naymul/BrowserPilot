@@ -284,22 +284,14 @@ export const MetricCard = ({
       onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`group relative overflow-visible rounded-xl backdrop-blur-sm transition-all duration-300
-        ${hovered
-          ? "shadow-[0_8px_24px_rgba(0,0,0,0.12)] border-primary/50"
-          : "shadow-[0_1px_3px_rgba(0,0,0,0.08),0_1px_2px_rgba(0,0,0,0.06)]"
-        }
+      className={`group relative overflow-visible glass-panel glass-hover p-6
         ${isSelected
-          ? "border-primary bg-card ring-1 ring-primary ring-offset-1 ring-offset-background"
-          : "border-border/50 bg-card/95"
+          ? "!border-primary/60 ring-1 ring-primary ring-offset-1 ring-offset-background"
+          : ""
         }
         ${onClick || enableExpand ? "cursor-pointer" : ""}
         ${flashHighlight ? "flash-highlight" : ""}
-        ${previewHighlight ? "preview-highlight" : ""}
-        border p-6`}
-      style={{
-        transform: hovered ? 'translateZ(0)' : undefined,
-      }}
+        ${previewHighlight ? "preview-highlight" : ""}`}
       role="button"
       tabIndex={0}
       aria-expanded={false}
@@ -382,7 +374,7 @@ export const MetricCard = ({
 
       {/* Calm: a subtle accent tint on hover — no blur glow. */}
       <div
-        className="pointer-events-none absolute inset-0 rounded-xl bg-primary/[0.04] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] bg-primary/[0.04] opacity-0 transition-opacity duration-200 group-hover:opacity-100"
       />
     </motion.div>
   );

@@ -14,8 +14,9 @@ import {
   CartesianGrid, 
   Tooltip, 
   Legend, 
-  ResponsiveContainer 
+  ResponsiveContainer
 } from "recharts";
+import { soften } from "@/lib/colors";
 
 interface ChartLine {
   dataKey: string;
@@ -117,7 +118,7 @@ export const ChartWidget = ({
           key={line.dataKey}
           name={line.name}
           data={data}
-          fill={line.color || defaultColors[idx % defaultColors.length]}
+          fill={soften(line.color) || defaultColors[idx % defaultColors.length]}
           animationDuration={1000}
         />
       ))}
@@ -160,7 +161,7 @@ export const ChartWidget = ({
           />
         )}
         {lines.map((line, idx) => {
-          const color = line.color || defaultColors[idx % defaultColors.length];
+          const color = soften(line.color) || defaultColors[idx % defaultColors.length];
           
           if (chartType === 'area') {
             return (
@@ -200,7 +201,7 @@ export const ChartWidget = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-border bg-card p-6"
+      className="glass-panel p-6"
     >
       {(xAxisLabel || yAxisLabel) && (
         <div className="mb-4">

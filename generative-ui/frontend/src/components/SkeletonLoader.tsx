@@ -33,7 +33,7 @@ const SkeletonBox = ({ className = '', delay = 0 }: { className?: string; delay?
         ease: 'linear',
       },
     }}
-    className={`bg-gradient-to-r from-muted/40 via-muted/60 to-muted/40 bg-[length:200%_100%] rounded-lg ${className}`}
+    className={`bg-gradient-to-r from-white/[0.03] via-primary/10 to-white/[0.03] bg-[length:200%_100%] rounded-lg ${className}`}
     style={{
       backgroundPosition: '200% 0',
     }}

@@ -212,7 +212,7 @@ export const AppPanel = ({
   const hasCenterContent = hasMapData || hasComponentData;
 
   return (
-    <div className="app-panel flex flex-col h-full bg-background rounded-2xl border border-border overflow-hidden shadow-xl">
+    <div className="app-panel flex flex-col h-full rounded-2xl border border-white/10 overflow-hidden shadow-xl">
       {/* Tri-Pane Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Pane: Entity List */}

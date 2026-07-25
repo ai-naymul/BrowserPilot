@@ -21,7 +21,7 @@ All colors MUST be HSL.
     --popover-foreground: 0 0% 96%;
 
     /* Primary - soft sky blue */
-    --primary: 199 95% 74%;
+    --primary: 199 80% 80%;
     --primary-foreground: 220 18% 3%;
 
     /* Secondary - panel surface */
@@ -33,7 +33,7 @@ All colors MUST be HSL.
     --muted-foreground: 220 9% 58%;
 
     /* Accent - soft sky blue (single accent; the old gold is removed) */
-    --accent: 199 95% 74%;
+    --accent: 199 80% 80%;
     --accent-foreground: 220 18% 3%;
 
     --destructive: 0 65% 60%;
@@ -42,7 +42,7 @@ All colors MUST be HSL.
     /* Borders */
     --border: 220 15% 18%;
     --input: 220 15% 18%;
-    --ring: 199 95% 74%;
+    --ring: 199 80% 80%;
 
     /* Shell surfaces — dark to match the Signal default (no light flash) */
     --sidebar-background: 220 18% 3%;
@@ -55,12 +55,12 @@ All colors MUST be HSL.
     --chat-border: 220 15% 18%;
 
     --message-ai: 220 13% 15%;
-    --message-user: 199 95% 74%;
+    --message-user: 199 80% 80%;
 
     /* Entity tags */
     --tag-safety: 0 65% 60%;
     --tag-dietary: 142 71% 45%;
-    --tag-info: 199 95% 74%;
+    --tag-info: 199 80% 80%;
 
     --radius: 0.5rem;
 
@@ -81,7 +81,7 @@ All colors MUST be HSL.
     --popover-foreground: 0 0% 96%;
 
     /* Primary: Soft Sky Blue (calm, trustworthy) */
-    --primary: 199 95% 74%;           /* #7dd3fc - Soft sky blue */
+    --primary: 199 80% 80%;           /* #7dd3fc - Soft sky blue */
     --primary-foreground: 220 18% 3%;  /* Dark text on blue */
 
     --secondary: 220 13% 15%;         /* #111318 - Main panel background */
@@ -91,7 +91,7 @@ All colors MUST be HSL.
     --muted-foreground: 220 8% 58%;   /* #8f99a8 - Muted grey text */
 
     /* Accent: Soft Sky Blue (same as primary for consistency) */
-    --accent: 199 95% 74%;            /* #7dd3fc - Soft sky blue */
+    --accent: 199 80% 80%;            /* #7dd3fc - Soft sky blue */
     --accent-foreground: 220 18% 3%;
 
     --destructive: 0 72% 66%;         /* #f87171 - Soft red */
@@ -100,7 +100,7 @@ All colors MUST be HSL.
     /* Borders: Subtle cool grey */
     --border: 220 15% 18%;            /* #2a2f3a - Subtle border */
     --input: 220 15% 18%;
-    --ring: 199 95% 74%;              /* Sky blue focus ring */
+    --ring: 199 80% 80%;              /* Sky blue focus ring */
 
     --sidebar-background: 220 18% 3%;
     --sidebar-foreground: 0 0% 96%;
@@ -111,7 +111,7 @@ All colors MUST be HSL.
     --chat-border: 220 15% 18%;
 
     --message-ai: 220 13% 15%;
-    --message-user: 199 95% 74%;
+    --message-user: 199 80% 80%;
 
     /* Tag colors: Muted, cohesive, soft */
     --tag-blue: 217 33% 27%;          /* #1e293b - Muted blue bg */
@@ -127,9 +127,9 @@ All colors MUST be HSL.
     --tag-purple-text: 270 91% 87%;   /* #e9d5ff - Soft purple text */
 
     /* Additional accent tokens for soft backgrounds */
-    --accent-soft: 199 95% 74% / 0.14;  /* Sky blue soft bg */
-    --accent-border: 199 100% 70%;      /* #38bdf8 - Sky blue border */
-    --accent-text: 199 95% 74%;         /* #7dd3fc - Sky blue text */
+    --accent-soft: 199 80% 80% / 0.12;  /* Softened sky blue, low-opacity fill */
+    --accent-border: 199 78% 78%;       /* Softened sky blue border */
+    --accent-text: 199 80% 80%;         /* Softened sky blue text */
   }
 }
 
@@ -210,8 +210,8 @@ All colors MUST be HSL.
 
   .hover-glow:hover {
     box-shadow:
-      0 0 20px rgba(125, 211, 252, 0.2),
-      0 0 40px rgba(125, 211, 252, 0.1),
+      0 0 20px rgba(163, 219, 245, 0.16),
+      0 0 40px rgba(163, 219, 245, 0.08),
       0 20px 25px -5px rgba(0, 0, 0, 0.2);
   }
 
@@ -220,9 +220,9 @@ All colors MUST be HSL.
     transition: all 150ms ease;
   }
 
-  /* Primary color RGB for shadows (sky blue) */
+  /* Primary color RGB for shadows (softened sky blue #a3dbf5) */
   :root {
-    --primary-rgb: 125, 211, 252;
+    --primary-rgb: 163, 219, 245;
   }
 }
 
@@ -285,6 +285,130 @@ All colors MUST be HSL.
   /* Data-semantic colors (calm, reserved for meaning like up/down, best/worst) */
   .text-positive { color: hsl(152 52% 62%); }
   .text-negative { color: hsl(0 66% 68%); }
+
+  /* ── Apple-style floating glass ────────────────────────────────────────────
+     Frosted, translucent panels that float above the ambient background.
+     Dark-mode recipe: low-opacity white fill (not grey), a hairline top-edge
+     highlight (the "lit from above" cue), a hairline border, and a soft float
+     shadow. Blur 16px + saturate keeps colors behind the glass alive. */
+  .glass-panel {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.06),   /* top-edge highlight */
+      0 12px 40px -12px rgba(0, 0, 0, 0.55);        /* soft float shadow */
+  }
+
+  /* Slightly heavier glass for the primary hero surface. */
+  .glass-panel-strong {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.025));
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+      0 24px 60px -18px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Float-on-hover: 2px lift, accent-tinted border + halo. Transform/opacity
+     only, expo easing (Bezier 0.16,1,0.3,1) for the Apple "settle". */
+  .glass-hover {
+    transition:
+      transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 260ms ease,
+      border-color 260ms ease;
+    will-change: transform;
+  }
+  .glass-hover:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--accent) / 0.30);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.09),
+      0 20px 52px -14px rgba(0, 0, 0, 0.62),
+      0 0 0 1px hsl(var(--accent) / 0.06),
+      0 0 30px -6px hsl(var(--accent) / 0.14);   /* soft accent halo */
+  }
+
+  /* ── Ambient atmosphere ────────────────────────────────────────────────────
+     Glass needs something living behind it to refract. Two slow-drifting
+     accent blobs sit at z-0 behind the app; every glass panel picks up their
+     colour through the blur. pointer-events:none so they never block input. */
+  .atmosphere {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .atmosphere::before,
+  .atmosphere::after {
+    content: "";
+    position: absolute;
+    width: 48vmax;
+    height: 48vmax;
+    border-radius: 50%;
+    filter: blur(90px);
+    background: radial-gradient(circle at center, hsl(var(--accent)), transparent 68%);
+  }
+  .atmosphere::before {
+    top: -18vmax;
+    left: -12vmax;
+    opacity: 0.10;
+    animation: blob-drift 28s ease-in-out infinite;
+  }
+  .atmosphere::after {
+    bottom: -20vmax;
+    right: -14vmax;
+    opacity: 0.06;
+    animation: blob-drift 36s ease-in-out infinite reverse;
+  }
+  @keyframes blob-drift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(6vmax, 4vmax) scale(1.08); }
+  }
+
+  /* ── Loading shimmer skeleton ──────────────────────────────────────────────
+     A gradient sweep (not an opacity pulse — reads as "loading" more clearly).
+     Kill the element on real-content mount so the loop can't leak. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.035);
+    border-radius: var(--radius-md);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .atmosphere::before,
+    .atmosphere::after,
+    .skeleton::after {
+      animation: none;
+    }
+    .glass-hover {
+      transition-duration: 120ms;
+    }
+  }
 
   /* Surface styles */
   .surface {
@@ -618,7 +742,12 @@ All colors MUST be HSL.
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: hsl(var(--background));
+  /* Translucent so the ambient atmosphere refracts through the frame — the
+     tri-pane reads as one floating glass slab. */
+  background: hsl(var(--background) / 0.72);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Entity list pane */
