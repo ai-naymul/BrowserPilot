@@ -238,6 +238,27 @@ GOOGLE_API_KEY=your_gemini_api_key
 SCRAPER_PROXIES=[{"server": "http://proxy:port", "username": "user", "password": "pass", "location": "US"}]
 ```
 
+### Access control
+
+The API has no user accounts. By default it accepts requests from loopback only
+(foreign `Origin` headers are rejected, so a page you visit cannot drive it),
+and it is published on `127.0.0.1` in Docker.
+
+Before exposing the port beyond your machine — a LAN address, a tunnel, a public
+host — set a token:
+
+```bash
+BROWSERPILOT_TOKEN=$(openssl rand -hex 32)
+```
+
+Every non-public request then needs `X-API-Token: <token>` (or `?token=<token>`
+for the `/ws` and `/stream` WebSockets, which cannot set headers). The dashboard
+asks for the token once on a 401 and stores it in `localStorage`.
+
+`/` and `/assets/*` stay public so the app shell can load and read its token.
+Add non-loopback origins you trust with `BROWSERPILOT_ALLOWED_ORIGINS`
+(comma separated). See `backend/security.py`.
+
 ---
 
 ## Use Cases

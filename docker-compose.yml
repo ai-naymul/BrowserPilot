@@ -6,12 +6,18 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      # Bound to loopback on purpose. The API has no user accounts — publishing
+      # this on 0.0.0.0 hands anyone on your network a browser running under your
+      # Gemini key and proxies. To expose it deliberately, set BROWSERPILOT_TOKEN
+      # and change this to "8000:8000".
+      - "127.0.0.1:8000:8000"
     environment:
       # Required: Add your Google AI API key
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       # Optional: Proxy configuration
       - SCRAPER_PROXIES=${SCRAPER_PROXIES:-[]}
+      # Optional but required before exposing the port beyond loopback
+      - BROWSERPILOT_TOKEN=${BROWSERPILOT_TOKEN:-}
     volumes:
       # Persist outputs directory
       - ./outputs:/app/outputs

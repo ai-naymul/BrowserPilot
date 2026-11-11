@@ -1,5 +1,7 @@
 type EventCallback = (data: any) => void;
 
+import { wsUrl } from './api';
+
 export class WebSocketManager {
   private websocket: WebSocket | null = null;
   private streamWebSocket: WebSocket | null = null;
@@ -13,12 +15,8 @@ export class WebSocketManager {
       this.websocket.close();
     }
 
-    // Detect if we're in development mode (frontend on different port than backend)
-    const isDev = window.location.port === '5173';
-    const backendHost = isDev ? 'localhost:8000' : window.location.host;
-    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${backendHost}`;
-    console.log(`📡 Connecting to WebSocket: ${wsBase}/ws/${jobId}`);
-    this.websocket = new WebSocket(`${wsBase}/ws/${jobId}`);
+    console.log(`📡 Connecting to WebSocket: /ws/${jobId}`);
+    this.websocket = new WebSocket(wsUrl(`/ws/${jobId}`));
     
     this.websocket.onopen = () => {
       console.log('📡 WebSocket connected successfully');
@@ -92,12 +90,8 @@ export class WebSocketManager {
       this.streamWebSocket.close();
     }
 
-    // Detect if we're in development mode (frontend on different port than backend)
-    const isDev = window.location.port === '5173';
-    const backendHost = isDev ? 'localhost:8000' : window.location.host;
-    const wsBase = `${window.location.protocol === "https:" ? "wss" : "ws"}://${backendHost}`;
-    console.log(`🎥 Connecting to Stream WebSocket: ${wsBase}/stream/${jobId}`);
-    this.streamWebSocket = new WebSocket(`${wsBase}/stream/${jobId}`);
+    console.log(`🎥 Connecting to Stream WebSocket: /stream/${jobId}`);
+    this.streamWebSocket = new WebSocket(wsUrl(`/stream/${jobId}`));
     
     this.streamWebSocket.onopen = () => {
       console.log('🎥 Stream WebSocket connected successfully');
