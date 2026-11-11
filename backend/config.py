@@ -2,9 +2,23 @@ import os
 import platform
 import random
 import json
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+def _utf8_stdio() -> None:
+    """Windows consoles default to cp1252, which raises UnicodeEncodeError on the
+    emoji this codebase logs at import time — the app dies before it starts.
+    Every entry point imports config, so repair it once, here."""
+    for stream in (sys.stdout, sys.stderr):
+        encoding = (getattr(stream, "encoding", "") or "").lower()
+        if encoding not in ("utf-8", "utf8") and hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
+_utf8_stdio()
 
 # ── AI Model ──────────────────────────────────────────────────────────────────
 # Use the "-latest" alias, not a dated/versioned id: Google retires specific
