@@ -3,7 +3,7 @@ import struct
 from dataclasses import dataclass
 from typing import Optional
 
-from backend.config import get_random_ua, _detect_chromium_major, _UA_TEMPLATES
+from backend.config import get_random_ua, _detect_chromium_major, _detect_host_os, _UA_TEMPLATES
 from backend.proxy_manager import get_locale_for_country
 
 
@@ -104,10 +104,16 @@ def generate_profile(
     rng = _SeededRandom(seed)
 
     if user_agent is None:
-        ua_pool_key = rng.choice(["windows", "mac", "linux"])
-        base_version = _detect_chromium_major()
-        version_offset = rng.randint(0, 2)
-        version = base_version - version_offset
+        # Match the host OS. navigator.platform and userAgentData come from the
+        # real platform under Patchright (stealth_engine deliberately does not
+        # patch them), so a macOS or Linux UA on a Windows host is unfixable
+        # afterwards — rebrowser reports it verbatim as
+        # "User agent says macOS, but navigator.platform is Win32".
+        ua_pool_key = _detect_host_os()
+        # Must equal the binary's real major: navigator.userAgentData reports the
+        # true version regardless of the UA override, so claiming an older one is
+        # a free tell ("User agent says Chrome 154, but userAgentData says 156").
+        version = _detect_chromium_major()
         ua = _UA_TEMPLATES[ua_pool_key].format(version=version)
     else:
         ua = user_agent

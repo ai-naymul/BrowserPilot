@@ -17,7 +17,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      # Loopback only — same reasoning as docker-compose.yml. genui-backend
+      # reaches this over the compose network, which needs no published port.
+      - "127.0.0.1:8000:8000"
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - SCRAPER_PROXIES=${SCRAPER_PROXIES:-[]}

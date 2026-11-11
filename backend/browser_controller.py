@@ -1,6 +1,7 @@
 import asyncio
 import subprocess
 import os
+import sys
 import logging
 import json
 import base64
@@ -130,7 +131,10 @@ class BrowserController:
 
     async def _ensure_display(self):
         """Start a virtual X server when running in headful mode without DISPLAY."""
-        if self.headless or os.environ.get("DISPLAY"):
+        # Xvfb is X11-only. Windows and macOS have a real display server, so
+        # trying to start Xvfb there always fails and silently drops the session
+        # into headless mode — which is exactly what Ghost Mode must not do.
+        if self.headless or os.environ.get("DISPLAY") or sys.platform in ("win32", "darwin"):
             return
 
         display_number = self._find_free_display()

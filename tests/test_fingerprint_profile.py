@@ -36,12 +36,26 @@ def test_profile_viewport_variety():
     assert len(viewports) >= 5
 
 
-def test_profile_ua_variety():
-    uas = set()
+def test_profile_ua_matches_host_and_binary():
+    """UA must mirror the real host OS and Chromium version.
+
+    navigator.platform and navigator.userAgentData are not spoofable under
+    Patchright, so a UA that disagrees with either is a free detection signal.
+    Variety across seeds is intentionally gone: it was only achievable by
+    claiming a different OS or an older Chrome version than the binary.
+    """
+    from backend.config import _detect_host_os, _detect_chromium_major
+
+    host = _detect_host_os()
+    major = _detect_chromium_major()
+    expected_marker = {"windows": "Windows NT", "mac": "Macintosh", "linux": "X11; Linux"}[host]
+
     for i in range(50):
-        p = generate_profile(seed=f"ua-variety-{i}")
-        uas.add(p.user_agent)
-    assert len(uas) >= 3
+        p = generate_profile(seed=f"ua-coherence-{i}")
+        ua = p.user_agent
+        assert expected_marker in ua, f"seed {i}: UA host mismatch: {ua}"
+        assert f"Chrome/{major}." in ua, f"seed {i}: UA version != {major}: {ua}"
+        assert "HeadlessChrome" not in ua, f"seed {i}: headless UA leaked: {ua}"
 
 
 def test_coherence_all_generated_profiles():

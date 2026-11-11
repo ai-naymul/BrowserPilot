@@ -9,20 +9,32 @@ from backend.agent import run_agent
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from backend.config import WS_BASE_URL, STREAM_SESSION_TIMEOUT_S, EXTRACTION_MAX_CHARS
+from backend.security import LocalOnlyMiddleware, ALLOWED_ORIGINS
 from backend.bulk_engine import BulkEngine, BulkJobConfig, extract_dom
 from backend.browser_controller import BrowserController
 from backend.universal_extractor import MODEL
 
 app = FastAPI()
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO add specific origins in production
+    allow_origins=[
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "http://localhost:5173",  # vite dev server
+        "http://127.0.0.1:5173",
+        *ALLOWED_ORIGINS,
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Added last so it wraps everything (Starlette puts the newest middleware
+# outermost): rejects foreign Origins — which blocks drive-by requests from any
+# page you visit — and enforces BROWSERPILOT_TOKEN when it is set, before the
+# app or CORS ever sees the request. See backend/security.py.
+app.add_middleware(LocalOnlyMiddleware)
 
 tasks = {} # job_id → async.Task
 ws_subscribers = {} # job_id → { websocket, … }
