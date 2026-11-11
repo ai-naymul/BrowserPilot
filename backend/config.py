@@ -46,28 +46,41 @@ _UA_TEMPLATES: dict[str, str] = {
 
 
 def _detect_chromium_major() -> int:
-    """Detect Playwright's bundled Chromium major version from the installed binary."""
+    """Detect Playwright's bundled Chromium major version.
+
+    Reads the driver's browsers.json, which states the version explicitly
+    ("browserVersion": "156.0.8078.4"). The previous implementation ran
+    `chrome --version`, which is POSIX-only: on Windows it prints nothing, so
+    the probe silently fell back to 136 and every spoofed UA claimed a Chrome
+    version three releases older than the binary — a trivial tell that
+    bot-detector.rebrowser.net flags outright.
+    """
     chromium_override = os.getenv("CHROMIUM_MAJOR_VERSION")
     if chromium_override and chromium_override.isdigit():
         return int(chromium_override)
-    import re as _re
-    import subprocess as _sp
+
+    import json as _json
     import pathlib as _pl
-    try:
-        pw_cache = _pl.Path.home() / ".cache" / "ms-playwright"
-        for d in sorted(pw_cache.iterdir(), reverse=True):
-            if d.name.startswith("chromium-") and d.is_dir():
-                for binary in [d / "chrome-linux64" / "chrome", d / "chrome-linux" / "chrome",
-                               d / "chrome-win" / "chrome.exe",
-                               d / "chrome-mac" / "Chromium.app" / "Contents" / "MacOS" / "Chromium"]:
-                    if binary.exists():
-                        r = _sp.run([str(binary), "--version"], capture_output=True, text=True, timeout=5)
-                        m = _re.search(r"(\d+)\.", r.stdout)
-                        if m:
-                            return int(m.group(1))
-                break
-    except Exception:
-        pass
+    import importlib.util as _ilu
+
+    for module in ("patchright", "playwright"):
+        try:
+            spec = _ilu.find_spec(module)
+        except (ImportError, ValueError):
+            continue
+        if not spec or not spec.origin:
+            continue
+        manifest = _pl.Path(spec.origin).parent / "driver" / "package" / "browsers.json"
+        try:
+            data = _json.loads(manifest.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for entry in data.get("browsers", []):
+            if entry.get("name") == "chromium":
+                version = str(entry.get("browserVersion", ""))
+                if version.split(".")[0].isdigit():
+                    return int(version.split(".")[0])
+
     return 136
 
 
